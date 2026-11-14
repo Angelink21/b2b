@@ -64,6 +64,12 @@ const ELECTRICAL_KEYS: SpecFieldKey[] = [
 
 const DIMENSION_KEYS: SpecFieldKey[] = ["dimensionsMm"];
 
+export const SPEC_FIELD_ORDER: readonly SpecFieldKey[] = [
+  ...MAIN_KEYS,
+  ...ELECTRICAL_KEYS,
+  ...DIMENSION_KEYS,
+];
+
 function heatingLabel(
   product: Product,
   heatingLabels: Partial<Record<string, string>>,
@@ -75,7 +81,8 @@ function heatingLabel(
     : base;
 }
 
-function valueFor(
+/** Formatted value for one spec field, or null when empty. */
+export function getSpecFieldValue(
   product: Product,
   key: SpecFieldKey,
   heatingLabels: Partial<Record<string, string>>,
@@ -135,7 +142,7 @@ function collect(
 ): SpecEntry[] {
   const items: SpecEntry[] = [];
   for (const key of keys) {
-    const value = valueFor(product, key, heatingLabels);
+    const value = getSpecFieldValue(product, key, heatingLabels);
     if (value == null || value === "" || value === "—") continue;
     items.push({ key, value });
   }

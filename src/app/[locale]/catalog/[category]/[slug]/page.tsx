@@ -1,7 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { CatalogReturnLink } from "@/components/catalog/CatalogReturnLink";
+import { ModelActions } from "@/components/catalog/ModelActions";
 import { ModelBreadcrumbs } from "@/components/catalog/ModelBreadcrumbs";
 import { ModelFamilySwitcher } from "@/components/catalog/ModelFamilySwitcher";
 import { ModelSpecs } from "@/components/catalog/ModelSpecs";
@@ -19,13 +21,13 @@ import {
 } from "@/lib/catalog";
 import { summarizeFamily } from "@/lib/catalog/family-diff";
 import { formatLoadKg } from "@/lib/catalog/format";
-import { getModelImage } from "@/lib/images";
 import {
   CATEGORY_SLUGS,
   HEATING_KEYS,
   type CategorySlug,
 } from "@/lib/catalog/schema";
 import { buildSpecGroups } from "@/lib/catalog/spec-groups";
+import { getModelImage } from "@/lib/images";
 
 type PageProps = {
   params: Promise<{ locale: string; category: string; slug: string }>;
@@ -70,7 +72,6 @@ export default async function ModelPage({ params }: PageProps) {
   const t = await getTranslations({ locale, namespace: "model" });
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const tCatalog = await getTranslations({ locale, namespace: "catalog" });
-  const tQuote = await getTranslations({ locale, namespace: "quote" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
 
   const series = getSeriesById(product.seriesId);
@@ -157,14 +158,13 @@ export default async function ModelPage({ params }: PageProps) {
             />
           </div>
 
-          <div className="model-cta mt-8">
-            <a
-              className="btn btn-red"
-              href={`/${locale}/quote?m=${encodeURIComponent(product.slug)}`}
-            >
-              {tQuote("quoteThisModel")}
-            </a>
-          </div>
+          <Suspense fallback={null}>
+            <ModelActions
+              slug={product.slug}
+              category={product.category}
+              locale={locale}
+            />
+          </Suspense>
 
           <div className="mt-8">
             <ModelFamilySwitcher

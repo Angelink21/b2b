@@ -1,0 +1,55 @@
+/* Print / datasheet — A4 sheet, no site chrome */
+
+body:has(.datasheet-page) .site-header,
+body:has(.datasheet-page) .site-footer,
+body:has(.datasheet-page) .skip-link,
+body:has(.datasheet-page) .compare-tray {
+  display: none !important;
+}
+
+body:has(.datasheet-page) {
+  background: var(--bg);
+}
+
+body:has(.datasheet-page) #main {
+  padding-bottom: 0;
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  .no-print,
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .compare-tray {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .datasheet-page {
+    padding: 0;
+  }
+
+  .datasheet-sheet {
+    border: none;
+    padding: 0;
+  }
+
+  .datasheet-drawing svg {
+    max-height: 320px;
+  }
+}

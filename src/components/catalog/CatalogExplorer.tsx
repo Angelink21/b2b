@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useQueryStates } from "nuqs";
+import { useQueryState, useQueryStates } from "nuqs";
 import { useMemo, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { RangeDual } from "@/components/ui/RangeDual";
 import { Select } from "@/components/ui/Select";
 import { Link, usePathname } from "@/i18n/navigation";
+import { serializeCompareSlugs } from "@/lib/catalog/compare";
 import { filterProducts, sortProducts } from "@/lib/catalog/query";
 import {
   CATEGORY_SLUGS,
@@ -21,6 +22,7 @@ import {
 import {
   CATALOG_PAGE_SIZE,
   catalogParsers,
+  parseAsModelSlugs,
 } from "@/lib/catalog/search-params";
 
 import { CatalogScrollRestore } from "./CatalogScrollRestore";
@@ -47,6 +49,12 @@ export function CatalogExplorer({
     history: "replace",
     shallow: false,
   });
+  const [compareSlugs] = useQueryState("m", parseAsModelSlugs);
+
+  const compareQuery =
+    compareSlugs && compareSlugs.length > 0
+      ? `?m=${encodeURIComponent(serializeCompareSlugs(compareSlugs))}`
+      : "";
 
   const activeCategory = lockedCategory ?? query.type;
 
@@ -140,13 +148,17 @@ export function CatalogExplorer({
         <div className="catalog-chips" role="group" aria-label={t("type")}>
           {lockedCategory ? (
             <>
-              <Link href="/catalog" className="chip" aria-pressed="false">
+              <Link
+                href={`/catalog${compareQuery}`}
+                className="chip"
+                aria-pressed="false"
+              >
                 {t("all")}
               </Link>
               {CATEGORY_SLUGS.map((slug) => (
                 <Link
                   key={slug}
-                  href={`/catalog/${slug}`}
+                  href={`/catalog/${slug}${compareQuery}`}
                   className="chip"
                   aria-pressed={slug === lockedCategory ? "true" : "false"}
                 >

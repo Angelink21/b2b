@@ -9,6 +9,9 @@
     "quoteDescription": "Заявка на комерційну пропозицію.",
     "privacyTitle": "Конфіденційність",
     "privacyDescription": "Політика конфіденційності.",
+    "compareTitle": "Порівняння моделей",
+    "compareDescription": "Порівняйте характеристики вибраних моделей Fagor Industrial.",
+    "datasheetTitle": "Datasheet",
     "notFoundTitle": "Сторінку не знайдено",
     "styleguideTitle": "Стилегайд"
   },
@@ -71,7 +74,29 @@
     "colWidth": "Ширина, мм",
     "colSpeed": "Швидкість, м/хв",
     "colShaft": "Вал, мм",
-    "colVolume": "Об’єм, л"
+    "colVolume": "Об’єм, л",
+    "actions": "Дії"
+  },
+  "compare": {
+    "title": "Порівняння моделей",
+    "add": "Порівняти",
+    "inCompare": "В порівнянні",
+    "full": "Можна порівняти не більше 4 моделей",
+    "trayLabel": "Панель порівняння",
+    "selected": "{count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделі}}",
+    "openCompare": "Порівняти",
+    "clear": "Очистити",
+    "remove": "Прибрати {name}",
+    "diffOnly": "Лише відмінності",
+    "quoteSelected": "Отримати КП на ці моделі",
+    "copyLink": "Копіювати посилання",
+    "copied": "Посилання скопійовано",
+    "empty": "Оберіть 2–4 моделі в каталозі, щоб порівняти.",
+    "toCatalog": "До каталогу",
+    "tableCaption": "Порівняння характеристик",
+    "field": "Характеристика",
+    "silhouettesLabel": "Силуети в одному масштабі",
+    "loading": "Завантаження порівняння…"
   },
   "categories": {
     "washers": "Пральні машини",
@@ -146,6 +171,9 @@
     "differsIn": "Відрізняється: {fields}",
     "fullDescription": "Опис серії",
     "related": "Схожі моделі",
+    "datasheet": "Datasheet",
+    "print": "Друк / PDF",
+    "datasheetHeading": "Технічний паспорт",
     "groups": {
       "main": "Основні",
       "electrical": "Електрика",

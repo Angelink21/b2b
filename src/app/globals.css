@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+@import "../styles/print.css";
 
 @theme inline {
   --color-bg: var(--bg);
@@ -823,6 +824,237 @@ a.chip[aria-pressed="true"] {
 .model-uk-note {
   color: var(--steel);
   font-size: 0.9em;
+}
+
+.model-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* Compare tray */
+.compare-tray {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--surf);
+  border-top: 1.5px solid var(--line);
+}
+
+.compare-tray-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.compare-tray-count {
+  margin: 0;
+  font-weight: 500;
+}
+
+.compare-tray-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.compare-tray-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-chip);
+  background: var(--floor);
+}
+
+.compare-tray-name {
+  font-size: 15px;
+}
+
+.compare-tray-remove {
+  font-family: var(--font-sans);
+  font-size: 20px;
+  line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -4px -8px -4px 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.compare-tray-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+body.has-compare-tray #main {
+  padding-bottom: 96px;
+}
+
+/* Compare page */
+.compare-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.compare-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.compare-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-inline-start: auto;
+}
+
+.compare-copy-status {
+  margin: 0;
+  width: 100%;
+  color: var(--steel);
+}
+
+.compare-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+}
+
+.compare-silhouettes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  align-items: flex-end;
+  padding: var(--space-4);
+  background: var(--floor);
+  border-bottom: 1.5px solid var(--line);
+}
+
+.compare-silhouette {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: center;
+  max-width: 200px;
+}
+
+.compare-silhouette figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.compare-silhouette a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.compare-table-wrap {
+  margin-bottom: var(--space-4);
+}
+
+.compare-table .compare-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg);
+}
+
+.compare-table thead .compare-sticky {
+  background: var(--floor);
+}
+
+.compare-col-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.compare-col-head a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Datasheet */
+.datasheet-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.datasheet-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.datasheet-sheet {
+  background: var(--surf);
+  border: 1.5px solid var(--line);
+  padding: var(--space-5);
+}
+
+.datasheet-header {
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1.5px solid var(--line);
+}
+
+.datasheet-brand {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-serif);
+  font-size: var(--text-h3);
+  font-weight: 400;
+}
+
+.datasheet-meta {
+  margin: var(--space-2) 0 0;
+}
+
+.datasheet-layout {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(200px, 320px) minmax(0, 1fr);
+  align-items: start;
+}
+
+@media (max-width: 820px) {
+  .datasheet-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-tray-inner {
+    padding-inline: var(--space-3);
+  }
 }
 
 .model-spec-heading {

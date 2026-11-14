@@ -21,6 +21,7 @@ import {
   SORT_BY_TO_COLUMN,
   type SortParam,
 } from "@/lib/catalog/search-params";
+import { CompareToggle } from "@/components/compare/CompareToggle";
 import {
   DataTable,
   type DataTableColumn,
@@ -155,35 +156,46 @@ export function CatalogTable({
       }
     };
 
-    return columnDefs.map((def) => {
-      const id = def.id;
-      return {
-        id,
-        header: headerFor(id),
-        sortable: Boolean(def.sortable),
-        sortValue: (row) => sortValue(id, row),
-        cell: (row) => {
-          if (id === "name") {
-            return (
-              <Link
-                href={`/catalog/${row.category}/${row.slug}`}
-                className="catalog-model-link"
-                onClick={() => {
-                  saveCatalogReturn({
-                    pathname: returnPathname,
-                    search: returnSearch,
-                    scrollY: window.scrollY,
-                  });
-                }}
-              >
-                {row.name}
-              </Link>
-            );
-          }
-          return cellText(id, row, tCat, tHeat);
-        },
-      };
-    });
+    const dataColumns: DataTableColumn<CatalogIndexItem>[] =
+      columnDefs.map((def) => {
+        const id = def.id;
+        return {
+          id,
+          header: headerFor(id),
+          sortable: Boolean(def.sortable),
+          sortValue: (row) => sortValue(id, row),
+          cell: (row) => {
+            if (id === "name") {
+              return (
+                <Link
+                  href={`/catalog/${row.category}/${row.slug}`}
+                  className="catalog-model-link"
+                  onClick={() => {
+                    saveCatalogReturn({
+                      pathname: returnPathname,
+                      search: returnSearch,
+                      scrollY: window.scrollY,
+                    });
+                  }}
+                >
+                  {row.name}
+                </Link>
+              );
+            }
+            return cellText(id, row, tCat, tHeat);
+          },
+        };
+      });
+
+    return [
+      ...dataColumns,
+      {
+        id: "actions",
+        header: t("actions"),
+        sortable: false,
+        cell: (row) => <CompareToggle slug={row.slug} />,
+      },
+    ];
   }, [columnDefs, returnPathname, returnSearch, t, tCat, tHeat]);
 
   return (

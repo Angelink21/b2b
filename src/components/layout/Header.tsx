@@ -8,7 +8,7 @@ export async function Header() {
   const t = await getTranslations("nav");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-bg">
+    <header className="site-header sticky top-0 z-50 border-b border-line bg-bg">
       <Container className="flex h-16 items-center gap-4">
         <Link
           href="/"

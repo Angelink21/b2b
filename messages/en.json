@@ -9,6 +9,9 @@
     "quoteDescription": "Request a commercial quote.",
     "privacyTitle": "Privacy",
     "privacyDescription": "Privacy policy.",
+    "compareTitle": "Compare models",
+    "compareDescription": "Compare specifications of selected Fagor Industrial models.",
+    "datasheetTitle": "Datasheet",
     "notFoundTitle": "Page not found",
     "styleguideTitle": "Styleguide"
   },
@@ -71,7 +74,29 @@
     "colWidth": "Width, mm",
     "colSpeed": "Speed, m/min",
     "colShaft": "Shaft, mm",
-    "colVolume": "Volume, l"
+    "colVolume": "Volume, l",
+    "actions": "Actions"
+  },
+  "compare": {
+    "title": "Compare models",
+    "add": "Compare",
+    "inCompare": "In compare",
+    "full": "You can compare up to 4 models",
+    "trayLabel": "Compare tray",
+    "selected": "{count, plural, one {# model} other {# models}}",
+    "openCompare": "Compare",
+    "clear": "Clear",
+    "remove": "Remove {name}",
+    "diffOnly": "Differences only",
+    "quoteSelected": "Get a quote for these models",
+    "copyLink": "Copy link",
+    "copied": "Link copied",
+    "empty": "Pick 2–4 models in the catalog to compare.",
+    "toCatalog": "To catalog",
+    "tableCaption": "Specification comparison",
+    "field": "Specification",
+    "silhouettesLabel": "Silhouettes at one scale",
+    "loading": "Loading comparison…"
   },
   "categories": {
     "washers": "Washers",
@@ -146,6 +171,9 @@
     "differsIn": "Differs in: {fields}",
     "fullDescription": "Series description",
     "related": "Similar models",
+    "datasheet": "Datasheet",
+    "print": "Print / PDF",
+    "datasheetHeading": "Technical datasheet",
     "groups": {
       "main": "Main",
       "electrical": "Electrical",

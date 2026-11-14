@@ -96,6 +96,38 @@ export const parseAsCatalogSort = createParser({
 
 export const CATALOG_PAGE_SIZE = 60;
 
+/** Max models in compare selection (`?m=`). */
+export const COMPARE_MAX = 4;
+
+/**
+ * Comma-separated model slugs for compare / quote prefill.
+ * Unique, trimmed, capped at COMPARE_MAX; empty → null.
+ */
+export const parseAsModelSlugs = createParser({
+  parse(queryValue: string): string[] | null {
+    const parts = queryValue
+      .split(",")
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+    const unique: string[] = [];
+    for (const part of parts) {
+      if (!unique.includes(part)) unique.push(part);
+      if (unique.length >= COMPARE_MAX) break;
+    }
+    return unique.length > 0 ? unique : null;
+  },
+  serialize(value: string[]): string {
+    const unique: string[] = [];
+    for (const part of value) {
+      const slug = part.trim();
+      if (!slug || unique.includes(slug)) continue;
+      unique.push(slug);
+      if (unique.length >= COMPARE_MAX) break;
+    }
+    return unique.join(",");
+  },
+});
+
 export const catalogParsers = {
   kg: parseAsKgRange,
   type: parseAsStringLiteral(CATEGORY_SLUGS),
@@ -103,6 +135,10 @@ export const catalogParsers = {
   q: parseAsString.withDefault(""),
   sort: parseAsCatalogSort,
   limit: parseAsInteger.withDefault(CATALOG_PAGE_SIZE),
+};
+
+export const compareParsers = {
+  m: parseAsModelSlugs,
 };
 
 export type CatalogQueryState = {
