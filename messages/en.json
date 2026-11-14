@@ -33,7 +33,13 @@
     "showInCatalog": "Show in catalog",
     "industriesHeading": "Who it is for",
     "featuredHeading": "Where to start",
-    "stub": "Home content arrives in stage 4."
+    "casesHeading": "Case studies",
+    "lineupLabel": "Washer lineup by load capacity",
+    "ariaMin": "Minimum load",
+    "ariaMax": "Maximum load",
+    "ariaValueText": "from {from} to {to} kg",
+    "quoteCta": "Get a quote · {count, plural, one {#} other {#}}",
+    "quoteLink": "Get a quote"
   },
   "catalog": {
     "title": "Catalog",

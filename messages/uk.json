@@ -33,7 +33,13 @@
     "showInCatalog": "Показати в каталозі",
     "industriesHeading": "Для кого",
     "featuredHeading": "Моделі, з яких варто почати",
-    "stub": "Контент головної з’явиться на етапі 4."
+    "casesHeading": "Кейси",
+    "lineupLabel": "Лінійка пральних машин за завантаженням",
+    "ariaMin": "Мінімальне завантаження",
+    "ariaMax": "Максимальне завантаження",
+    "ariaValueText": "від {from} до {to} кг",
+    "quoteCta": "Отримати КП · {count, plural, one {#} few {#} many {#} other {#}}",
+    "quoteLink": "Отримати КП"
   },
   "catalog": {
     "title": "Каталог",
