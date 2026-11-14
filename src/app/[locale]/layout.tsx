@@ -8,6 +8,7 @@ import { SiteShell } from "@/components/layout/SiteShell";
 import { ThemeScript } from "@/components/theme/ThemeScript";
 import { MOTION_LEVEL } from "@/config/motion";
 import { routing } from "@/i18n/routing";
+import { metadataBaseUrl } from "@/lib/seo/metadata";
 import "../globals.css";
 
 const spectral = Spectral({
@@ -38,6 +39,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps) {
   const t = await getTranslations({ locale, namespace: "meta" });
 
   return {
+    metadataBase: metadataBaseUrl(),
     title: {
       default: t("siteName"),
       template: `%s · ${t("siteName")}`,

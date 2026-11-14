@@ -9,6 +9,7 @@ import { ModelFamilySwitcher } from "@/components/catalog/ModelFamilySwitcher";
 import { ModelSpecs } from "@/components/catalog/ModelSpecs";
 import { DimHighlightProvider } from "@/components/motion/DimHighlight";
 import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Container } from "@/components/ui/Container";
 import { DimensionDrawing } from "@/components/ui/DimensionDrawing";
 import { ModelImage } from "@/components/ui/ModelImage";
@@ -27,9 +28,16 @@ import {
   CATEGORY_SLUGS,
   HEATING_KEYS,
   type CategorySlug,
+  type HeatingKey,
 } from "@/lib/catalog/schema";
 import { buildSpecGroups } from "@/lib/catalog/spec-groups";
 import { getModelImage } from "@/lib/images";
+import {
+  breadcrumbListJsonLd,
+  productJsonLd,
+} from "@/lib/seo/json-ld";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+import { buildProductDescription } from "@/lib/seo/product-copy";
 
 type PageProps = {
   params: Promise<{ locale: string; category: string; slug: string }>;
@@ -56,12 +64,34 @@ export async function generateMetadata({ params }: PageProps) {
   if (!product || product.category !== category) {
     return {};
   }
-  const t = await getTranslations({ locale, namespace: "meta" });
-  const load = product.loadKg ? `, ${product.loadKg.raw} kg` : "";
-  return {
+  const tCat = await getTranslations({ locale, namespace: "categories" });
+  const tHeat = await getTranslations({ locale, namespace: "heating" });
+  const tUnits = await getTranslations({ locale, namespace: "units" });
+
+  let heatingLabel: string | null = null;
+  if (product.heating) {
+    heatingLabel = tHeat(product.heating as HeatingKey);
+  }
+
+  return buildPageMetadata({
+    locale,
+    path: `/catalog/${product.category}/${product.slug}`,
     title: product.name,
-    description: `${product.name}${load}. ${t("catalogDescription")}`,
-  };
+    description: buildProductDescription(product, {
+      category: tCat(product.category),
+      heating: heatingLabel,
+      units: {
+        kg: tUnits("kg"),
+        kW: tUnits("kW"),
+        mm: tUnits("mm"),
+        L: tUnits("L"),
+        rpm: tUnits("rpm"),
+        mpm: tUnits("mpm"),
+        m3h: tUnits("m3h"),
+        dB: tUnits("dB"),
+      },
+    }),
+  });
 }
 
 export default async function ModelPage({ params }: PageProps) {
@@ -90,8 +120,43 @@ export default async function ModelPage({ params }: PageProps) {
   const photo = getModelImage(product);
   const dims = product.dimensionsMm;
 
+  let heatingLabel: string | null = null;
+  if (product.heating) {
+    heatingLabel = tHeat(product.heating as HeatingKey);
+  }
+
   return (
     <Container className="model-page py-12">
+      <JsonLd
+        data={[
+          breadcrumbListJsonLd(locale, [
+            { name: tCatalog("title"), path: "/catalog" },
+            {
+              name: tCat(product.category),
+              path: `/catalog/${product.category}`,
+            },
+            {
+              name: product.name,
+              path: `/catalog/${product.category}/${product.slug}`,
+            },
+          ]),
+          productJsonLd(locale, product, {
+            category: tCat(product.category),
+            heating: heatingLabel,
+            propertyNames: {
+              loadKg: t("specs.loadKg"),
+              powerKw: t("specs.powerKw"),
+              dimensionsMm: t("specs.dimensionsMm"),
+              heating: t("specs.heating"),
+              volumeL: t("specs.volumeL"),
+              workingWidthMm: t("specs.workingWidthMm"),
+              spinRpm: t("specs.spinRpm"),
+              gFactor: t("specs.gFactor"),
+              voltage: t("specs.voltage"),
+            },
+          }),
+        ]}
+      />
       <ModelBreadcrumbs
         label={t("breadcrumbs")}
         catalogLabel={tCatalog("title")}

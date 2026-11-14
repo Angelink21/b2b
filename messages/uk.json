@@ -13,7 +13,21 @@
     "compareDescription": "Порівняйте характеристики вибраних моделей Fagor Industrial.",
     "datasheetTitle": "Datasheet",
     "notFoundTitle": "Сторінку не знайдено",
-    "styleguideTitle": "Стилегайд"
+    "styleguideTitle": "Стилегайд",
+    "categoryDescription": "{category}. Каталог промислового прачечного обладнання Fagor Industrial.",
+    "categoryOgAlt": "{category} — Fagor Industrial",
+    "modelOgAlt": "{name} — Fagor Industrial",
+    "homeOgAlt": "Fagor Industrial — лінійка обладнання"
+  },
+  "units": {
+    "kg": "кг",
+    "kW": "кВт",
+    "mm": "мм",
+    "L": "л",
+    "rpm": "об/хв",
+    "mpm": "м/хв",
+    "m3h": "м³/год",
+    "dB": "дБ"
   },
   "nav": {
     "skip": "До змісту",

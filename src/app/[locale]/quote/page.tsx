@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { QuoteFormSection } from "@/components/quote/QuoteFormSection";
 import { Container } from "@/components/ui/Container";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata({
   params,
@@ -10,10 +11,12 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
-  return {
+  return buildPageMetadata({
+    locale,
+    path: "/quote",
     title: t("quoteTitle"),
     description: t("quoteDescription"),
-  };
+  });
 }
 
 export default async function QuotePage() {

@@ -10,6 +10,7 @@ import {
   HEATING_KEYS,
 } from "@/lib/catalog/schema";
 import type { SpecFieldKey } from "@/lib/catalog/spec-groups";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
@@ -18,10 +19,12 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
-  return {
+  return buildPageMetadata({
+    locale,
+    path: "/compare",
     title: t("compareTitle"),
     description: t("compareDescription"),
-  };
+  });
 }
 
 export default async function ComparePage({ params }: PageProps) {

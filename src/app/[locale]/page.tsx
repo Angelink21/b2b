@@ -6,6 +6,7 @@ import { HomeHero } from "@/components/sections/HomeHero";
 import { IndustriesSection } from "@/components/sections/IndustriesSection";
 import { QuoteTeaser } from "@/components/sections/QuoteTeaser";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata({
   params,
@@ -14,16 +15,23 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
-  return {
+  return buildPageMetadata({
+    locale,
+    path: "",
     title: t("homeTitle"),
     description: t("homeDescription"),
-  };
+  });
 }
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   return (
     <>
-      <OrganizationJsonLd />
+      <OrganizationJsonLd locale={locale} />
       <HomeHero />
       <IndustriesSection />
       <FeaturedSection />

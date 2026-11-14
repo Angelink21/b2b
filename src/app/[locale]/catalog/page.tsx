@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { Container } from "@/components/ui/Container";
 import { facets, getIndex } from "@/lib/catalog";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata({
   params,
@@ -12,10 +13,12 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
-  return {
+  return buildPageMetadata({
+    locale,
+    path: "/catalog",
     title: t("catalogTitle"),
     description: t("catalogDescription"),
-  };
+  });
 }
 
 export default async function CatalogPage() {

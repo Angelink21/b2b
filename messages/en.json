@@ -13,7 +13,21 @@
     "compareDescription": "Compare specifications of selected Fagor Industrial models.",
     "datasheetTitle": "Datasheet",
     "notFoundTitle": "Page not found",
-    "styleguideTitle": "Styleguide"
+    "styleguideTitle": "Styleguide",
+    "categoryDescription": "{category}. Fagor Industrial industrial laundry equipment catalog.",
+    "categoryOgAlt": "{category} — Fagor Industrial",
+    "modelOgAlt": "{name} — Fagor Industrial",
+    "homeOgAlt": "Fagor Industrial — equipment lineup"
+  },
+  "units": {
+    "kg": "kg",
+    "kW": "kW",
+    "mm": "mm",
+    "L": "L",
+    "rpm": "rpm",
+    "mpm": "m/min",
+    "m3h": "m³/h",
+    "dB": "dB"
   },
   "nav": {
     "skip": "Skip to content",

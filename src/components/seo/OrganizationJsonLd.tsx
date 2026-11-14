@@ -1,20 +1,13 @@
-import { siteConfig } from "@/config/site";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo/json-ld";
 
-export function OrganizationJsonLd() {
-  const data: Record<string, string> = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: siteConfig.name,
-  };
-  const url = siteConfig.url;
-  if (url) {
-    data.url = url;
-  }
+type OrganizationJsonLdProps = {
+  locale: string;
+};
 
+/** Organization + WebSite on the home page (no invented address/phone). */
+export function OrganizationJsonLd({ locale }: OrganizationJsonLdProps) {
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <JsonLd data={[organizationJsonLd(), webSiteJsonLd(locale)]} />
   );
 }

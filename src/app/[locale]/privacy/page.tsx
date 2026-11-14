@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/Container";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 const SECTIONS = [
   "controller",
@@ -18,10 +19,12 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });
-  return {
+  return buildPageMetadata({
+    locale,
+    path: "/privacy",
     title: t("privacyTitle"),
     description: t("privacyDescription"),
-  };
+  });
 }
 
 export default async function PrivacyPage() {

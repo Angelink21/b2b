@@ -19,6 +19,7 @@ export function LocaleSwitcher() {
       className="btn btn-sm"
       aria-label={`${t("language")}: ${label}`}
       hrefLang={other}
+      lang={other}
     >
       {label}
     </Link>
