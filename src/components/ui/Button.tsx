@@ -85,6 +85,11 @@ export function Button(props: ButtonProps) {
   const {
     disabled,
     type = "button",
+    children: _children,
+    variant: _variant,
+    size: _size,
+    loading: _loading,
+    className: _className,
     ...rest
   } = props as ButtonAsButton;
 

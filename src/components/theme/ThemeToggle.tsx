@@ -35,7 +35,7 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      className="btn btn-sm"
+      className="header-tool"
       onClick={() => {
         cycleThemePreference();
       }}

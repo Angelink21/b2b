@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { getEnv } from "@/env";
 import { getAll } from "@/lib/catalog";
 import { SECTOR_KEYS } from "@/lib/catalog/schema";
+import { typo } from "@/lib/typo";
 
 import { QuoteForm, QuoteFormFallback, type SectorOption } from "./QuoteForm";
 
@@ -38,8 +39,8 @@ export async function QuoteFormSection({
     <div className="quote-section-inner">
       {showIntro ? (
         <div className="quote-section-copy">
-          <Heading>{t("title")}</Heading>
-          <p className="quote-teaser-sub">{t("subtitle")}</p>
+          <Heading>{typo(t("title"))}</Heading>
+          <p className="quote-teaser-sub">{typo(t("subtitle"))}</p>
         </div>
       ) : null}
       <div className="quote-teaser-panel">

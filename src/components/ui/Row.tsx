@@ -1,5 +1,10 @@
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
+import { typo } from "@/lib/typo";
+
+function typoNode(node: ReactNode): ReactNode {
+  return typeof node === "string" ? typo(node) : node;
+}
 
 type RowProps = {
   title: ReactNode;
@@ -12,9 +17,9 @@ type RowProps = {
 export function Row({ title, body, meta, href, className = "" }: RowProps) {
   const content = (
     <>
-      <b className="row-title">{title}</b>
-      {body ? <span className="row-body">{body}</span> : <span />}
-      {meta ? <i className="row-meta">{meta}</i> : <span />}
+      <b className="row-title">{typoNode(title)}</b>
+      {body ? <span className="row-body">{typoNode(body)}</span> : null}
+      {meta ? <i className="row-meta">{typoNode(meta)}</i> : null}
     </>
   );
 
@@ -36,5 +41,5 @@ export function RowList({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`rows ${className}`.trim()}>{children}</div>;
+  return <div className={`page-grid rows ${className}`.trim()}>{children}</div>;
 }

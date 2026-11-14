@@ -3,6 +3,7 @@
 import { animate, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import {
+  Children,
   useCallback,
   useEffect,
   useId,
@@ -10,6 +11,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from "react";
 
@@ -57,10 +59,7 @@ function useDebounced<T>(value: T, ms: number): T {
 }
 
 /** Nearest anchor unit (0…1000) if within magnetic threshold; else null. */
-function magnetUnit(
-  unit: number,
-  anchorCount: number,
-): number | null {
+function magnetUnit(unit: number, anchorCount: number): number | null {
   if (anchorCount < 2) return null;
   let best = unit;
   let bestDist = Infinity;
@@ -88,6 +87,7 @@ export function LineupRuler({
 
   const [loUnit, setLoUnit] = useState<number>(INITIAL_RANGE_UNIT.lo);
   const [hiUnit, setHiUnit] = useState<number>(INITIAL_RANGE_UNIT.hi);
+  const [lineupReady, setLineupReady] = useState(false);
   const [introReady, setIntroReady] = useState(true);
   const [playMachineIntro, setPlayMachineIntro] = useState(false);
   const [scaleDrawn, setScaleDrawn] = useState(true);
@@ -110,10 +110,12 @@ export function LineupRuler({
   useLayoutEffect(() => {
     if (introStarted.current) return;
     introStarted.current = true;
-    stageRef.current?.setAttribute("data-lineup-ready", "true");
 
     if (!enabled || hasPlayedLineupIntro()) {
-      return;
+      const frame = window.requestAnimationFrame(() => {
+        setLineupReady(true);
+      });
+      return () => window.cancelAnimationFrame(frame);
     }
 
     markLineupIntroPlayed();
@@ -123,6 +125,7 @@ export function LineupRuler({
 
     // Defer setState out of the effect body (lint: set-state-in-effect).
     const frame = window.requestAnimationFrame(() => {
+      setLineupReady(true);
       if (userMovedRef.current) return;
       setLoUnit(0);
       setHiUnit(0);
@@ -216,15 +219,11 @@ export function LineupRuler({
   }, [expressive, hi, anchors.length]);
   const visualLeftPct = (visualLo / RANGE_UNIT_MAX) * 100;
   const visualWidthPct =
-    ((Math.max(visualLo, visualHi) - Math.min(visualLo, visualHi)) /
-      RANGE_UNIT_MAX) *
+    ((Math.max(visualLo, visualHi) - Math.min(visualLo, visualHi)) / RANGE_UNIT_MAX) *
     100;
-  const showMagnet =
-    expressive && (visualLo !== lo || visualHi !== hi);
+  const showMagnet = expressive && (visualLo !== lo || visualHi !== hi);
 
-  const catalogHref = fullRange
-    ? "/catalog"
-    : `/catalog?kg=${loKgRound}-${hiKgRound}`;
+  const catalogHref = fullRange ? "/catalog" : `/catalog?kg=${loKgRound}-${hiKgRound}`;
   const quoteHref = fullRange ? "/quote" : `/quote?kg=${hiKgRound}`;
 
   const setHovered = useCallback((kg: number | null) => {
@@ -244,20 +243,23 @@ export function LineupRuler({
     setHoveredKg: setHovered,
   };
 
+  const slots = Children.toArray(children);
+  const columns = Math.max(anchors.length, 1);
+  const gridStyle = {
+    "--lineup-n": columns,
+  } as CSSProperties;
+
   return (
     <LineupRangeProvider value={rangeState}>
       <div
         ref={stageRef}
         className="lineup-stage"
-        data-lineup-ready="false"
+        data-lineup-ready={lineupReady ? "true" : "false"}
         data-lineup-intro={playMachineIntro && !introReady ? "1" : "0"}
       >
-        <div className="lineup-stage-in">
-          <div
-            className="lineup-line"
-            role="img"
-            aria-label={t("lineupLabel")}
-          >
+        <Container>
+          <p className="sr-only">{t("lineupLabel")}</p>
+          <div className="lineup-grid" style={gridStyle}>
             {/* motion: floor scale draws left→right on first load */}
             <motion.div
               className="lineup-floor"
@@ -272,82 +274,90 @@ export function LineupRuler({
               }}
               style={{ transformOrigin: "left center" }}
             />
-            {children}
-          </div>
-          <div className="lineup-kgs" aria-hidden="true">
-            {anchors.map((kg) => {
-              const inWindow =
-                fullRange ||
-                (kg >= loKg - 0.01 && kg <= hiKg + 0.01);
+            {anchors.map((kg, index) => {
+              const inWindow = fullRange || (kg >= loKg - 0.01 && kg <= hiKg + 0.01);
               const hovered = hoveredKg === kg;
               return (
-                <span
-                  key={kg}
-                  className={
-                    [
+                <div className="lineup-col" key={kg}>
+                  <div className="lineup-well">{slots[index]}</div>
+                  <span
+                    className={[
+                      "lineup-kg",
                       inWindow && !fullRange ? "is-on" : "",
                       hovered ? "is-hover" : "",
                     ]
                       .filter(Boolean)
-                      .join(" ") || undefined
-                  }
-                >
-                  {kg}
-                </span>
+                      .join(" ")}
+                  >
+                    {kg}
+                  </span>
+                </div>
               );
             })}
-          </div>
-          <div className="lineup-ruler">
-            <div
-              className="lineup-band"
-              style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-            />
-            {showMagnet ? (
+            <div className="lineup-ruler">
+              {anchors.map((kg, index) => {
+                const tick =
+                  anchors.length < 2 ? 0 : (index / (anchors.length - 1)) * 100;
+                return (
+                  <span
+                    key={`tick-${kg}`}
+                    className="lineup-tick"
+                    style={{ left: `${tick}%` }}
+                    aria-hidden="true"
+                  />
+                );
+              })}
               <div
-                className="lineup-band lineup-band-magnet"
-                aria-hidden="true"
-                style={{
-                  left: `${visualLeftPct}%`,
-                  width: `${visualWidthPct}%`,
+                className="lineup-band"
+                style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+              />
+              {showMagnet ? (
+                <div
+                  className="lineup-band lineup-band-magnet"
+                  aria-hidden="true"
+                  style={{
+                    left: `${visualLeftPct}%`,
+                    width: `${visualWidthPct}%`,
+                  }}
+                />
+              ) : null}
+              <input
+                id={`${id}-min`}
+                type="range"
+                className="lineup-range"
+                min={RANGE_UNIT_MIN}
+                max={RANGE_UNIT_MAX}
+                step={1}
+                value={lo}
+                aria-label={t("ariaMin")}
+                aria-valuetext={valueText}
+                onChange={(event) => {
+                  userMovedRef.current = true;
+                  finishIntro();
+                  const next = Number(event.target.value);
+                  setLoUnit(Math.min(next, hi));
                 }}
               />
-            ) : null}
-            <input
-              id={`${id}-min`}
-              type="range"
-              className="lineup-range"
-              min={RANGE_UNIT_MIN}
-              max={RANGE_UNIT_MAX}
-              step={1}
-              value={lo}
-              aria-label={t("ariaMin")}
-              aria-valuetext={valueText}
-              onChange={(event) => {
-                userMovedRef.current = true;
-                finishIntro();
-                const next = Number(event.target.value);
-                setLoUnit(Math.min(next, hi));
-              }}
-            />
-            <input
-              id={`${id}-max`}
-              type="range"
-              className="lineup-range"
-              min={RANGE_UNIT_MIN}
-              max={RANGE_UNIT_MAX}
-              step={1}
-              value={hi}
-              aria-label={t("ariaMax")}
-              aria-valuetext={valueText}
-              onChange={(event) => {
-                userMovedRef.current = true;
-                finishIntro();
-                const next = Number(event.target.value);
-                setHiUnit(Math.max(next, lo));
-              }}
-            />
+              <input
+                id={`${id}-max`}
+                type="range"
+                className="lineup-range"
+                min={RANGE_UNIT_MIN}
+                max={RANGE_UNIT_MAX}
+                step={1}
+                value={hi}
+                aria-label={t("ariaMax")}
+                aria-valuetext={valueText}
+                onChange={(event) => {
+                  userMovedRef.current = true;
+                  finishIntro();
+                  const next = Number(event.target.value);
+                  setHiUnit(Math.max(next, lo));
+                }}
+              />
+            </div>
           </div>
-        </div>
+        </Container>
       </div>
 
       <Container className="lineup-read">
@@ -380,5 +390,4 @@ export function LineupRuler({
 }
 
 /** Time before scale draw starts (last machine delay + most of settle). */
-const MACHINE_INTRO_MS =
-  7 * 60 + MOTION_MS.machine * 0.35;
+const MACHINE_INTRO_MS = 7 * 60 + MOTION_MS.machine * 0.35;

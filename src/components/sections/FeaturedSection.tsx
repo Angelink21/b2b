@@ -4,6 +4,7 @@ import { Row, RowList } from "@/components/ui/Row";
 import { Section } from "@/components/ui/Section";
 import { FEATURED_SLUGS } from "@/config/featured";
 import { getBySlug } from "@/lib/catalog";
+import { typo } from "@/lib/typo";
 
 export async function FeaturedSection() {
   const t = await getTranslations("home");
@@ -19,12 +20,10 @@ export async function FeaturedSection() {
 
   return (
     <Section className="home-block">
-      <h2>{t("featuredHeading")}</h2>
-      <RowList>
+      <h2>{typo(t("featuredHeading"))}</h2>
+      <RowList className="rows-metrics">
         {items.map((product) => {
-          const kgLabel = product.loadKg
-            ? `${product.loadKg.raw} ${tCat("kg")}`
-            : "—";
+          const kgLabel = product.loadKg ? `${product.loadKg.raw} ${tCat("kg")}` : "—";
           const parts = [tCategories(product.category)];
           if (product.heating) {
             parts.push(tHeating(product.heating));

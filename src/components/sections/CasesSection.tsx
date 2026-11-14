@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Section } from "@/components/ui/Section";
 import { listCases } from "@/lib/content/cases";
+import { typo } from "@/lib/typo";
 
 export async function CasesSection() {
   const cases = listCases();
@@ -11,7 +12,7 @@ export async function CasesSection() {
 
   return (
     <Section className="home-block">
-      <h2>{t("casesHeading")}</h2>
+      <h2>{typo(t("casesHeading"))}</h2>
       <ul>
         {cases.map((entry) => (
           <li key={entry.slug}>{entry.title}</li>

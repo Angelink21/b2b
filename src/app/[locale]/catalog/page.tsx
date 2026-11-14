@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { Container } from "@/components/ui/Container";
 import { facets, getIndex } from "@/lib/catalog";
+import { typo } from "@/lib/typo";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata({
@@ -29,9 +30,9 @@ export default async function CatalogPage() {
 
   return (
     <Container className="catalog-page py-12">
-      <h1>{t("title")}</h1>
-      <p className="catalog-lead mt-4 text-steel">{t("lead")}</p>
-      <Suspense fallback={<p className="mt-8 text-steel">{t("loading")}</p>}>
+      <h1>{typo(t("title"))}</h1>
+      <p className="catalog-lead text-steel mt-4">{typo(t("lead"))}</p>
+      <Suspense fallback={<p className="text-steel mt-8">{t("loading")}</p>}>
         <div className="mt-8">
           <CatalogExplorer items={items} kgBounds={kgBounds} />
         </div>

@@ -67,7 +67,7 @@ export default async function StyleguidePage() {
   return (
     <Container className="py-12">
       <h1>{t("title")}</h1>
-      <p className="mt-4 max-w-[52ch] text-steel">{t("intro")}</p>
+      <p className="styleguide-intro mt-4 text-steel">{t("intro")}</p>
 
       <section className="styleguide-block" data-sg="buttons" aria-labelledby="sg-buttons">
         <h2 id="sg-buttons">{t("buttons")}</h2>

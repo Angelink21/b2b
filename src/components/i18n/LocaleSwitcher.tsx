@@ -16,7 +16,7 @@ export function LocaleSwitcher() {
     <Link
       href={pathname}
       locale={other}
-      className="btn btn-sm"
+      className="header-tool"
       aria-label={`${t("language")}: ${label}`}
       hrefLang={other}
       lang={other}

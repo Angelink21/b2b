@@ -12,3 +12,6 @@
 2026-11-14 · submitLead reads locale from hidden form field + messages/*.json · next-intl getLocale/getTranslations use root-params, unsupported inside Server Actions on Next 16.4.
 2026-11-14 · motion 14.14.0 (`motion/react`) · Stage 8 orchestration and layout animations; CSS for hover/scroll-driven; React 19.3 ViewTransition for catalog list → model card.
 2026-11-14 · SEO via Next Metadata API + `next/og` (no extra deps) · Stage 9: canonical/hreflang, sitemap/robots, JSON-LD, OG silhouettes from `tokens.ts`; product descriptions from specs not series copy.
+2026-11-14 · Typography tokens `--measure` / `--measure-narrow` · Reading measure 65ch/52ch; balance/pretty/overflow-wrap centralized in globals without layout-shift animations.
+2026-11-14 · Gutter `clamp(16px, 4vw, 32px)`, 12-column grid gap 24/32, measure 66ch/60ch · P1 alignment (rule 15). Fixed 24px fields in DESIGN.md left the lineup readout and section rows on different edges.
+2026-11-14 · Industries rail removed · The 24px indent and the line that stopped mid-list fought the shared left edge. Rows sit on the heading edge; a full-height line would cover the text.

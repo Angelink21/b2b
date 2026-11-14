@@ -7,6 +7,7 @@ import { useMemo, type ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Field } from "@/components/ui/Field";
+import { Grid } from "@/components/ui/Grid";
 import { Input } from "@/components/ui/Input";
 import { RangeDual } from "@/components/ui/RangeDual";
 import { Select } from "@/components/ui/Select";
@@ -73,15 +74,7 @@ export function CatalogExplorer({
       list = sortProducts(list, { by: "name", dir: "asc" });
     }
     return list;
-  }, [
-    items,
-    lockedCategory,
-    query.heat,
-    query.kg,
-    query.q,
-    query.sort,
-    query.type,
-  ]);
+  }, [items, lockedCategory, query.heat, query.kg, query.q, query.sort, query.type]);
 
   const limit = Math.max(CATALOG_PAGE_SIZE, query.limit || CATALOG_PAGE_SIZE);
   const visible = filtered.slice(0, limit);
@@ -97,27 +90,14 @@ export function CatalogExplorer({
     if (limit !== CATALOG_PAGE_SIZE) params.set("limit", String(limit));
     const s = params.toString();
     return s ? `?${s}` : "";
-  }, [
-    limit,
-    lockedCategory,
-    query.heat,
-    query.kg,
-    query.q,
-    query.sort,
-    query.type,
-  ]);
+  }, [limit, lockedCategory, query.heat, query.kg, query.q, query.sort, query.type]);
 
   const kgValue = query.kg ?? kgBounds;
   const kgActive =
-    query.kg !== null &&
-    (query.kg.min > kgBounds.min || query.kg.max < kgBounds.max);
+    query.kg !== null && (query.kg.min > kgBounds.min || query.kg.max < kgBounds.max);
 
   const hasActiveFilters = Boolean(
-    query.q ||
-      query.heat ||
-      query.kg ||
-      (!lockedCategory && query.type) ||
-      query.sort,
+    query.q || query.heat || query.kg || (!lockedCategory && query.type) || query.sort,
   );
 
   async function resetAll() {
@@ -145,140 +125,134 @@ export function CatalogExplorer({
       <CatalogScrollRestore />
 
       <div className="catalog-toolbar" role="search">
-        <div className="catalog-chips" role="group" aria-label={t("type")}>
-          {lockedCategory ? (
-            <>
-              <Link
-                href={`/catalog${compareQuery}`}
-                className="chip"
-                aria-pressed="false"
-              >
-                {t("all")}
-              </Link>
-              {CATEGORY_SLUGS.map((slug) => (
+        <Grid>
+          <div className="catalog-chips" role="group" aria-label={t("type")}>
+            {lockedCategory ? (
+              <>
                 <Link
-                  key={slug}
-                  href={`/catalog/${slug}${compareQuery}`}
+                  href={`/catalog${compareQuery}`}
                   className="chip"
-                  aria-pressed={slug === lockedCategory ? "true" : "false"}
+                  aria-pressed="false"
                 >
-                  {tCat(slug)}
+                  {t("all")}
                 </Link>
-              ))}
-            </>
-          ) : (
-            <>
-              <Chip
-                pressed={!query.type}
-                onPressedChange={() => {
-                  void setQuery({ type: null, limit: CATALOG_PAGE_SIZE });
-                }}
-              >
-                {t("all")}
-              </Chip>
-              {CATEGORY_SLUGS.map((slug) => (
+                {CATEGORY_SLUGS.map((slug) => (
+                  <Link
+                    key={slug}
+                    href={`/catalog/${slug}${compareQuery}`}
+                    className="chip"
+                    aria-pressed={slug === lockedCategory ? "true" : "false"}
+                  >
+                    {tCat(slug)}
+                  </Link>
+                ))}
+              </>
+            ) : (
+              <>
                 <Chip
-                  key={slug}
-                  pressed={query.type === slug}
+                  pressed={!query.type}
                   onPressedChange={() => {
-                    void setQuery({
-                      type: query.type === slug ? null : slug,
-                      limit: CATALOG_PAGE_SIZE,
-                    });
+                    void setQuery({ type: null, limit: CATALOG_PAGE_SIZE });
                   }}
                 >
-                  {tCat(slug)}
+                  {t("all")}
                 </Chip>
-              ))}
-            </>
-          )}
-        </div>
+                {CATEGORY_SLUGS.map((slug) => (
+                  <Chip
+                    key={slug}
+                    pressed={query.type === slug}
+                    onPressedChange={() => {
+                      void setQuery({
+                        type: query.type === slug ? null : slug,
+                        limit: CATALOG_PAGE_SIZE,
+                      });
+                    }}
+                  >
+                    {tCat(slug)}
+                  </Chip>
+                ))}
+              </>
+            )}
+          </div>
 
-        <div className="catalog-filters">
-          <Field id="catalog-q" label={t("search")}>
-            <Input
-              id="catalog-q"
-              value={query.q}
-              onChange={(event) => {
+          <div className="catalog-filters">
+            <Field id="catalog-q" label={t("search")}>
+              <Input
+                id="catalog-q"
+                value={query.q}
+                onChange={(event) => {
+                  void setQuery({
+                    q: event.target.value,
+                    limit: CATALOG_PAGE_SIZE,
+                  });
+                }}
+                autoComplete="off"
+              />
+            </Field>
+
+            <Field id="catalog-heat" label={t("heating")}>
+              <Select
+                id="catalog-heat"
+                value={query.heat ?? ""}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  void setQuery({
+                    heat: value === "" ? null : (value as (typeof HEATING_KEYS)[number]),
+                    limit: CATALOG_PAGE_SIZE,
+                  });
+                }}
+              >
+                <option value="">{t("anyHeating")}</option>
+                {HEATING_KEYS.map((key) => (
+                  <option key={key} value={key}>
+                    {tHeat(key)}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+
+          <div className="catalog-kg">
+            <p className="catalog-kg-label">{t("load")}</p>
+            <RangeDual
+              min={kgBounds.min}
+              max={kgBounds.max}
+              valueMin={kgValue.min}
+              valueMax={kgValue.max}
+              step={1}
+              unit={t("kg")}
+              valueTextFrom={t("from")}
+              valueTextTo={t("to")}
+              labelMin={t("kgMin")}
+              labelMax={t("kgMax")}
+              onChange={({ min, max }) => {
+                const full = min <= kgBounds.min && max >= kgBounds.max;
                 void setQuery({
-                  q: event.target.value,
+                  kg: full ? null : { min, max },
                   limit: CATALOG_PAGE_SIZE,
                 });
               }}
-              autoComplete="off"
             />
-          </Field>
-
-          <Field id="catalog-heat" label={t("heating")}>
-            <Select
-              id="catalog-heat"
-              value={query.heat ?? ""}
-              onChange={(event) => {
-                const value = event.target.value;
-                void setQuery({
-                  heat:
-                    value === ""
-                      ? null
-                      : (value as (typeof HEATING_KEYS)[number]),
-                  limit: CATALOG_PAGE_SIZE,
-                });
-              }}
-            >
-              <option value="">{t("anyHeating")}</option>
-              {HEATING_KEYS.map((key) => (
-                <option key={key} value={key}>
-                  {tHeat(key)}
-                </option>
-              ))}
-            </Select>
-          </Field>
-        </div>
-
-        <div className="catalog-kg">
-          <p className="catalog-kg-label">{t("load")}</p>
-          <RangeDual
-            min={kgBounds.min}
-            max={kgBounds.max}
-            valueMin={kgValue.min}
-            valueMax={kgValue.max}
-            step={1}
-            unit={t("kg")}
-            valueTextFrom={t("from")}
-            valueTextTo={t("to")}
-            labelMin={t("kgMin")}
-            labelMax={t("kgMax")}
-            onChange={({ min, max }) => {
-              const full = min <= kgBounds.min && max >= kgBounds.max;
-              void setQuery({
-                kg: full ? null : { min, max },
-                limit: CATALOG_PAGE_SIZE,
-              });
-            }}
-          />
-          {kgActive ? (
-            <Button
-              type="button"
-              variant="link"
-              size="sm"
-              onClick={() => {
-                void setQuery({ kg: null, limit: CATALOG_PAGE_SIZE });
-              }}
-            >
-              {t("resetKg")}
-            </Button>
-          ) : null}
-        </div>
+            {kgActive ? (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                onClick={() => {
+                  void setQuery({ kg: null, limit: CATALOG_PAGE_SIZE });
+                }}
+              >
+                {t("resetKg")}
+              </Button>
+            ) : null}
+          </div>
+        </Grid>
       </div>
 
       <div className="catalog-meta" aria-live="polite">
         <span>{t("models", { count: filtered.length })}</span>
         {hasActiveFilters ? (
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            onClick={() => void resetAll()}
-          >
+          <Button type="button" variant="link" size="sm" onClick={() => void resetAll()}>
             {t("reset")}
           </Button>
         ) : null}

@@ -2,11 +2,9 @@ import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/Container";
 import { Silhouette } from "@/components/ui/Silhouette";
+import { typo } from "@/lib/typo";
 import { getAll, getIndex } from "@/lib/catalog";
-import {
-  indexKgPairs,
-  selectLineup,
-} from "@/lib/catalog/lineup";
+import { indexKgPairs, selectLineup } from "@/lib/catalog/lineup";
 
 import { LineupMachineSlot } from "./LineupMachineSlot";
 import { LineupRuler } from "./LineupRuler";
@@ -25,8 +23,8 @@ export async function HomeHero() {
   return (
     <section className="home-hero">
       <Container className="home-hero-copy">
-        <h1>{t("title")}</h1>
-        <p className="home-hero-sub">{t("subtitle")}</p>
+        <h1>{typo(t("title"))}</h1>
+        <p className="home-hero-sub">{typo(t("subtitle"))}</p>
       </Container>
 
       <LineupRuler
