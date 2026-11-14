@@ -1,6 +1,6 @@
 ---
 description: Форма КП, Server Actions, отправка заявок, безопасность и приватность
-globs: src/app/**/actions.ts,src/lib/leads/**,src/components/quote/**,src/proxy.ts
+globs: src/app/**/actions.ts,src/lib/leads/**,src/components/quote/**,src/proxy.ts,src/env.ts
 alwaysApply: false
 ---
 - Заявка уходит через Server Action. Валидация Zod на сервере всегда; клиентской валидации недостаточно.

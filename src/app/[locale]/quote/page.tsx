@@ -1,4 +1,6 @@
 import { getTranslations } from "next-intl/server";
+
+import { QuoteFormSection } from "@/components/quote/QuoteFormSection";
 import { Container } from "@/components/ui/Container";
 
 export async function generateMetadata({
@@ -15,14 +17,10 @@ export async function generateMetadata({
 }
 
 export default async function QuotePage() {
-  const t = await getTranslations("quote");
-
   return (
     <section className="bg-floor py-12">
       <Container>
-        <h1>{t("title")}</h1>
-        <p className="mt-4 max-w-[52ch] text-steel">{t("subtitle")}</p>
-        <p className="mt-8 text-steel">{t("stub")}</p>
+        <QuoteFormSection idPrefix="page-quote" headingLevel="h1" />
       </Container>
     </section>
   );

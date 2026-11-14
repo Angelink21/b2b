@@ -626,7 +626,7 @@ a {
   padding: var(--space-5) 0;
 }
 
-.quote-teaser-grid {
+.quote-section-inner {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   gap: var(--space-5);
@@ -643,6 +643,107 @@ a {
   background: var(--surf);
   padding: var(--space-4);
   border-left: 4px solid var(--ink);
+}
+
+.quote-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.quote-form-full {
+  grid-column: 1 / -1;
+}
+
+.quote-form-fallback {
+  min-height: 240px;
+}
+
+.quote-hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.quote-models {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.quote-model-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.quote-consent {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-3);
+  align-items: start;
+}
+
+.quote-consent input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--ink);
+}
+
+.quote-consent label {
+  line-height: 1.4;
+}
+
+.quote-consent .field-error {
+  grid-column: 1 / -1;
+}
+
+.quote-consent.is-invalid input[type="checkbox"] {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.quote-success {
+  padding: var(--space-4);
+  border-left: 4px solid var(--ink);
+  background: var(--floor);
+}
+
+.quote-success-title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.quote-success-next {
+  margin: var(--space-2) 0 0;
+  color: var(--steel);
+}
+
+.privacy-page .privacy-intro {
+  max-width: 52ch;
+}
+
+.privacy-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.privacy-section h2 {
+  margin-bottom: var(--space-2);
+}
+
+.privacy-section p {
+  margin: 0;
+  max-width: 60ch;
 }
 
 .draw {
@@ -1139,7 +1240,11 @@ body.has-compare-tray #main {
     height: 200px;
   }
 
-  .quote-teaser-grid {
+  .quote-section-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-form {
     grid-template-columns: 1fr;
   }
 

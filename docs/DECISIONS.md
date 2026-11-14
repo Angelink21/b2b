@@ -7,3 +7,6 @@
 2026-11-14 · csv-parse 7.x · CSV → JSON конвейер этапа 2; нужен для quoted multiline и BOM в products_clean.csv.
 2026-11-14 · boilerPowerKw как {raw,min,max} · В CSV есть значение `6-7.5` (1 модель); простой number ломал сборку.
 2026-11-14 · nuqs 2.10.3 · Состояние фильтров каталога в URL; страница остаётся статичной (хуки только в клиентском острове внутри Suspense).
+2026-11-14 · LeadSink adapters via fetch (no Resend/Telegram/Upstash SDKs) · Fewer dependencies; secrets stay in env; stage 7 Q6 default LEADS_SINKS=console.
+2026-11-14 · CSP with nonce deferred to stage 10 · Stage 7 ships X-Content-Type-Options, Referrer-Policy, Permissions-Policy, production HSTS; nonce CSP needs careful proxy plumbing with Cache Components.
+2026-11-14 · submitLead reads locale from hidden form field + messages/*.json · next-intl getLocale/getTranslations use root-params, unsupported inside Server Actions on Next 16.4.

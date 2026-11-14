@@ -23,6 +23,11 @@ export default defineConfig({
       ...process.env,
       // Styleguide is gated in production; enable for e2e / local preview.
       ENABLE_STYLEGUIDE: "1",
+      LEADS_SINKS: "console",
+      // Skip min-fill anti-spam wait in automated browser tests.
+      LEADS_MIN_FILL_MS: "0",
+      // Parallel projects share one Node process IP hash.
+      LEADS_RATE_LIMIT_MAX: "200",
     },
   },
   projects: [
