@@ -11,7 +11,7 @@ export type DataTableColumn<T> = {
   cell: (row: T) => ReactNode;
 };
 
-type SortState = { id: string; dir: "asc" | "desc" } | null;
+export type DataTableSortState = { id: string; dir: "asc" | "desc" } | null;
 
 type DataTableProps<T> = {
   caption: string;
@@ -20,7 +20,21 @@ type DataTableProps<T> = {
   rowKey: (row: T) => string;
   empty: ReactNode;
   className?: string;
+  /** Controlled sort; when set, parent owns sorting of `rows`. */
+  sort?: DataTableSortState;
+  onSortChange?: (next: DataTableSortState) => void;
+  /** When true with controlled sort, skip internal re-sort (rows already sorted). */
+  rowsPreSorted?: boolean;
 };
+
+function nextSortState(
+  prev: DataTableSortState,
+  id: string,
+): DataTableSortState {
+  if (!prev || prev.id !== id) return { id, dir: "asc" };
+  if (prev.dir === "asc") return { id, dir: "desc" };
+  return null;
+}
 
 export function DataTable<T>({
   caption,
@@ -29,10 +43,17 @@ export function DataTable<T>({
   rowKey,
   empty,
   className = "",
+  sort: controlledSort,
+  onSortChange,
+  rowsPreSorted = false,
 }: DataTableProps<T>) {
-  const [sort, setSort] = useState<SortState>(null);
+  const [uncontrolledSort, setUncontrolledSort] =
+    useState<DataTableSortState>(null);
+  const controlled = onSortChange !== undefined;
+  const sort = controlled ? (controlledSort ?? null) : uncontrolledSort;
 
   const sorted = useMemo(() => {
+    if (controlled && rowsPreSorted) return rows;
     if (!sort) return rows;
     const col = columns.find((c) => c.id === sort.id);
     if (!col) return rows;
@@ -46,17 +67,19 @@ export function DataTable<T>({
       if (typeof av === "number" && typeof bv === "number") {
         return (av - bv) * dir;
       }
-      return String(av).localeCompare(String(bv), undefined, { numeric: true }) * dir;
+      return String(av).localeCompare(String(bv), undefined, { numeric: true }) *
+        dir;
     });
     return copy;
-  }, [columns, rows, sort]);
+  }, [columns, controlled, rows, rowsPreSorted, sort]);
 
   function toggleSort(id: string) {
-    setSort((prev) => {
-      if (!prev || prev.id !== id) return { id, dir: "asc" };
-      if (prev.dir === "asc") return { id, dir: "desc" };
-      return null;
-    });
+    const next = nextSortState(sort, id);
+    if (controlled) {
+      onSortChange?.(next);
+    } else {
+      setUncontrolledSort(next);
+    }
   }
 
   if (rows.length === 0) {
@@ -79,11 +102,7 @@ export function DataTable<T>({
                     ? "none"
                     : undefined;
               return (
-                <th
-                  key={col.id}
-                  scope="col"
-                  aria-sort={ariaSort}
-                >
+                <th key={col.id} scope="col" aria-sort={ariaSort}>
                   {col.sortable ? (
                     <button
                       type="button"

@@ -2,6 +2,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Source_Sans_3, Spectral } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactNode } from "react";
 import { SiteShell } from "@/components/layout/SiteShell";
 import { ThemeScript } from "@/components/theme/ThemeScript";
@@ -67,7 +68,9 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-full flex-col font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
-          <SiteShell>{children}</SiteShell>
+          <NuqsAdapter>
+            <SiteShell>{children}</SiteShell>
+          </NuqsAdapter>
         </NextIntlClientProvider>
       </body>
     </html>

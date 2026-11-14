@@ -1,0 +1,236 @@
+import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
+
+import { CatalogReturnLink } from "@/components/catalog/CatalogReturnLink";
+import { ModelBreadcrumbs } from "@/components/catalog/ModelBreadcrumbs";
+import { ModelFamilySwitcher } from "@/components/catalog/ModelFamilySwitcher";
+import { ModelSpecs } from "@/components/catalog/ModelSpecs";
+import { Container } from "@/components/ui/Container";
+import { DimensionDrawing } from "@/components/ui/DimensionDrawing";
+import { ModelImage } from "@/components/ui/ModelImage";
+import { Row, RowList } from "@/components/ui/Row";
+import { routing } from "@/i18n/routing";
+import {
+  getAll,
+  getBySlug,
+  getFamily,
+  getRelated,
+  getSeriesById,
+} from "@/lib/catalog";
+import { summarizeFamily } from "@/lib/catalog/family-diff";
+import { formatLoadKg } from "@/lib/catalog/format";
+import { getModelImage } from "@/lib/images";
+import {
+  CATEGORY_SLUGS,
+  HEATING_KEYS,
+  type CategorySlug,
+} from "@/lib/catalog/schema";
+import { buildSpecGroups } from "@/lib/catalog/spec-groups";
+
+type PageProps = {
+  params: Promise<{ locale: string; category: string; slug: string }>;
+};
+
+function isCategorySlug(value: string): value is CategorySlug {
+  return (CATEGORY_SLUGS as readonly string[]).includes(value);
+}
+
+export function generateStaticParams() {
+  const products = getAll();
+  return routing.locales.flatMap((locale) =>
+    products.map((product) => ({
+      locale,
+      category: product.category,
+      slug: product.slug,
+    })),
+  );
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const { locale, category, slug } = await params;
+  const product = getBySlug(slug);
+  if (!product || product.category !== category) {
+    return {};
+  }
+  const t = await getTranslations({ locale, namespace: "meta" });
+  const load = product.loadKg ? `, ${product.loadKg.raw} kg` : "";
+  return {
+    title: product.name,
+    description: `${product.name}${load}. ${t("catalogDescription")}`,
+  };
+}
+
+export default async function ModelPage({ params }: PageProps) {
+  const { locale, category, slug } = await params;
+  if (!isCategorySlug(category)) notFound();
+
+  const product = getBySlug(slug);
+  if (!product || product.category !== category) notFound();
+
+  const t = await getTranslations({ locale, namespace: "model" });
+  const tCat = await getTranslations({ locale, namespace: "categories" });
+  const tCatalog = await getTranslations({ locale, namespace: "catalog" });
+  const tQuote = await getTranslations({ locale, namespace: "quote" });
+  const tHeat = await getTranslations({ locale, namespace: "heating" });
+
+  const series = getSeriesById(product.seriesId);
+  const family = getFamily(product.familyId);
+  const familyMembers = summarizeFamily(product, family);
+  const related = getRelated(product.slug, 4);
+
+  const heatingLabels: Partial<Record<string, string>> = {};
+  for (const key of HEATING_KEYS) {
+    heatingLabels[key] = tHeat(key);
+  }
+  const groups = buildSpecGroups(product, heatingLabels);
+
+  const photo = getModelImage(product);
+  const dims = product.dimensionsMm;
+
+  return (
+    <Container className="model-page py-12">
+      <ModelBreadcrumbs
+        label={t("breadcrumbs")}
+        catalogLabel={tCatalog("title")}
+        catalogHref="/catalog"
+        categoryLabel={tCat(product.category)}
+        categoryHref={`/catalog/${product.category}`}
+        modelName={product.name}
+      />
+      <CatalogReturnLink />
+
+      <div className="model-layout mt-8">
+        <div className="model-visual">
+          {photo ? (
+            <ModelImage product={product} targetMaxPx={300} />
+          ) : (
+            <DimensionDrawing
+              widthMm={dims.w}
+              heightMm={dims.h}
+              targetMaxPx={300}
+              title={product.name}
+            />
+          )}
+        </div>
+
+        <div className="model-main">
+          <h1>{product.name}</h1>
+
+          {series?.shortDescription ? (
+            <p
+              className="model-series mt-4 text-steel"
+              {...(locale === "en" ? { lang: "uk" } : {})}
+            >
+              {series.shortDescription}
+              {locale === "en" ? (
+                <span className="model-uk-note"> — {t("ukCopyNote")}</span>
+              ) : null}
+            </p>
+          ) : null}
+
+          <div className="mt-6">
+            <ModelSpecs
+              groups={groups}
+              groupLabels={{
+                main: t("groups.main"),
+                electrical: t("groups.electrical"),
+                dimensions: t("groups.dimensions"),
+              }}
+              specLabels={{
+                loadKg: t("specs.loadKg"),
+                volumeL: t("specs.volumeL"),
+                boilerL: t("specs.boilerL"),
+                powerKw: t("specs.powerKw"),
+                boilerPowerKw: t("specs.boilerPowerKw"),
+                gFactor: t("specs.gFactor"),
+                spinRpm: t("specs.spinRpm"),
+                shaftDiameterMm: t("specs.shaftDiameterMm"),
+                workingWidthMm: t("specs.workingWidthMm"),
+                workingSpeedMpm: t("specs.workingSpeedMpm"),
+                voltage: t("specs.voltage"),
+                exhaustMm: t("specs.exhaustMm"),
+                airflowM3h: t("specs.airflowM3h"),
+                noiseDb: t("specs.noiseDb"),
+                heating: t("specs.heating"),
+                dimensionsMm: t("specs.dimensionsMm"),
+              }}
+            />
+          </div>
+
+          <div className="model-cta mt-8">
+            <a
+              className="btn btn-red"
+              href={`/${locale}/quote?m=${encodeURIComponent(product.slug)}`}
+            >
+              {tQuote("quoteThisModel")}
+            </a>
+          </div>
+
+          <div className="mt-8">
+            <ModelFamilySwitcher
+              currentSlug={product.slug}
+              members={familyMembers}
+              heading={t("otherVariants")}
+              differsIn={(fields) => t("differsIn", { fields })}
+              fieldLabels={{
+                variantLabel: t("diffFields.variantLabel"),
+                heating: t("diffFields.heating"),
+                heatingVariant: t("diffFields.heatingVariant"),
+                powerKw: t("diffFields.powerKw"),
+                loadKg: t("diffFields.loadKg"),
+                voltage: t("diffFields.voltage"),
+                dimensionsMm: t("diffFields.dimensionsMm"),
+                name: t("diffFields.name"),
+              }}
+            />
+          </div>
+
+          {series && series.fullBullets.length > 0 ? (
+            <section
+              className="model-description mt-10"
+              aria-labelledby="model-desc-heading"
+            >
+              <h2 id="model-desc-heading">{t("fullDescription")}</h2>
+              {locale === "en" ? (
+                <p className="model-uk-note mt-2">{t("ukCopyNote")}</p>
+              ) : null}
+              <ul
+                className="model-bullets mt-4"
+                {...(locale === "en" ? { lang: "uk" } : {})}
+              >
+                {series.fullBullets.map((bullet, index) => (
+                  <li key={`${index}-${bullet.slice(0, 24)}`}>{bullet}</li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {related.length > 0 ? (
+            <section
+              className="model-related mt-10"
+              aria-labelledby="model-related-heading"
+            >
+              <h2 id="model-related-heading">{t("related")}</h2>
+              <RowList className="mt-4">
+                {related.map((item) => {
+                  const meta = item.loadKg
+                    ? `${formatLoadKg(item.loadKg)} ${tCatalog("kg")}`
+                    : undefined;
+                  return (
+                    <Row
+                      key={item.slug}
+                      href={`/catalog/${item.category}/${item.slug}`}
+                      title={item.name}
+                      body={tCat(item.category)}
+                      {...(meta ? { meta } : {})}
+                    />
+                  );
+                })}
+              </RowList>
+            </section>
+          ) : null}
+        </div>
+      </div>
+    </Container>
+  );
+}

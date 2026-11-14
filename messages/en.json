@@ -43,12 +43,17 @@
   },
   "catalog": {
     "title": "Catalog",
+    "lead": "Find a model by type, heating, and load.",
+    "loading": "Loading catalog…",
     "stub": "Catalog arrives in stage 5.",
     "reset": "Reset",
+    "resetKg": "Reset kg range",
     "more": "Show more",
     "search": "Model name",
     "all": "All",
     "anyHeating": "Any heating",
+    "empty": "Nothing found. Change filters or reset them.",
+    "tableCaption": "Catalog models",
     "models": "{count, plural, one {# model} other {# models}}",
     "name": "Name",
     "type": "Type",
@@ -56,7 +61,17 @@
     "power": "Power",
     "heating": "Heating",
     "dimensions": "Size, mm",
-    "kg": "kg"
+    "kg": "kg",
+    "from": "from",
+    "to": "to",
+    "kgMin": "Minimum load",
+    "kgMax": "Maximum load",
+    "colGFactor": "G-factor",
+    "colSpin": "Spin, rpm",
+    "colWidth": "Width, mm",
+    "colSpeed": "Speed, m/min",
+    "colShaft": "Shaft, mm",
+    "colVolume": "Volume, l"
   },
   "categories": {
     "washers": "Washers",
@@ -66,7 +81,17 @@
     "ironing-rollers": "Ironing rollers",
     "finishing": "Finishing",
     "water-recovery": "Water recovery",
-    "washer-dryers": "Washer-dryers"
+    "washer-dryers": "Washer-dryers",
+    "intro": {
+      "washers": "TODO(copy): short intro for washers.",
+      "dryers": "TODO(copy): short intro for dryers.",
+      "flatwork-ironers": "TODO(copy): short intro for flatwork ironers.",
+      "laundry-carts": "TODO(copy): short intro for laundry carts.",
+      "ironing-rollers": "TODO(copy): short intro for ironing rollers.",
+      "finishing": "TODO(copy): short intro for finishing equipment.",
+      "water-recovery": "TODO(copy): short intro for water recovery systems.",
+      "washer-dryers": "TODO(copy): short intro for washer-dryers."
+    }
   },
   "heating": {
     "electric": "Electric",
@@ -115,9 +140,31 @@
   },
   "model": {
     "ukCopyNote": "Text in Ukrainian",
+    "breadcrumbs": "Breadcrumb",
+    "backToResults": "Back to results →",
+    "otherVariants": "Other variants",
+    "differsIn": "Differs in: {fields}",
+    "fullDescription": "Series description",
+    "related": "Similar models",
+    "groups": {
+      "main": "Main",
+      "electrical": "Electrical",
+      "dimensions": "Dimensions"
+    },
+    "diffFields": {
+      "variantLabel": "variant",
+      "heating": "heating",
+      "heatingVariant": "heating subtype",
+      "powerKw": "power",
+      "loadKg": "load",
+      "voltage": "voltage",
+      "dimensionsMm": "dimensions",
+      "name": "name"
+    },
     "specs": {
       "loadKg": "Load, kg",
-      "volumeL": "Drum volume, l",
+      "volumeL": "Volume, l",
+      "boilerL": "Boiler, l",
       "powerKw": "Power, kW",
       "boilerPowerKw": "Boiler power, kW",
       "gFactor": "G-factor",
