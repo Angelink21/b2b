@@ -34,7 +34,10 @@ jobs:
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+        env:
+          ENABLE_STYLEGUIDE: "1"
       - run: pnpm exec playwright install --with-deps chromium webkit
       - run: pnpm e2e
         env:
           CI: "true"
+          ENABLE_STYLEGUIDE: "1"

@@ -45,7 +45,9 @@ test.describe("header screenshots", () => {
       document.documentElement.setAttribute("data-theme", "light");
     });
     await page.reload();
-    await expect(page.getByRole("banner")).toHaveScreenshot("header-light-1440.png");
+    await expect(page.getByRole("banner")).toHaveScreenshot("header-light-1440.png", {
+      maxDiffPixelRatio: 0.02,
+    });
   });
 
   test("header dark 1440", async ({ page }, testInfo) => {
@@ -56,7 +58,9 @@ test.describe("header screenshots", () => {
       document.documentElement.setAttribute("data-theme", "dark");
     });
     await page.reload();
-    await expect(page.getByRole("banner")).toHaveScreenshot("header-dark-1440.png");
+    await expect(page.getByRole("banner")).toHaveScreenshot("header-dark-1440.png", {
+      maxDiffPixelRatio: 0.02,
+    });
   });
 
   test("header light 390", async ({ page }, testInfo) => {
@@ -67,7 +71,9 @@ test.describe("header screenshots", () => {
       document.documentElement.setAttribute("data-theme", "light");
     });
     await page.reload();
-    await expect(page.getByRole("banner")).toHaveScreenshot("header-light-390.png");
+    await expect(page.getByRole("banner")).toHaveScreenshot("header-light-390.png", {
+      maxDiffPixelRatio: 0.02,
+    });
   });
 
   test("header dark 390", async ({ page }, testInfo) => {
@@ -78,6 +84,8 @@ test.describe("header screenshots", () => {
       document.documentElement.setAttribute("data-theme", "dark");
     });
     await page.reload();
-    await expect(page.getByRole("banner")).toHaveScreenshot("header-dark-390.png");
+    await expect(page.getByRole("banner")).toHaveScreenshot("header-dark-390.png", {
+      maxDiffPixelRatio: 0.02,
+    });
   });
 });

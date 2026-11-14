@@ -19,6 +19,11 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    env: {
+      ...process.env,
+      // Styleguide is gated in production; enable for e2e / local preview.
+      ENABLE_STYLEGUIDE: "1",
+    },
   },
   projects: [
     {

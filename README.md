@@ -42,6 +42,10 @@ pnpm dev
 - `docs/PROMPTS.md` — этапы работ
 - `.env.example` — переменные окружения
 
+## Styleguide
+
+`/[locale]/_styleguide` — внутренний UI-кит. В production нужен `ENABLE_STYLEGUIDE=1` (см. `.env.example`).
+
 ## Статус
 
-Этап 2: конвейер каталога (303 модели, API, тесты). UI контента страниц — с этапа 3–5.
+Этап 3: UI-кит + styleguide. Контент главной/каталога — этапы 4–5.
