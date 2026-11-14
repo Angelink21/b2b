@@ -1,0 +1,14 @@
+---
+description: Правила движения и анимации: токены, допустимые свойства, запреты, хореография
+globs: src/components/motion/**
+alwaysApply: false
+---
+- Движение объясняет изменение. В комментарии к каждой анимации: `// motion: <какое изменение она показывает>`. Не можешь объяснить — не делай.
+- Токены (из `docs/DESIGN.md`, раздел Motion): fast 120ms · base 200ms · slow 400ms · signature 1100ms;
+  ease-standard `cubic-bezier(.2,0,0,1)`, ease-emphasized `cubic-bezier(.16,1,.3,1)`; пружины без отскока (bounce 0).
+- Анимируются только `transform`, `opacity`, `stroke-dashoffset`, `clip-path`. Никаких `width/height/top/left`, никаких сдвигов раскладки.
+- Библиотека: Motion (`motion/react`) для оркестровки и layout-анимаций; CSS для hover/focus; View Transitions (React 19.3) для список → карточка.
+- Уровень задаётся `MOTION_LEVEL` в `src/config/motion.ts`: `signature` (одна анимация загрузки) или `expressive` (полный набор из этапа 8).
+- Всегда уважай `prefers-reduced-motion` (хук `useReducedMotion` или `@media`). Проверяй e2e с `reducedMotion: 'reduce'`.
+- Запрещено: параллакс, частицы, свечения и градиентные подсветки, бесконечные циклы, scroll-jacking, появление каждого блока снизу, 3D-вращения ради эффекта.
+- Одновременно анимируется не более 3 независимых элементов (кроме stagger линейки). `will-change` — только на время анимации.

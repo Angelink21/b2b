@@ -1,0 +1,19 @@
+---
+description: Архитектура Next.js 16.4: Cache Components, proxy.ts, статика, клиентские острова
+globs: src/app/**,src/proxy.ts,src/i18n/**,next.config.*
+alwaysApply: false
+---
+- Next.js 16.4+: Cache Components включены (`cacheComponents: true`). Кэш — через `'use cache'` и `cacheLife`.
+  Динамические API (`cookies`, `headers`, `searchParams`) только внутри `<Suspense>`.
+- Не используй route segment config (`dynamic`, `revalidate`, `fetchCache`) без проверки по актуальной документации для режима Cache Components.
+- `middleware.ts` переименован в `proxy.ts`. Определение языка живёт там. `next lint` удалён: ESLint запускается напрямую.
+- `params` и `searchParams` — Promise: всегда `await`.
+- Маркетинговые страницы, категории и карточки моделей статичны (`generateStaticParams` для locale × category × slug).
+  Проверяй таблицу маршрутов в выводе `next build`: ни одна из них не должна стать динамической случайно.
+- Server Components по умолчанию. Клиентские острова маленькие: ruler, фильтры каталога, compare-tray, motion-обёртки, форма.
+- Каталог целиком в клиент не отправляется: для фильтров клиент получает лёгкую проекцию `catalog.index.json` (бюджет ≤ 40 KB gzip).
+- Состояние фильтров живёт в URL (nuqs, клиентские хуки внутри `<Suspense>`), чтобы страница каталога оставалась статичной.
+- i18n и Cache Components: известные подводные камни next-intl (setRequestLocale, root layout, root params) проверяй по актуальным докам
+  и фиксируй выбранную схему в `docs/PLAN.md` до реализации.
+- View Transitions (React 19.3) допустимы для перехода список → карточка; без поддержки браузера страница работает без анимации.
+- Изображения только через `next/image`; внешние домены из env в `images.remotePatterns`.

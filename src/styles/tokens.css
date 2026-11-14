@@ -1,0 +1,68 @@
+/* Design tokens — sole source of hex/rgb for UI (see docs/DESIGN.md) */
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f5f7;
+  --floor: #e3e7eb;
+  --surf: #ffffff;
+  --line: #c5ccd4;
+  --ink: #0f1b2d;
+  --steel: #556171;
+  --red: #c9331c;
+  --red-h: #b02a16;
+  --on-red: #ffffff;
+
+  --font-serif: var(--font-spectral), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-source-sans), system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+
+  --text-h1: clamp(34px, 5.4vw, 64px);
+  --text-h2: clamp(26px, 3.4vw, 40px);
+  --text-h3: 22px;
+  --text-body: 17px;
+  --text-caption: 15px;
+  --leading-body: 1.55;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 48px;
+  --space-6: 96px;
+
+  --radius-control: 6px;
+  --radius-chip: 20px;
+  --radius-none: 0;
+
+  --container: 1200px;
+  --page-gutter: 24px;
+
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 400ms;
+  --dur-signature: 1100ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e141c;
+  --floor: #17202b;
+  --surf: #131b25;
+  --line: #2b3745;
+  --ink: #e9eef3;
+  --steel: #9aa7b5;
+  --red: #c9331c;
+  --red-h: #b02a16;
+  --on-red: #ffffff;
+}
+
+@media (max-width: 820px) {
+  :root,
+  [data-theme="light"],
+  [data-theme="dark"] {
+    --page-gutter: 16px;
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "siteName": "Fagor Industrial",
+    "homeTitle": "Fagor Industrial — equipment lineup",
+    "homeDescription": "Industrial laundry equipment. Pick a model by load and request a commercial quote.",
+    "catalogTitle": "Catalog",
+    "catalogDescription": "Fagor Industrial industrial laundry equipment catalog.",
+    "quoteTitle": "Get a quote",
+    "quoteDescription": "Request a commercial quote.",
+    "privacyTitle": "Privacy",
+    "privacyDescription": "Privacy policy.",
+    "notFoundTitle": "Page not found"
+  },
+  "nav": {
+    "skip": "Skip to content",
+    "brand": "Fagor Industrial",
+    "catalog": "Catalog",
+    "industries": "Industries",
+    "quote": "Get a quote",
+    "mainNav": "Main navigation",
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "home": {
+    "title": "How many kilograms per shift?",
+    "subtitle": "Drag the load range: matching models step forward and the catalog filters itself.",
+    "showInCatalog": "Show in catalog",
+    "industriesHeading": "Who it is for",
+    "featuredHeading": "Where to start",
+    "stub": "Home content arrives in stage 4."
+  },
+  "catalog": {
+    "title": "Catalog",
+    "stub": "Catalog arrives in stage 5.",
+    "reset": "Reset",
+    "more": "Show more",
+    "search": "Model name",
+    "all": "All",
+    "anyHeating": "Any heating",
+    "models": "{count, plural, one {# model} other {# models}}",
+    "name": "Name",
+    "type": "Type",
+    "load": "Load",
+    "power": "Power",
+    "heating": "Heating",
+    "dimensions": "Size, mm",
+    "kg": "kg"
+  },
+  "categories": {
+    "washers": "Washers",
+    "dryers": "Dryers",
+    "flatwork-ironers": "Flatwork ironers",
+    "laundry-carts": "Laundry carts",
+    "ironing-rollers": "Ironing rollers",
+    "finishing": "Finishing",
+    "water-recovery": "Water recovery",
+    "washer-dryers": "Washer-dryers"
+  },
+  "heating": {
+    "electric": "Electric",
+    "steam": "Steam",
+    "gas": "Gas",
+    "hot-water": "Hot water",
+    "combined": "Combined"
+  },
+  "industries": {
+    "hospitality": {
+      "title": "Hotels and restaurants",
+      "body": "Fast turnover of sheets and towels."
+    },
+    "hospitals": {
+      "title": "Hospitals and clinics",
+      "body": "Hygiene and a predictable cycle."
+    },
+    "laundries": {
+      "title": "Laundries and self-service",
+      "body": "Throughput and low cost per kg."
+    },
+    "social": {
+      "title": "Social facilities",
+      "body": "Reliability and simple operation."
+    },
+    "industrial": {
+      "title": "Industrial plants",
+      "body": "Large volumes and continuous flow."
+    }
+  },
+  "quote": {
+    "title": "Get a commercial quote",
+    "subtitle": "Tell us about the site and linen volume. We will pick a model and calculate the price.",
+    "stub": "Quote form arrives in stage 7.",
+    "name": "Name",
+    "company": "Company",
+    "contact": "Email or phone",
+    "site": "Site",
+    "kgPerShift": "Kg of linen per shift",
+    "modelsComment": "Models and comments",
+    "send": "Send request",
+    "errorName": "Enter your name.",
+    "errorContact": "Enter an email or phone so we can reply.",
+    "success": "Request received. We will contact you.",
+    "quoteThisModel": "Get a quote for this model"
+  },
+  "model": {
+    "ukCopyNote": "Text in Ukrainian",
+    "specs": {
+      "loadKg": "Load, kg",
+      "volumeL": "Drum volume, l",
+      "powerKw": "Power, kW",
+      "boilerPowerKw": "Boiler power, kW",
+      "gFactor": "G-factor",
+      "spinRpm": "Spin, rpm",
+      "shaftDiameterMm": "Shaft diameter, mm",
+      "workingWidthMm": "Working width, mm",
+      "workingSpeedMpm": "Working speed, m/min",
+      "voltage": "Voltage",
+      "exhaustMm": "Exhaust, mm",
+      "airflowM3h": "Airflow, m³/h",
+      "noiseDb": "Noise, dB",
+      "heating": "Heating",
+      "dimensionsMm": "Size, mm"
+    }
+  },
+  "privacy": {
+    "title": "Privacy",
+    "stub": "TODO(legal): privacy policy text will appear after legal copy is provided."
+  },
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "Check the address or return home.",
+    "backHome": "Back home",
+    "errorTitle": "Something went wrong",
+    "errorBody": "Try refreshing the page. If it keeps happening, contact us via the quote form.",
+    "retry": "Try again"
+  },
+  "footer": {
+    "note": "Industrial laundry equipment by Fagor Industrial."
+  },
+  "fontcheck": {
+    "title": "Glyph check",
+    "sample": "Ґанок, єдність, їжак, Київ, п’ять, ʼ"
+  }
+}
