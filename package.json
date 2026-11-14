@@ -19,6 +19,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "csv-parse": "^7.0.3",
     "next": "16.4.6",
     "next-intl": "4.15.1",
     "react": "19.3.1",

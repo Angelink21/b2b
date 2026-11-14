@@ -27,18 +27,21 @@ pnpm dev
 | `pnpm typecheck` | TypeScript |
 | `pnpm test` | Vitest |
 | `pnpm e2e` | Playwright (+ axe) |
-| `pnpm catalog:build` | CSV → JSON (полный конвейер — этап 2) |
+| `pnpm catalog:build` | CSV → JSON (`src/data/*`, `docs/CATALOG_REPORT.md`) |
 | `pnpm verify` | lint + typecheck + test + build |
+
+После смены `data/products_clean.csv` обязательно: `pnpm catalog:build`.
 
 ## Документы
 
 - `docs/PLAN.md` — архитектура
 - `docs/DESIGN.md` — дизайн-система
 - `docs/DATA_CONTRACT.md` — каталог
+- `docs/CATALOG_REPORT.md` — отчёт последней сборки каталога
 - `docs/ACCEPTANCE.md` — приёмка
 - `docs/PROMPTS.md` — этапы работ
 - `.env.example` — переменные окружения
 
-## Этап 1
+## Статус
 
-Каркас: токены, шрифты, темы light/dark/system, i18n uk/en, оболочка, CI. Контент страниц — заглушки.
+Этап 2: конвейер каталога (303 модели, API, тесты). UI контента страниц — с этапа 3–5.
