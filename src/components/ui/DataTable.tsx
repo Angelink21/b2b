@@ -1,6 +1,9 @@
 "use client";
 
+import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { useMemo, useState, type ReactNode } from "react";
+
+import { isExpressive, MOTION_EASE, MOTION_MS } from "@/config/motion";
 
 export type DataTableColumn<T> = {
   id: string;
@@ -27,6 +30,8 @@ type DataTableProps<T> = {
   rowsPreSorted?: boolean;
 };
 
+const LAYOUT_ROW_CAP = 30;
+
 function nextSortState(
   prev: DataTableSortState,
   id: string,
@@ -51,6 +56,8 @@ export function DataTable<T>({
     useState<DataTableSortState>(null);
   const controlled = onSortChange !== undefined;
   const sort = controlled ? (controlledSort ?? null) : uncontrolledSort;
+  const reduced = useReducedMotion() === true;
+  const layoutRows = isExpressive() && !reduced;
 
   const sorted = useMemo(() => {
     if (controlled && rowsPreSorted) return rows;
@@ -88,47 +95,64 @@ export function DataTable<T>({
 
   return (
     <div className={`data-table-wrap ${className}`.trim()}>
-      <table className="data-table">
-        <caption className="sr-only">{caption}</caption>
-        <thead>
-          <tr>
-            {columns.map((col) => {
-              const ariaSort =
-                sort?.id === col.id
-                  ? sort.dir === "asc"
-                    ? "ascending"
-                    : "descending"
-                  : col.sortable
-                    ? "none"
-                    : undefined;
-              return (
-                <th key={col.id} scope="col" aria-sort={ariaSort}>
-                  {col.sortable ? (
-                    <button
-                      type="button"
-                      className="data-table-sort"
-                      onClick={() => toggleSort(col.id)}
-                    >
-                      {col.header}
-                    </button>
-                  ) : (
-                    col.header
-                  )}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((row) => (
-            <tr key={rowKey(row)}>
-              {columns.map((col) => (
-                <td key={col.id}>{col.cell(row)}</td>
-              ))}
+      <LayoutGroup>
+        <table className="data-table">
+          <caption className="sr-only">{caption}</caption>
+          <thead>
+            <tr>
+              {columns.map((col) => {
+                const ariaSort =
+                  sort?.id === col.id
+                    ? sort.dir === "asc"
+                      ? "ascending"
+                      : "descending"
+                    : col.sortable
+                      ? "none"
+                      : undefined;
+                return (
+                  <th key={col.id} scope="col" aria-sort={ariaSort}>
+                    {col.sortable ? (
+                      <button
+                        type="button"
+                        className="data-table-sort"
+                        onClick={() => toggleSort(col.id)}
+                      >
+                        {col.header}
+                      </button>
+                    ) : (
+                      col.header
+                    )}
+                  </th>
+                );
+              })}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sorted.map((row, index) => {
+              const key = rowKey(row);
+              const cells = columns.map((col) => (
+                <td key={col.id}>{col.cell(row)}</td>
+              ));
+              // motion: first 30 filtered rows reflow with layout animation
+              if (layoutRows && index < LAYOUT_ROW_CAP) {
+                return (
+                  <motion.tr
+                    key={key}
+                    layout
+                    transition={{
+                      duration: MOTION_MS.base / 1000,
+                      ease: MOTION_EASE.standard,
+                    }}
+                  >
+                    {cells}
+                  </motion.tr>
+                );
+              }
+              return <tr key={key}>{cells}</tr>;
+            })}
+          </tbody>
+        </table>
+      </LayoutGroup>
     </div>
   );
 }

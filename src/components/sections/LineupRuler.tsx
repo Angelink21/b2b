@@ -1,17 +1,32 @@
 "use client";
 
+import { animate, motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import {
+  useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react";
 
+import { NumberRoll } from "@/components/motion/NumberRoll";
+import {
+  hasPlayedLineupIntro,
+  markLineupIntroPlayed,
+} from "@/components/motion/sessionIntro";
+import { useMotionEnabled } from "@/components/motion/useMotionEnabled";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import {
+  INTRO_BUDGET_MS,
+  MAGNET_THRESHOLD_UNITS,
+  MOTION_EASE,
+  MOTION_MS,
+} from "@/config/motion";
 import {
   countModelsInKgRange,
   INITIAL_RANGE_UNIT,
@@ -41,6 +56,25 @@ function useDebounced<T>(value: T, ms: number): T {
   return debounced;
 }
 
+/** Nearest anchor unit (0…1000) if within magnetic threshold; else null. */
+function magnetUnit(
+  unit: number,
+  anchorCount: number,
+): number | null {
+  if (anchorCount < 2) return null;
+  let best = unit;
+  let bestDist = Infinity;
+  for (let i = 0; i < anchorCount; i += 1) {
+    const u = Math.round((i / (anchorCount - 1)) * RANGE_UNIT_MAX);
+    const d = Math.abs(u - unit);
+    if (d < bestDist) {
+      bestDist = d;
+      best = u;
+    }
+  }
+  return bestDist <= MAGNET_THRESHOLD_UNITS ? best : null;
+}
+
 export function LineupRuler({
   anchors,
   kgPairs,
@@ -50,14 +84,96 @@ export function LineupRuler({
   const t = useTranslations("home");
   const tCat = useTranslations("catalog");
   const id = useId();
+  const { enabled, expressive } = useMotionEnabled();
 
   const [loUnit, setLoUnit] = useState<number>(INITIAL_RANGE_UNIT.lo);
   const [hiUnit, setHiUnit] = useState<number>(INITIAL_RANGE_UNIT.hi);
+  const [introReady, setIntroReady] = useState(true);
+  const [playMachineIntro, setPlayMachineIntro] = useState(false);
+  const [scaleDrawn, setScaleDrawn] = useState(true);
+  const [hoveredKg, setHoveredKg] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const introStarted = useRef(false);
+  const loAnimRef = useRef<{ stop: () => void } | null>(null);
+  const hiAnimRef = useRef<{ stop: () => void } | null>(null);
+  const userMovedRef = useRef(false);
 
-  useEffect(() => {
-    stageRef.current?.setAttribute("data-lineup-ready", "true");
+  const finishIntro = useCallback(() => {
+    loAnimRef.current?.stop();
+    hiAnimRef.current?.stop();
+    loAnimRef.current = null;
+    hiAnimRef.current = null;
+    setScaleDrawn(true);
+    setIntroReady(true);
   }, []);
+
+  useLayoutEffect(() => {
+    if (introStarted.current) return;
+    introStarted.current = true;
+    stageRef.current?.setAttribute("data-lineup-ready", "true");
+
+    if (!enabled || hasPlayedLineupIntro()) {
+      return;
+    }
+
+    markLineupIntroPlayed();
+
+    let scaleTimer = 0;
+    let doneTimer = 0;
+
+    // Defer setState out of the effect body (lint: set-state-in-effect).
+    const frame = window.requestAnimationFrame(() => {
+      if (userMovedRef.current) return;
+      setLoUnit(0);
+      setHiUnit(0);
+      setPlayMachineIntro(true);
+      setScaleDrawn(false);
+      setIntroReady(false);
+
+      // motion: range handles spring to the starting load window (no bounce)
+      loAnimRef.current = animate(0, INITIAL_RANGE_UNIT.lo, {
+        type: "spring",
+        stiffness: 140,
+        damping: 22,
+        mass: 0.8,
+        bounce: 0,
+        onUpdate: (v) => {
+          if (!userMovedRef.current) setLoUnit(Math.round(v));
+        },
+      });
+      hiAnimRef.current = animate(0, INITIAL_RANGE_UNIT.hi, {
+        type: "spring",
+        stiffness: 140,
+        damping: 22,
+        mass: 0.8,
+        bounce: 0,
+        onUpdate: (v) => {
+          if (!userMovedRef.current) setHiUnit(Math.round(v));
+        },
+      });
+
+      // motion: floor scale draws left→right after machines begin settling
+      scaleTimer = window.setTimeout(() => {
+        setScaleDrawn(true);
+      }, MACHINE_INTRO_MS);
+
+      doneTimer = window.setTimeout(() => {
+        if (!userMovedRef.current) {
+          setLoUnit(INITIAL_RANGE_UNIT.lo);
+          setHiUnit(INITIAL_RANGE_UNIT.hi);
+        }
+        setIntroReady(true);
+      }, INTRO_BUDGET_MS);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      loAnimRef.current?.stop();
+      hiAnimRef.current?.stop();
+      window.clearTimeout(scaleTimer);
+      window.clearTimeout(doneTimer);
+    };
+  }, [enabled]);
 
   const lo = Math.min(loUnit, hiUnit);
   const hi = Math.max(loUnit, hiUnit);
@@ -89,10 +205,31 @@ export function LineupRuler({
   const leftPct = (lo / RANGE_UNIT_MAX) * 100;
   const widthPct = ((hi - lo) / RANGE_UNIT_MAX) * 100;
 
+  // motion: thumbs visually magnetize to kg anchors (aria/values unchanged)
+  const visualLo = useMemo(() => {
+    if (!expressive) return lo;
+    return magnetUnit(lo, anchors.length) ?? lo;
+  }, [expressive, lo, anchors.length]);
+  const visualHi = useMemo(() => {
+    if (!expressive) return hi;
+    return magnetUnit(hi, anchors.length) ?? hi;
+  }, [expressive, hi, anchors.length]);
+  const visualLeftPct = (visualLo / RANGE_UNIT_MAX) * 100;
+  const visualWidthPct =
+    ((Math.max(visualLo, visualHi) - Math.min(visualLo, visualHi)) /
+      RANGE_UNIT_MAX) *
+    100;
+  const showMagnet =
+    expressive && (visualLo !== lo || visualHi !== hi);
+
   const catalogHref = fullRange
     ? "/catalog"
     : `/catalog?kg=${loKgRound}-${hiKgRound}`;
   const quoteHref = fullRange ? "/quote" : `/quote?kg=${hiKgRound}`;
+
+  const setHovered = useCallback((kg: number | null) => {
+    setHoveredKg(kg);
+  }, []);
 
   const rangeState = {
     loUnit: lo,
@@ -100,28 +237,60 @@ export function LineupRuler({
     loKg,
     hiKg,
     fullRange,
+    liftActive: expressive && !fullRange && introReady,
+    introReady,
+    playMachineIntro,
+    hoveredKg,
+    setHoveredKg: setHovered,
   };
 
   return (
     <LineupRangeProvider value={rangeState}>
-      <div ref={stageRef} className="lineup-stage" data-lineup-ready="false">
+      <div
+        ref={stageRef}
+        className="lineup-stage"
+        data-lineup-ready="false"
+        data-lineup-intro={playMachineIntro && !introReady ? "1" : "0"}
+      >
         <div className="lineup-stage-in">
           <div
             className="lineup-line"
             role="img"
             aria-label={t("lineupLabel")}
           >
+            {/* motion: floor scale draws left→right on first load */}
+            <motion.div
+              className="lineup-floor"
+              aria-hidden="true"
+              initial={false}
+              animate={{
+                scaleX: scaleDrawn || !enabled ? 1 : 0,
+              }}
+              transition={{
+                duration: enabled ? MOTION_MS.scale / 1000 : 0,
+                ease: MOTION_EASE.emphasized,
+              }}
+              style={{ transformOrigin: "left center" }}
+            />
             {children}
           </div>
           <div className="lineup-kgs" aria-hidden="true">
             {anchors.map((kg) => {
-              const on =
+              const inWindow =
                 fullRange ||
                 (kg >= loKg - 0.01 && kg <= hiKg + 0.01);
+              const hovered = hoveredKg === kg;
               return (
                 <span
                   key={kg}
-                  className={on && !fullRange ? "is-on" : undefined}
+                  className={
+                    [
+                      inWindow && !fullRange ? "is-on" : "",
+                      hovered ? "is-hover" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ") || undefined
+                  }
                 >
                   {kg}
                 </span>
@@ -133,6 +302,16 @@ export function LineupRuler({
               className="lineup-band"
               style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
             />
+            {showMagnet ? (
+              <div
+                className="lineup-band lineup-band-magnet"
+                aria-hidden="true"
+                style={{
+                  left: `${visualLeftPct}%`,
+                  width: `${visualWidthPct}%`,
+                }}
+              />
+            ) : null}
             <input
               id={`${id}-min`}
               type="range"
@@ -144,6 +323,8 @@ export function LineupRuler({
               aria-label={t("ariaMin")}
               aria-valuetext={valueText}
               onChange={(event) => {
+                userMovedRef.current = true;
+                finishIntro();
                 const next = Number(event.target.value);
                 setLoUnit(Math.min(next, hi));
               }}
@@ -159,6 +340,8 @@ export function LineupRuler({
               aria-label={t("ariaMax")}
               aria-valuetext={valueText}
               onChange={(event) => {
+                userMovedRef.current = true;
+                finishIntro();
                 const next = Number(event.target.value);
                 setHiUnit(Math.max(next, lo));
               }}
@@ -174,7 +357,16 @@ export function LineupRuler({
               {liveLo}–{liveHi} {tCat("kg")}{" "}
             </>
           )}
-          <small>{tCat("models", { count: liveCount })}</small>
+          <small className="lineup-count">
+            {expressive ? (
+              <>
+                <NumberRoll value={liveCount} />{" "}
+                {tCat("modelsLabel", { count: liveCount })}
+              </>
+            ) : (
+              tCat("models", { count: liveCount })
+            )}
+          </small>
         </output>
         <Button href={catalogHref} variant="secondary">
           {t("showInCatalog")}
@@ -186,3 +378,7 @@ export function LineupRuler({
     </LineupRangeProvider>
   );
 }
+
+/** Time before scale draw starts (last machine delay + most of settle). */
+const MACHINE_INTRO_MS =
+  7 * 60 + MOTION_MS.machine * 0.35;

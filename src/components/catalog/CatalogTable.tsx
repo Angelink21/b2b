@@ -22,6 +22,7 @@ import {
   type SortParam,
 } from "@/lib/catalog/search-params";
 import { CompareToggle } from "@/components/compare/CompareToggle";
+import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
 import {
   DataTable,
   type DataTableColumn,
@@ -167,19 +168,21 @@ export function CatalogTable({
           cell: (row) => {
             if (id === "name") {
               return (
-                <Link
-                  href={`/catalog/${row.category}/${row.slug}`}
-                  className="catalog-model-link"
-                  onClick={() => {
-                    saveCatalogReturn({
-                      pathname: returnPathname,
-                      search: returnSearch,
-                      scrollY: window.scrollY,
-                    });
-                  }}
-                >
-                  {row.name}
-                </Link>
+                <ModelSharedTransition slug={row.slug}>
+                  <Link
+                    href={`/catalog/${row.category}/${row.slug}`}
+                    className="catalog-model-link"
+                    onClick={() => {
+                      saveCatalogReturn({
+                        pathname: returnPathname,
+                        search: returnSearch,
+                        scrollY: window.scrollY,
+                      });
+                    }}
+                  >
+                    {row.name}
+                  </Link>
+                </ModelSharedTransition>
               );
             }
             return cellText(id, row, tCat, tHeat);

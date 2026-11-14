@@ -7,6 +7,14 @@ type ModelSpecsProps = {
   specLabels: Record<string, string>;
 };
 
+function dimHighlightFor(
+  key: string,
+): "width" | "height" | "both" | undefined {
+  if (key === "dimensionsMm") return "both";
+  if (key === "workingWidthMm") return "width";
+  return undefined;
+}
+
 export function ModelSpecs({
   groups,
   groupLabels,
@@ -26,10 +34,14 @@ export function ModelSpecs({
             {groupLabels[group.id] ?? group.id}
           </h2>
           <SpecList
-            items={group.items.map((item) => ({
-              term: specLabels[item.key] ?? item.key,
-              description: item.value,
-            }))}
+            items={group.items.map((item) => {
+              const dimHighlight = dimHighlightFor(item.key);
+              return {
+                term: specLabels[item.key] ?? item.key,
+                description: item.value,
+                ...(dimHighlight ? { dimHighlight } : {}),
+              };
+            })}
           />
         </section>
       ))}

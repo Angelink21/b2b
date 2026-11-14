@@ -7,6 +7,8 @@ import { ModelActions } from "@/components/catalog/ModelActions";
 import { ModelBreadcrumbs } from "@/components/catalog/ModelBreadcrumbs";
 import { ModelFamilySwitcher } from "@/components/catalog/ModelFamilySwitcher";
 import { ModelSpecs } from "@/components/catalog/ModelSpecs";
+import { DimHighlightProvider } from "@/components/motion/DimHighlight";
+import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
 import { Container } from "@/components/ui/Container";
 import { DimensionDrawing } from "@/components/ui/DimensionDrawing";
 import { ModelImage } from "@/components/ui/ModelImage";
@@ -100,22 +102,27 @@ export default async function ModelPage({ params }: PageProps) {
       />
       <CatalogReturnLink />
 
+      <DimHighlightProvider>
       <div className="model-layout mt-8">
         <div className="model-visual">
-          {photo ? (
-            <ModelImage product={product} targetMaxPx={300} />
-          ) : (
-            <DimensionDrawing
-              widthMm={dims.w}
-              heightMm={dims.h}
-              targetMaxPx={300}
-              title={product.name}
-            />
-          )}
+          <ModelSharedTransition slug={`${product.slug}-visual`}>
+            {photo ? (
+              <ModelImage product={product} targetMaxPx={300} />
+            ) : (
+              <DimensionDrawing
+                widthMm={dims.w}
+                heightMm={dims.h}
+                targetMaxPx={300}
+                title={product.name}
+              />
+            )}
+          </ModelSharedTransition>
         </div>
 
         <div className="model-main">
-          <h1>{product.name}</h1>
+          <ModelSharedTransition slug={product.slug}>
+            <h1>{product.name}</h1>
+          </ModelSharedTransition>
 
           {series?.shortDescription ? (
             <p
@@ -231,6 +238,7 @@ export default async function ModelPage({ params }: PageProps) {
           ) : null}
         </div>
       </div>
+      </DimHighlightProvider>
     </Container>
   );
 }

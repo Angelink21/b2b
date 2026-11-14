@@ -1,3 +1,10 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
+
+import { useDimHighlight } from "@/components/motion/DimHighlight";
+import { isExpressive, MOTION_EASE, MOTION_MS } from "@/config/motion";
+
 import { computeSilhouetteLayout } from "./Silhouette";
 
 type DimensionDrawingProps = {
@@ -31,6 +38,18 @@ export function DimensionDrawing({
   const vbW = width + padR + 30;
   const vbH = height + padB + 20;
 
+  const reduced = useReducedMotion() === true;
+  const expressive = isExpressive() && !reduced;
+  const { active } = useDimHighlight();
+
+  const widthPath = `M0 ${height + 16}H${width}M0 ${height + 10}v12M${width} ${height + 10}v12`;
+  const heightPath = `M${width + 16} 0V${height}M${width + 10} 0h12M${width + 10} ${height}h12`;
+
+  const widthOn =
+    active === "width" || active === "both";
+  const heightOn =
+    active === "height" || active === "both";
+
   return (
     <div className={`draw ${className}`.trim()}>
       <svg
@@ -59,21 +78,83 @@ export function DimensionDrawing({
           <circle cx={cx} cy={cy} r={rInner} className="silhouette-port-inner" />
         </g>
         <g className="dim-lines">
-          <path
-            d={`M0 ${height + 16}H${width}M0 ${height + 10}v12M${width} ${height + 10}v12M${width + 16} 0V${height}M${width + 10} 0h12M${width + 10} ${height}h12`}
-            fill="none"
-          />
-          <text
-            x={width / 2}
-            y={height + 36}
-            textAnchor="middle"
-            className="dim-label"
-          >
-            {widthMm}
-          </text>
-          <text x={width + 28} y={height / 2} className="dim-label">
-            {heightMm}
-          </text>
+          {/* motion: dimension lines draw via stroke length; labels fade in after 150ms */}
+          {expressive ? (
+            <>
+              <motion.path
+                d={widthPath}
+                fill="none"
+                className={widthOn ? "dim-line is-hot" : "dim-line"}
+                data-dim="width"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{
+                  duration: MOTION_MS.slow / 1000,
+                  ease: MOTION_EASE.emphasized,
+                }}
+              />
+              <motion.path
+                d={heightPath}
+                fill="none"
+                className={heightOn ? "dim-line is-hot" : "dim-line"}
+                data-dim="height"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{
+                  duration: MOTION_MS.slow / 1000,
+                  ease: MOTION_EASE.emphasized,
+                  delay: 0.08,
+                }}
+              />
+              <motion.text
+                x={width / 2}
+                y={height + 36}
+                textAnchor="middle"
+                className={widthOn ? "dim-label is-hot" : "dim-label"}
+                data-dim="width"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                  delay: MOTION_MS.labelDelay / 1000,
+                  duration: MOTION_MS.base / 1000,
+                }}
+              >
+                {widthMm}
+              </motion.text>
+              <motion.text
+                x={width + 28}
+                y={height / 2}
+                className={heightOn ? "dim-label is-hot" : "dim-label"}
+                data-dim="height"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                  delay: MOTION_MS.labelDelay / 1000,
+                  duration: MOTION_MS.base / 1000,
+                }}
+              >
+                {heightMm}
+              </motion.text>
+            </>
+          ) : (
+            <>
+              <path
+                d={`${widthPath}${heightPath}`}
+                fill="none"
+              />
+              <text
+                x={width / 2}
+                y={height + 36}
+                textAnchor="middle"
+                className="dim-label"
+              >
+                {widthMm}
+              </text>
+              <text x={width + 28} y={height / 2} className="dim-label">
+                {heightMm}
+              </text>
+            </>
+          )}
         </g>
       </svg>
     </div>

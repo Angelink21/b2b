@@ -60,14 +60,24 @@ export function Button(props: ButtonProps) {
       return (
         <span className={`${cls} is-disabled`} aria-disabled="true">
           {children}
-          {variant === "link" ? <span aria-hidden="true"> →</span> : null}
+          {variant === "link" ? (
+            <span className="btn-arrow" aria-hidden="true">
+              {" "}
+              →
+            </span>
+          ) : null}
         </span>
       );
     }
     return (
       <Link href={href} className={cls}>
         {children}
-        {variant === "link" ? <span aria-hidden="true"> →</span> : null}
+        {variant === "link" ? (
+          <span className="btn-arrow" aria-hidden="true">
+            {" "}
+            →
+          </span>
+        ) : null}
       </Link>
     );
   }
@@ -87,7 +97,12 @@ export function Button(props: ButtonProps) {
       {...rest}
     >
       {children}
-      {variant === "link" ? <span aria-hidden="true"> →</span> : null}
+      {variant === "link" ? (
+        <span className="btn-arrow" aria-hidden="true">
+          {" "}
+          →
+        </span>
+      ) : null}
     </button>
   );
 }

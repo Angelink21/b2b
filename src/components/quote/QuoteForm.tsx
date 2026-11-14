@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 
+import { SuccessCheck } from "@/components/motion/SuccessCheck";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { Field, fieldAria } from "@/components/ui/Field";
@@ -172,7 +173,10 @@ export function QuoteForm({
         role="status"
         tabIndex={-1}
       >
-        <p className="quote-success-title">{t("success")}</p>
+        <div className="quote-success-head">
+          <SuccessCheck />
+          <p className="quote-success-title">{t("success")}</p>
+        </div>
         <p className="quote-success-next">{t("successNext")}</p>
       </div>
     );

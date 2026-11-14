@@ -6,6 +6,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactNode } from "react";
 import { SiteShell } from "@/components/layout/SiteShell";
 import { ThemeScript } from "@/components/theme/ThemeScript";
+import { MOTION_LEVEL } from "@/config/motion";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -60,6 +61,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       data-theme="light"
+      data-motion-level={MOTION_LEVEL}
       className={`${spectral.variable} ${sourceSans.variable} h-full`}
       suppressHydrationWarning
     >

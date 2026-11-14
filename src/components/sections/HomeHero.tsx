@@ -34,8 +34,18 @@ export async function HomeHero() {
         kgPairs={kgPairs}
         totalCount={index.length}
       >
-        {lineup.map((m) => (
-          <LineupMachineSlot key={m.slug} kgMax={m.kgMax}>
+        {lineup.map((m, i) => (
+          <LineupMachineSlot
+            key={m.slug}
+            kgMax={m.kgMax}
+            index={i}
+            caption={t("machineCaption", {
+              kg: m.kgMax,
+              w: m.dimensionsMm.w,
+              d: m.dimensionsMm.d,
+              h: m.dimensionsMm.h,
+            })}
+          >
             <Silhouette
               widthMm={m.dimensionsMm.w}
               heightMm={m.dimensionsMm.h}

@@ -10,3 +10,4 @@
 2026-11-14 · LeadSink adapters via fetch (no Resend/Telegram/Upstash SDKs) · Fewer dependencies; secrets stay in env; stage 7 Q6 default LEADS_SINKS=console.
 2026-11-14 · CSP with nonce deferred to stage 10 · Stage 7 ships X-Content-Type-Options, Referrer-Policy, Permissions-Policy, production HSTS; nonce CSP needs careful proxy plumbing with Cache Components.
 2026-11-14 · submitLead reads locale from hidden form field + messages/*.json · next-intl getLocale/getTranslations use root-params, unsupported inside Server Actions on Next 16.4.
+2026-11-14 · motion 14.14.0 (`motion/react`) · Stage 8 orchestration and layout animations; CSS for hover/scroll-driven; React 19.3 ViewTransition for catalog list → model card.

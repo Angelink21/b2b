@@ -12,6 +12,14 @@ export type LineupRangeState = {
   loKg: number;
   hiKg: number;
   fullRange: boolean;
+  /** Expressive: machines in range lift while the window is narrowed. */
+  liftActive: boolean;
+  /** Signature/expressive intro finished (or skipped). */
+  introReady: boolean;
+  /** Whether machine enter stagger should play. */
+  playMachineIntro: boolean;
+  hoveredKg: number | null;
+  setHoveredKg: (kg: number | null) => void;
 };
 
 const LineupRangeContext = createContext<LineupRangeState | null>(null);
