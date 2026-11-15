@@ -1,0 +1,49 @@
+{
+  "budgets": {
+    "performance": 90,
+    "accessibility": 95,
+    "best-practices": 95,
+    "seo": 95,
+    "lcpMs": 2500,
+    "cls": 0.1
+  },
+  "base": "http://127.0.0.1:3035",
+  "summary": [
+    {
+      "path": "/uk",
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100,
+      "lcpMs": 1205.3811,
+      "cls": 0.008800006750709709
+    },
+    {
+      "path": "/uk/catalog",
+      "performance": 99,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100,
+      "lcpMs": 1204.796,
+      "cls": 0
+    },
+    {
+      "path": "/uk/catalog/washers",
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100,
+      "lcpMs": 1204.8091,
+      "cls": 0
+    },
+    {
+      "path": "/uk/catalog/washers/haier-hcw12cbd",
+      "performance": 98,
+      "accessibility": 100,
+      "best-practices": 100,
+      "seo": 100,
+      "lcpMs": 1204.0501,
+      "cls": 0.09133305125255918
+    }
+  ]
+}

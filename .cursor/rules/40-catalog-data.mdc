@@ -3,7 +3,7 @@ description: Правила конвейера каталога (CSV → JSON) �
 globs: scripts/**,src/lib/catalog/**,src/data/**,data/**
 alwaysApply: false
 ---
-- Источник правды — `data/products_clean.csv`. Спецификация разбора — `docs/DATA_CONTRACT.md` (читай целиком перед правками).
+- Источник правды — опубликованный CSV Google Таблицы (`CATALOG_CSV_URL`), иначе `data/products_clean.csv` (локальный запасной и фикстура тестов). Спецификация — `docs/DATA_CONTRACT.md`.
 - Сгенерированные файлы (`src/data/*.generated.json`) руками не правятся; их порождает `pnpm catalog:build`.
 - Схема в Zod (`src/lib/catalog/schema.ts`). Сборка падает на: дубль slug, неизвестная категория, неразобранные габариты там, где они обязательны.
 - Смысл неизвестных полей не угадываем: диапазоны кг (`8-9`), суффиксы в названиях (E, G, S, HW, V, P…) хранятся как сырые строки/метки.

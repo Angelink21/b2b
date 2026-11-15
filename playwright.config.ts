@@ -21,6 +21,7 @@ export default defineConfig({
     timeout: 180_000,
     env: {
       ...process.env,
+      NODE_ENV: "production",
       // Styleguide is gated in production; enable for e2e / local preview.
       ENABLE_STYLEGUIDE: "1",
       LEADS_SINKS: "console",
@@ -28,6 +29,8 @@ export default defineConfig({
       LEADS_MIN_FILL_MS: "0",
       // Parallel projects share one Node process IP hash.
       LEADS_RATE_LIMIT_MAX: "200",
+      // Keep the production build away from the dev server's `.next`.
+      NEXT_DIST_DIR: ".next-e2e",
     },
   },
   projects: [

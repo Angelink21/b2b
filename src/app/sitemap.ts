@@ -11,7 +11,16 @@ import { routing } from "@/i18n/routing";
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const products = getAll();
-  const staticPaths = ["", "/catalog", "/compare", "/quote", "/privacy"] as const;
+  const staticPaths = [
+    "",
+    "/catalog",
+    "/compare",
+    "/quote",
+    "/privacy",
+    "/about",
+    "/service",
+    "/contacts",
+  ] as const;
   const categoryPaths = CATEGORY_SLUGS.map((c) => `/catalog/${c}`);
   const modelPaths = products.map(
     (p) => `/catalog/${p.category}/${p.slug}` as const,

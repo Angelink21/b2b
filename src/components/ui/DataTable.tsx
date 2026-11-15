@@ -7,8 +7,16 @@ import { isExpressive, MOTION_EASE, MOTION_MS } from "@/config/motion";
 
 export type DataTableColumn<T> = {
   id: string;
-  header: string;
+  header: ReactNode;
+  /** Visually hide header text; keep it for assistive tech. */
+  headerVisuallyHidden?: boolean;
+  /** Content before the header label (e.g. compare gutter). */
+  leadingHeader?: ReactNode;
   sortable?: boolean;
+  /** Marks numeric / dimensional cells for tabular figures */
+  numeric?: boolean;
+  /** Progressive hide stage for container queries (1 first, 2 last). */
+  narrowHide?: 1 | 2;
   /** Numeric sort helper; falls back to string of cell */
   sortValue?: (row: T) => string | number | null;
   cell: (row: T) => ReactNode;
@@ -74,8 +82,12 @@ export function DataTable<T>({
       if (typeof av === "number" && typeof bv === "number") {
         return (av - bv) * dir;
       }
-      return String(av).localeCompare(String(bv), undefined, { numeric: true }) *
-        dir;
+      return (
+        String(av).localeCompare(String(bv), "uk", {
+          numeric: true,
+          sensitivity: "base",
+        }) * dir
+      );
     });
     return copy;
   }, [columns, controlled, rows, rowsPreSorted, sort]);
@@ -109,19 +121,55 @@ export function DataTable<T>({
                     : col.sortable
                       ? "none"
                       : undefined;
+                const headerNode = col.headerVisuallyHidden ? (
+                  <span className="sr-only">{col.header}</span>
+                ) : (
+                  col.header
+                );
+                const label = col.sortable ? (
+                  <button
+                    type="button"
+                    className="data-table-sort"
+                    onClick={() => toggleSort(col.id)}
+                  >
+                    <span className="data-table-sort-label">{headerNode}</span>
+                    <span className="data-table-sort-mark" aria-hidden="true">
+                      {sort?.id === col.id
+                        ? sort.dir === "asc"
+                          ? "↑"
+                          : "↓"
+                        : "↕"}
+                    </span>
+                  </button>
+                ) : (
+                  <span className="data-table-th-label">{headerNode}</span>
+                );
                 return (
-                  <th key={col.id} scope="col" aria-sort={ariaSort}>
-                    {col.sortable ? (
-                      <button
-                        type="button"
-                        className="data-table-sort"
-                        onClick={() => toggleSort(col.id)}
-                      >
-                        {col.header}
-                      </button>
-                    ) : (
-                      col.header
-                    )}
+                  <th
+                    key={col.id}
+                    scope="col"
+                    aria-sort={ariaSort}
+                    aria-label={
+                      col.headerVisuallyHidden && typeof col.header === "string"
+                        ? col.header
+                        : undefined
+                    }
+                    data-col={col.id}
+                    data-narrow-hide={
+                      col.narrowHide !== undefined
+                        ? String(col.narrowHide)
+                        : undefined
+                    }
+                    className={col.numeric ? "is-num" : undefined}
+                  >
+                    <div className="data-table-th-inner">
+                      {col.leadingHeader ? (
+                        <span className="data-table-th-leading">
+                          {col.leadingHeader}
+                        </span>
+                      ) : null}
+                      {label}
+                    </div>
                   </th>
                 );
               })}
@@ -131,7 +179,18 @@ export function DataTable<T>({
             {sorted.map((row, index) => {
               const key = rowKey(row);
               const cells = columns.map((col) => (
-                <td key={col.id}>{col.cell(row)}</td>
+                <td
+                  key={col.id}
+                  data-col={col.id}
+                  data-narrow-hide={
+                    col.narrowHide !== undefined
+                      ? String(col.narrowHide)
+                      : undefined
+                  }
+                  className={col.numeric ? "is-num" : undefined}
+                >
+                  {col.cell(row)}
+                </td>
               ));
               // motion: first 30 filtered rows reflow with layout animation
               if (layoutRows && index < LAYOUT_ROW_CAP) {

@@ -4,24 +4,43 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 
-export function LocaleSwitcher() {
+const LABEL: Record<AppLocale, string> = {
+  uk: "UA",
+  en: "EN",
+};
+
+export function LocaleSwitcher({ className = "" }: { className?: string }) {
   const t = useTranslations("nav");
   const locale = useLocale();
   const pathname = usePathname();
 
-  const other = (routing.locales.find((l) => l !== locale) ?? "en") as AppLocale;
-  const label = other === "uk" ? "UA" : "EN";
-
   return (
-    <Link
-      href={pathname}
-      locale={other}
-      className="header-tool"
-      aria-label={`${t("language")}: ${label}`}
-      hrefLang={other}
-      lang={other}
+    <div
+      role="group"
+      aria-label={t("language")}
+      className={`locale-switch ${className}`.trim()}
     >
-      {label}
-    </Link>
+      {routing.locales.map((code, index) => {
+        const current = code === locale;
+        return (
+          <span key={code} className="locale-switch-item">
+            {index > 0 ? (
+              <span className="locale-sep" aria-hidden="true">
+                |
+              </span>
+            ) : null}
+            <Link
+              href={pathname}
+              locale={code}
+              hrefLang={code}
+              lang={code}
+              aria-current={current ? "page" : undefined}
+            >
+              {LABEL[code]}
+            </Link>
+          </span>
+        );
+      })}
+    </div>
   );
 }

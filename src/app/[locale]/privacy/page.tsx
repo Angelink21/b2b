@@ -1,16 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/Container";
+import { typo } from "@/lib/typo";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-
-const SECTIONS = [
-  "controller",
-  "purposes",
-  "categories",
-  "retention",
-  "rights",
-  "contact",
-] as const;
 
 export async function generateMetadata({
   params,
@@ -32,16 +24,16 @@ export default async function PrivacyPage() {
 
   return (
     <Container className="privacy-page py-12">
-      <h1>{t("title")}</h1>
-      <p className="privacy-intro mt-4 text-steel">{t("intro")}</p>
-      <div className="privacy-sections">
-        {SECTIONS.map((key) => (
-          <section key={key} className="privacy-section">
-            <h2>{t(`${key}Title`)}</h2>
-            <p className="text-steel">{t(`${key}Body`)}</p>
-          </section>
-        ))}
-      </div>
+      <h1>{typo(t("title"))}</h1>
+      <p className="privacy-intro mt-6 text-steel">{typo(t("intro"))}</p>
+      <section className="privacy-section">
+        <h2>{typo(t("fieldsTitle"))}</h2>
+        <p className="text-steel">{typo(t("fieldsBody"))}</p>
+      </section>
+      <section className="privacy-section">
+        <h2>{typo(t("purposeTitle"))}</h2>
+        <p className="text-steel">{typo(t("purposeBody"))}</p>
+      </section>
     </Container>
   );
 }

@@ -1,9 +1,11 @@
 import { getTranslations } from "next-intl/server";
 
+import { AdvantagesSection } from "@/components/sections/AdvantagesSection";
 import { CasesSection } from "@/components/sections/CasesSection";
-import { FeaturedSection } from "@/components/sections/FeaturedSection";
+import { FlagshipSection } from "@/components/sections/FlagshipSection";
 import { HomeHero } from "@/components/sections/HomeHero";
 import { IndustriesSection } from "@/components/sections/IndustriesSection";
+import { QuoteStepsSection } from "@/components/sections/QuoteStepsSection";
 import { QuoteTeaser } from "@/components/sections/QuoteTeaser";
 import { OrganizationJsonLd } from "@/components/seo/OrganizationJsonLd";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -34,8 +36,10 @@ export default async function HomePage({
       <OrganizationJsonLd locale={locale} />
       <HomeHero />
       <IndustriesSection />
-      <FeaturedSection />
+      <FlagshipSection />
+      <AdvantagesSection />
       <CasesSection />
+      <QuoteStepsSection />
       <QuoteTeaser />
     </>
   );

@@ -8,14 +8,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start-server.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
     "catalog:build": "tsx scripts/build-catalog.ts",
+    "images:sync": "tsx scripts/sync-images.ts",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "lhci": "node scripts/lighthouse-ci.mjs",
+    "bundle:report": "node scripts/bundle-report.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

@@ -16,7 +16,7 @@ export function ModelActions({ slug, category, locale }: ModelActionsProps) {
   const tModel = useTranslations("model");
 
   return (
-    <div className="model-cta mt-8">
+    <div className="model-cta">
       <a
         className="btn btn-red"
         href={`/${locale}/quote?m=${encodeURIComponent(slug)}`}

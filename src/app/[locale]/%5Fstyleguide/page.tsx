@@ -40,6 +40,7 @@ export async function generateMetadata({
 }
 
 const DEMO_PRODUCT = {
+  slug: "lap-08-tp2-e",
   name: "LAP-08 TP2 E",
   category: "washers",
   imageKey: "LAP-08 TP2 E.png",
@@ -47,7 +48,7 @@ const DEMO_PRODUCT = {
   dimensionsMm: { w: 686, d: 829, h: 1019 },
 } as const satisfies Pick<
   Product,
-  "name" | "category" | "imageKey" | "image" | "dimensionsMm"
+  "slug" | "name" | "category" | "imageKey" | "image" | "dimensionsMm"
 >;
 
 export default async function StyleguidePage() {
@@ -67,7 +68,7 @@ export default async function StyleguidePage() {
   return (
     <Container className="py-12">
       <h1>{t("title")}</h1>
-      <p className="styleguide-intro mt-4 text-steel">{t("intro")}</p>
+      <p className="styleguide-intro mt-6 text-steel">{t("intro")}</p>
 
       <section className="styleguide-block" data-sg="buttons" aria-labelledby="sg-buttons">
         <h2 id="sg-buttons">{t("buttons")}</h2>
@@ -126,7 +127,7 @@ export default async function StyleguidePage() {
       <section className="styleguide-block" aria-labelledby="sg-table">
         <h2 id="sg-table">{t("table")}</h2>
         <StyleguideTable />
-        <div className="mt-8">
+        <div className="mt-6">
           <StyleguideTable empty />
         </div>
       </section>
@@ -201,7 +202,7 @@ export default async function StyleguidePage() {
         </div>
       </section>
 
-      <Section className="styleguide-block !px-0" contained={false}>
+      <Section className="styleguide-block" contained={false}>
         <div data-sg="section">
           <h2>{t("sectionTitle")}</h2>
           <p className="mt-2 text-steel">{t("intro")}</p>

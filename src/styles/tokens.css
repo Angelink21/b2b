@@ -40,6 +40,7 @@
   --container: 1200px;
   --page-gutter: clamp(16px, 4vw, 32px);
   --grid-gap: 24px;
+  --header-h: 72px;
 
   --dur-fast: 120ms;
   --dur-base: 200ms;

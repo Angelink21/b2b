@@ -1,6 +1,7 @@
 # Catalog build report
 
-Generated: 2026-11-14T11:27:20.662Z
+Generated: 2026-11-15T17:03:43.052Z
+Source: **remote**
 
 ## Summary
 
@@ -9,8 +10,15 @@ Generated: 2026-11-14T11:27:20.662Z
 - Series entities: **64**
 - Families: **139**
 - Multi-variant families: **95**
-- Discarded empty CSV rows: **1**
+- Discarded empty CSV rows: **0**
 - Index JSON: 101050 bytes raw, **6080** bytes gzip
+
+## Что изменилось с прошлой сборки
+
+- Добавлены (0): —
+- Удалены (0): —
+- Изменены по имени (0): —
+- Переименования (по imageKey / image_id): —
 
 ## Counts by category
 
@@ -61,7 +69,10 @@ Generated: 2026-11-14T11:27:20.662Z
 
 ## Warnings
 
-_None_
+- P-18/100 M E: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
+- P-18/100 M E Nomex: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
+- P-18/120 M E: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
+- P-18/120 M E Nomex: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
 
 ## Multi-variant families (for review)
 

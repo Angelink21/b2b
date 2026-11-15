@@ -32,6 +32,15 @@ export type CompareRecord = {
   exhaustMm: Product["exhaustMm"];
   airflowM3h: Product["airflowM3h"];
   noiseDb: Product["noiseDb"];
+  imageKey: Product["imageKey"];
+  image: Product["image"];
+  /** Pre-resolved on the server so the compare client island never imports the images manifest. */
+  photo: {
+    loaderSrc: string;
+    alt: string;
+    width: number;
+    height: number;
+  } | null;
 };
 
 export type CompareMatrixRow = {
@@ -67,6 +76,9 @@ export function toCompareRecord(product: Product): CompareRecord {
     exhaustMm: product.exhaustMm,
     airflowM3h: product.airflowM3h,
     noiseDb: product.noiseDb,
+    imageKey: product.imageKey,
+    image: product.image,
+    photo: null,
   };
   if (product.heatingVariant !== undefined) {
     record.heatingVariant = product.heatingVariant;
@@ -76,10 +88,18 @@ export function toCompareRecord(product: Product): CompareRecord {
 
 export function buildCompareRecords(
   products: readonly Product[],
+  photos?: ReadonlyMap<
+    string,
+    NonNullable<CompareRecord["photo"]> | null
+  >,
 ): Record<string, CompareRecord> {
   const out: Record<string, CompareRecord> = {};
   for (const product of products) {
-    out[product.slug] = toCompareRecord(product);
+    const record = toCompareRecord(product);
+    if (photos) {
+      record.photo = photos.get(product.slug) ?? null;
+    }
+    out[product.slug] = record;
   }
   return out;
 }

@@ -29,7 +29,7 @@ export function Breadcrumbs({ items, label, className = "" }: BreadcrumbsProps) 
               )}
               {!last ? (
                 <span className="crumbs-sep" aria-hidden="true">
-                  {" / "}
+                  /
                 </span>
               ) : null}
             </li>

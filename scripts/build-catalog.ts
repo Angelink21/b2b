@@ -1,13 +1,22 @@
 /**
  * CSV → JSON catalog pipeline.
- * Reads data/products_clean.csv, validates, writes generated JSON + report.
+ * Source: CATALOG_CSV_URL (published Google Sheet) or data/products_clean.csv.
  */
+import { spawnSync } from "node:child_process";
 import { promisify } from "node:util";
 import { gzip as gzipCb } from "node:zlib";
 import fs from "node:fs";
 import path from "node:path";
-import { parse } from "csv-parse/sync";
 
+import {
+  applyGoogleSheetQuirks,
+  CatalogCsvError,
+  checkCsvHeaders,
+  describeCsvUrl,
+  fetchCatalogCsvText,
+  parseCatalogCsvText,
+  type CsvSourceKind,
+} from "../src/lib/catalog/csv-source";
 import { deriveFamily } from "../src/lib/catalog/families";
 import {
   CSV_COLUMNS,
@@ -26,6 +35,13 @@ import {
   type Product,
 } from "../src/lib/catalog/schema";
 import { buildSeriesRegistry } from "../src/lib/catalog/series";
+import {
+  diffCatalogByName,
+  emptySlugHistory,
+  updateSlugHistory,
+  type CatalogIdentityRow,
+  type SlugHistoryFile,
+} from "../src/lib/catalog/slug-history";
 
 const gzipAsync = promisify(gzipCb);
 
@@ -33,31 +49,108 @@ const ROOT = path.resolve(__dirname, "..");
 const CSV_PATH = path.join(ROOT, "data", "products_clean.csv");
 const OUT_GENERATED = path.join(ROOT, "src", "data", "catalog.generated.json");
 const OUT_INDEX = path.join(ROOT, "src", "data", "catalog.index.json");
+const OUT_META = path.join(ROOT, "src", "data", "catalog.meta.json");
+const OUT_SLUG_HISTORY = path.join(ROOT, "src", "data", "slug-history.json");
 const OUT_REPORT = path.join(ROOT, "docs", "CATALOG_REPORT.md");
 
 type Warning = { level: "warn" | "needs-review"; message: string };
+
+type CatalogMeta = {
+  version: 1;
+  modelCount: number;
+  builtAt: string;
+  source: CsvSourceKind;
+};
 
 function fail(message: string): never {
   console.error(`[catalog:build] FAIL: ${message}`);
   process.exit(1);
 }
 
-function readCsv(): CsvRow[] {
-  let text = fs.readFileSync(CSV_PATH, "utf8");
-  if (text.charCodeAt(0) === 0xfeff) {
-    text = text.slice(1);
+function loadDotEnv(filePath: string): void {
+  if (!fs.existsSync(filePath)) return;
+  const text = fs.readFileSync(filePath, "utf8");
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq <= 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    let value = trimmed.slice(eq + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (process.env[key] === undefined) process.env[key] = value;
+  }
+}
+
+function readJsonIfExists<T>(filePath: string): T | null {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+  } catch {
+    return null;
+  }
+}
+
+function toIdentity(p: Product): CatalogIdentityRow {
+  const row: CatalogIdentityRow = {
+    slug: p.slug,
+    name: p.name,
+    category: p.category,
+    imageKey: p.imageKey,
+  };
+  if (p.imageId) row.imageId = p.imageId;
+  return row;
+}
+
+async function loadCsvRows(): Promise<{
+  rows: CsvRow[];
+  source: CsvSourceKind;
+  warnings: Warning[];
+}> {
+  const warnings: Warning[] = [];
+  const url = process.env.CATALOG_CSV_URL?.trim();
+  let text: string;
+  let source: CsvSourceKind;
+
+  if (url) {
+    source = "remote";
+    console.log(`[catalog:build] Fetching CSV from ${describeCsvUrl(url)}`);
+    text = await fetchCatalogCsvText(url);
+  } else {
+    source = "local";
+    console.log("[catalog:build] Reading", CSV_PATH);
+    if (!fs.existsSync(CSV_PATH)) {
+      fail(`CSV not found: ${CSV_PATH}`);
+    }
+    text = fs.readFileSync(CSV_PATH, "utf8");
   }
 
-  const records = parse(text, {
-    columns: true,
-    skip_empty_lines: false,
-    relax_quotes: false,
-    relax_column_count: false,
-    trim: false,
-    bom: true,
-  }) as CsvRow[];
+  const parsed = parseCatalogCsvText(text);
+  const headerCheck = checkCsvHeaders(parsed.headers);
+  if (headerCheck.unexpected.length > 0) {
+    warnings.push({
+      level: "warn",
+      message: `Ignoring extra CSV columns: ${headerCheck.unexpected.join(", ")}`,
+    });
+  }
+  const quirks = applyGoogleSheetQuirks(parsed.rows);
+  for (const w of quirks.warnings) {
+    warnings.push({ level: "warn", message: `${w.model}: ${w.message}` });
+  }
+  if (parsed.hasImageId) {
+    warnings.push({
+      level: "warn",
+      message:
+        "Optional column image_id present — used for photo matching and slug redirects",
+    });
+  }
 
-  return records;
+  return { rows: quirks.rows, source, warnings };
 }
 
 function emptyFieldStats(products: Product[]): Record<string, number> {
@@ -151,6 +244,8 @@ function writeReport(opts: {
   indexBytes: number;
   indexGzip: number;
   discardedEmptyRows: number;
+  source: CsvSourceKind;
+  diff: ReturnType<typeof diffCatalogByName> | null;
 }): void {
   const cats = categoryCounts(opts.products);
   const empty = emptyFieldStats(opts.products);
@@ -162,6 +257,7 @@ function writeReport(opts: {
   lines.push("# Catalog build report");
   lines.push("");
   lines.push(`Generated: ${new Date().toISOString()}`);
+  lines.push(`Source: **${opts.source}**`);
   lines.push("");
   lines.push("## Summary");
   lines.push("");
@@ -177,6 +273,29 @@ function writeReport(opts: {
     `- Index JSON: ${opts.indexBytes} bytes raw, **${opts.indexGzip}** bytes gzip`,
   );
   lines.push("");
+
+  lines.push("## Что изменилось с прошлой сборки");
+  lines.push("");
+  if (!opts.diff) {
+    lines.push("_Нет предыдущего снимка — первая сборка или meta отсутствует._");
+  } else {
+    const { added, removed, changed, renamed } = opts.diff;
+    lines.push(`- Добавлены (${added.length}): ${added.length ? added.join(", ") : "—"}`);
+    lines.push(`- Удалены (${removed.length}): ${removed.length ? removed.join(", ") : "—"}`);
+    lines.push(
+      `- Изменены по имени (${changed.length}): ${changed.length ? changed.join(", ") : "—"}`,
+    );
+    if (renamed.length > 0) {
+      lines.push("- Переименования (по imageKey / image_id):");
+      for (const r of renamed) {
+        lines.push(`  - ${r.from} → ${r.to}`);
+      }
+    } else {
+      lines.push("- Переименования (по imageKey / image_id): —");
+    }
+  }
+  lines.push("");
+
   lines.push("## Counts by category");
   lines.push("");
   lines.push("| Category | Count |");
@@ -255,17 +374,37 @@ function writeReport(opts: {
   fs.writeFileSync(OUT_REPORT, `${lines.join("\n")}\n`, "utf8");
 }
 
-async function main(): Promise<void> {
-  console.log("[catalog:build] Reading", CSV_PATH);
-  if (!fs.existsSync(CSV_PATH)) {
-    fail(`CSV not found: ${CSV_PATH}`);
+function assertNotShrunk(modelCount: number, prevMeta: CatalogMeta | null): void {
+  if (!prevMeta || prevMeta.modelCount <= 0) return;
+  const ratio = modelCount / prevMeta.modelCount;
+  if (ratio >= 0.8) return;
+  if (process.env.CATALOG_ALLOW_SHRINK === "1") {
+    console.warn(
+      `[catalog:build] WARN: catalog shrank to ${modelCount} from ${prevMeta.modelCount} (allowed by CATALOG_ALLOW_SHRINK=1)`,
+    );
+    return;
   }
+  fail(
+    `каталог подозрительно уменьшился: ${modelCount} моделей (было ${prevMeta.modelCount}, ${(ratio * 100).toFixed(1)}% < 80%). Обход: CATALOG_ALLOW_SHRINK=1`,
+  );
+}
 
-  // Touch CSV_COLUMNS so tree-shaking keeps the mapping documented
+async function main(): Promise<void> {
+  loadDotEnv(path.join(ROOT, ".env.local"));
+
+  // Touch CSV_COLUMNS so the mapping stays referenced
   void CSV_COLUMNS;
 
-  const rows = readCsv();
-  const warnings: Warning[] = [];
+  let loaded: Awaited<ReturnType<typeof loadCsvRows>>;
+  try {
+    loaded = await loadCsvRows();
+  } catch (err) {
+    if (err instanceof CatalogCsvError) fail(err.message);
+    fail(err instanceof Error ? err.message : String(err));
+  }
+
+  const { rows, source } = loaded;
+  const warnings: Warning[] = [...loaded.warnings];
   let discardedEmptyRows = 0;
 
   const dataRows: CsvRow[] = [];
@@ -310,16 +449,37 @@ async function main(): Promise<void> {
       products.push(product);
     } catch (err) {
       if (err instanceof ParseError) {
-        fail(`${err.field} on "${name}": ${err.message} (raw=${JSON.stringify(err.raw)})`);
+        fail(
+          `${err.field} on "${name}": ${err.message} (raw=${JSON.stringify(err.raw)})`,
+        );
       }
       fail(`Row "${name}": ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
-  if (products.length !== 303) {
+  const prevMeta = readJsonIfExists<CatalogMeta>(OUT_META);
+  assertNotShrunk(products.length, prevMeta);
+
+  const prevGenerated = readJsonIfExists<{ products: Product[] }>(OUT_GENERATED);
+  const prevIdentities = (prevGenerated?.products ?? []).map(toIdentity);
+  const nextIdentities = products.map(toIdentity);
+  const diff =
+    prevIdentities.length > 0
+      ? diffCatalogByName(prevIdentities, nextIdentities)
+      : null;
+
+  const prevHistory =
+    readJsonIfExists<SlugHistoryFile>(OUT_SLUG_HISTORY) ?? emptySlugHistory();
+  const slugHistory = updateSlugHistory(
+    prevHistory,
+    prevIdentities,
+    nextIdentities,
+  );
+
+  if (products.length !== (prevMeta?.modelCount ?? 303)) {
     warnings.push({
       level: "warn",
-      message: `Expected 303 models, got ${products.length}`,
+      message: `Model count ${products.length} (previous snapshot ${prevMeta?.modelCount ?? "none"})`,
     });
   }
 
@@ -337,11 +497,24 @@ async function main(): Promise<void> {
     products: indexProducts,
   });
 
+  const meta: CatalogMeta = {
+    version: 1,
+    modelCount: products.length,
+    builtAt: generated.generatedAt,
+    source,
+  };
+
   fs.mkdirSync(path.dirname(OUT_GENERATED), { recursive: true });
   const generatedJson = `${JSON.stringify(generated, null, 2)}\n`;
   const indexJson = `${JSON.stringify(index)}\n`;
   fs.writeFileSync(OUT_GENERATED, generatedJson, "utf8");
   fs.writeFileSync(OUT_INDEX, indexJson, "utf8");
+  fs.writeFileSync(OUT_META, `${JSON.stringify(meta, null, 2)}\n`, "utf8");
+  fs.writeFileSync(
+    OUT_SLUG_HISTORY,
+    `${JSON.stringify(slugHistory, null, 2)}\n`,
+    "utf8",
+  );
 
   const indexGzip = await gzipSize(Buffer.from(indexJson, "utf8"));
   const familyReport = buildFamilyReport(products);
@@ -355,15 +528,21 @@ async function main(): Promise<void> {
     indexBytes: Buffer.byteLength(indexJson, "utf8"),
     indexGzip,
     discardedEmptyRows,
+    source,
+    diff,
   });
 
   const cats = categoryCounts(products);
   console.log("[catalog:build] Done.");
+  console.log(`  source:     ${source}`);
   console.log(`  models:     ${products.length}`);
   console.log(`  categories: ${CATEGORY_SLUGS.length}`);
   console.log(`  series:     ${seriesRegistry.series.length}`);
-  console.log(`  families:   ${familyReport.familyCount} (${familyReport.multiVariantFamilies.length} multi-variant)`);
+  console.log(
+    `  families:   ${familyReport.familyCount} (${familyReport.multiVariantFamilies.length} multi-variant)`,
+  );
   console.log(`  empty rows: ${discardedEmptyRows}`);
+  console.log(`  redirects:  ${slugHistory.redirects.length}`);
   console.log(`  index gzip: ${indexGzip} bytes`);
   console.log("  by category:");
   for (const slug of CATEGORY_SLUGS) {
@@ -371,13 +550,30 @@ async function main(): Promise<void> {
   }
   console.log(`  wrote: ${path.relative(ROOT, OUT_GENERATED)}`);
   console.log(`  wrote: ${path.relative(ROOT, OUT_INDEX)}`);
+  console.log(`  wrote: ${path.relative(ROOT, OUT_META)}`);
+  console.log(`  wrote: ${path.relative(ROOT, OUT_SLUG_HISTORY)}`);
   console.log(`  wrote: ${path.relative(ROOT, OUT_REPORT)}`);
 
-  if (products.length !== 303) {
-    fail(`Expected 303 models, got ${products.length}`);
-  }
   if (indexGzip > 40 * 1024) {
     fail(`Index gzip ${indexGzip} exceeds 40 KB budget`);
+  }
+
+  {
+    // images:sync loads .env.local itself; no-ops without CLOUDINARY_CLOUD_NAME.
+    console.log("[catalog:build] Running images:sync…");
+    const tsxCli = path.join(ROOT, "node_modules", "tsx", "dist", "cli.mjs");
+    const syncScript = path.join(ROOT, "scripts", "sync-images.ts");
+    const sync = spawnSync(process.execPath, [tsxCli, syncScript], {
+      cwd: ROOT,
+      stdio: "inherit",
+      env: process.env,
+    });
+    if (sync.error) {
+      fail(`images:sync failed to start: ${sync.error.message}`);
+    }
+    if (sync.status !== 0) {
+      fail(`images:sync failed (exit ${sync.status ?? "null"})`);
+    }
   }
 }
 

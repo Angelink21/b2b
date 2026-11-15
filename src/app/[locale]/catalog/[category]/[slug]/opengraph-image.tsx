@@ -3,6 +3,7 @@ import { ImageResponse } from "next/og";
 import { siteConfig } from "@/config/site";
 import { getBySlug } from "@/lib/catalog";
 import { HEATING_KEYS, type HeatingKey } from "@/lib/catalog/schema";
+import { getModelImage } from "@/lib/images";
 import { seoMessages } from "@/lib/seo/messages";
 import { OgFrame, OgSilhouette, OG_SIZE, ogColors } from "@/lib/seo/og";
 import { buildProductOgSpecs } from "@/lib/seo/product-copy";
@@ -44,6 +45,34 @@ export default async function Image({ params }: Props) {
     heating: heatingLabel,
     units: messages.units,
   });
+
+  const photo = getModelImage(product, {
+    categoryLabel: messages.categories[product.category],
+  });
+  const ogPhotoH = photo
+    ? Math.round((320 * photo.height) / Math.max(photo.width, 1))
+    : 0;
+  const visual = photo ? (
+    // ImageResponse (Satori) cannot use next/image.
+    // eslint-disable-next-line @next/next/no-img-element -- OG canvas
+    <img
+      src={photo.url}
+      alt={photo.alt}
+      width={320}
+      height={ogPhotoH}
+      style={{
+        objectFit: "contain",
+        width: 320,
+        height: ogPhotoH,
+      }}
+    />
+  ) : (
+    <OgSilhouette
+      widthMm={product.dimensionsMm.w}
+      heightMm={product.dimensionsMm.h}
+      maxPx={320}
+    />
+  );
 
   return new ImageResponse(
     (
@@ -98,11 +127,7 @@ export default async function Image({ params }: Props) {
             ))}
           </div>
         </div>
-        <OgSilhouette
-          widthMm={product.dimensionsMm.w}
-          heightMm={product.dimensionsMm.h}
-          maxPx={320}
-        />
+        {visual}
       </OgFrame>
     ),
     { ...size },

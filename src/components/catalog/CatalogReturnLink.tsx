@@ -35,7 +35,7 @@ export function CatalogReturnLink() {
   if (!path) return null;
 
   return (
-    <p className="model-return mt-3">
+    <p className="model-return mt-4">
       <a href={`/${locale}${path}`} className="btn btn-link btn-sm">
         {t("backToResults")}
       </a>

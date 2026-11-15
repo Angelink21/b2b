@@ -1,0 +1,96 @@
+{
+  "generatedAt": "2026-11-15T15:49:54.802Z",
+  "topChunks": [
+    {
+      "file": "2mofuf4uvdw1d.js",
+      "rawKB": 228.8,
+      "gzKB": 71.4,
+      "hints": "react-dom"
+    },
+    {
+      "file": "2uibk6qm7_k51.js",
+      "rawKB": 140.7,
+      "gzKB": 47.9,
+      "hints": "motion"
+    },
+    {
+      "file": "0-i3j16bpk386.js",
+      "rawKB": 166.4,
+      "gzKB": 45.4,
+      "hints": "—"
+    },
+    {
+      "file": "0cz1d0mv5g_q7.js",
+      "rawKB": 110,
+      "gzKB": 38.6,
+      "hints": "—"
+    },
+    {
+      "file": "0skls_kzvgsk5.js",
+      "rawKB": 116.2,
+      "gzKB": 33.7,
+      "hints": "nuqs,zod"
+    },
+    {
+      "file": "2dlftfeoyr80r.js",
+      "rawKB": 45.9,
+      "gzKB": 15.8,
+      "hints": "nuqs"
+    },
+    {
+      "file": "3aqv4ju9w1jch.js",
+      "rawKB": 32.9,
+      "gzKB": 12.4,
+      "hints": "motion"
+    },
+    {
+      "file": "2z_31bz62utqo.js",
+      "rawKB": 39.4,
+      "gzKB": 12,
+      "hints": "—"
+    },
+    {
+      "file": "3djt4g5n15ej5.js",
+      "rawKB": 28.7,
+      "gzKB": 7.5,
+      "hints": "—"
+    },
+    {
+      "file": "2v1ocs_-4-i23.js",
+      "rawKB": 21.8,
+      "gzKB": 7.1,
+      "hints": "CatalogExplorer"
+    },
+    {
+      "file": "01dve4liw4tas.js",
+      "rawKB": 22,
+      "gzKB": 7,
+      "hints": "—"
+    },
+    {
+      "file": "2b-pgiu_b38tn.js",
+      "rawKB": 22,
+      "gzKB": 6.9,
+      "hints": "—"
+    },
+    {
+      "file": "1a9hilpi9b9av.js",
+      "rawKB": 18.9,
+      "gzKB": 6.7,
+      "hints": "—"
+    },
+    {
+      "file": "2q86vsz-evt-3.js",
+      "rawKB": 17.5,
+      "gzKB": 6.3,
+      "hints": "—"
+    },
+    {
+      "file": "2csgwgk12rfws.js",
+      "rawKB": 15.8,
+      "gzKB": 5.8,
+      "hints": "—"
+    }
+  ],
+  "totalJsGzKB": 350.6
+}

@@ -1,0 +1,2131 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-15T17:03:57.202Z",
+  "cloudName": "dibou5rke",
+  "folder": "",
+  "fallbackAspectRatio": "4 / 5",
+  "images": {
+    "haier-hcw12cbd": {
+      "publicId": "HAIER_HCW12CBD",
+      "width": 670,
+      "height": 624,
+      "trimWidth": 670,
+      "trimHeight": 624
+    },
+    "lap-08-tp2-e-v": {
+      "publicId": "LAP-08_TP2_E_V",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-08-tp2-e-p": {
+      "publicId": "LAP-08_TP2_E_P",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-08-tp2-hw-v": {
+      "publicId": "LAP-08_TP2_HW_V",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-08-tp2-hw-p": {
+      "publicId": "LAP-08_TP2_HW_P",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-10-tp2-e-v": {
+      "publicId": "LAP-10_TP2_E_V",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-10-tp2-e-p": {
+      "publicId": "LAP-10_TP2_E_P",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-10-tp2-hw-v": {
+      "publicId": "LAP-10_TP2_HW_V",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lap-10-tp2-hw-p": {
+      "publicId": "LAP-10_TP2_HW_P",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-11-tp2-e": {
+      "publicId": "LA-11_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-11-tp2-hw": {
+      "publicId": "LA-11_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-11-tp2-s": {
+      "publicId": "LA-11_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-14-tp2-e": {
+      "publicId": "LA-14_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-14-tp2-hw": {
+      "publicId": "LA-14_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-14-tp2-s": {
+      "publicId": "LA-14_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-18-tp2-e": {
+      "publicId": "LA-18_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-18-tp2-hw": {
+      "publicId": "LA-18_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-18-tp2-s": {
+      "publicId": "LA-18_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-22-tp2-e": {
+      "publicId": "LA-22_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-22-tp2-hw": {
+      "publicId": "LA-22_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-22-tp2-s": {
+      "publicId": "LA-22_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-28-tp2-e": {
+      "publicId": "LA-28_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-28-tp2-hw": {
+      "publicId": "LA-28_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-28-tp2-s": {
+      "publicId": "LA-28_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "la-35c-tp2-e": {
+      "publicId": "LA-35C_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-35c-tp2-hw": {
+      "publicId": "LA-35C_TP2_HW",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-35c-tp2-s": {
+      "publicId": "LA-35C_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-45c-tp2-e": {
+      "publicId": "LA-45C_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-45c-tp2-hw": {
+      "publicId": "LA-45C_TP2_HW",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-45c-tp2-s": {
+      "publicId": "LA-45C_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-60c-tp2-e": {
+      "publicId": "LA-60C_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-60c-tp2-hw": {
+      "publicId": "LA-60C_TP2_HW",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-60c-tp2-s": {
+      "publicId": "LA-60C_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-80c-tp2-e": {
+      "publicId": "LA-80C_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-80c-tp2-hw": {
+      "publicId": "LA-80C_TP2_HW",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-80c-tp2-s": {
+      "publicId": "LA-80C_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-100c-tp2-hw": {
+      "publicId": "LA-100C_TP2_HW",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-100c-tp2-s": {
+      "publicId": "LA-100C_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-120c-tp2-hw": {
+      "publicId": "LA-120C_TP2_HW",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "la-120c-tp2-s": {
+      "publicId": "LA-120C_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "ln-11-tp2-e": {
+      "publicId": "LN-11_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-11-tp2-hw": {
+      "publicId": "LN-11_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-11-tp2-s": {
+      "publicId": "LN-11_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-14-tp2-e": {
+      "publicId": "LN-14_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-14-tp2-hw": {
+      "publicId": "LN-14_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-14-tp2-s": {
+      "publicId": "LN-14_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-18-tp2-e": {
+      "publicId": "LN-18_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-18-tp2-hw": {
+      "publicId": "LN-18_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-18-tp2-s": {
+      "publicId": "LN-18_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-22-tp2-e": {
+      "publicId": "LN-22_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-22-tp2-hw": {
+      "publicId": "LN-22_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-22-tp2-s": {
+      "publicId": "LN-22_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-28-tp2-e": {
+      "publicId": "LN-28_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-28-tp2-hw": {
+      "publicId": "LN-28_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-28-tp2-s": {
+      "publicId": "LN-28_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-35c-tp2-e": {
+      "publicId": "LN-35C_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-35c-tp2-hw": {
+      "publicId": "LN-35C_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-35c-tp2-s": {
+      "publicId": "LN-35C_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-45c-tp2-e": {
+      "publicId": "LN-45C_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-45c-tp2-hw": {
+      "publicId": "LN-45C_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-45c-tp2-s": {
+      "publicId": "LN-45C_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-60c-tp2-e": {
+      "publicId": "LN-60C_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-60c-tp2-hw": {
+      "publicId": "LN-60C_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-60c-tp2-s": {
+      "publicId": "LN-60C_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-80c-tp2-e": {
+      "publicId": "LN-80C_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-80c-tp2-hw": {
+      "publicId": "LN-80C_TP2_HW",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "ln-80c-tp2-s": {
+      "publicId": "LN-80C_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lmed-16-tp2-e": {
+      "publicId": "LMED-16_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lmed-16-tp2-s": {
+      "publicId": "LMED-16_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lmed-16-tp2-es": {
+      "publicId": "LMED-16_TP2_ES",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lmed-22-tp2-e": {
+      "publicId": "LMED-22_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lmed-22-tp2-s": {
+      "publicId": "LMED-22_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lmed-22-tp2-es": {
+      "publicId": "LMED-22_TP2_ES",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-27-tp2-e": {
+      "publicId": "LBS-27_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-27-tp2-s": {
+      "publicId": "LBS-27_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-27-tp2-es": {
+      "publicId": "LBS-27_TP2_ES",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-35-tp2-e": {
+      "publicId": "LBS-35_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-35-tp2-s": {
+      "publicId": "LBS-35_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-35-tp2-es": {
+      "publicId": "LBS-35_TP2_ES",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-50-tp2-e": {
+      "publicId": "LBS-50_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-50-tp2-s": {
+      "publicId": "LBS-50_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-50-tp2-es": {
+      "publicId": "LBS-50_TP2_ES",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-70-tp2-e": {
+      "publicId": "LBS-70_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "lbs-70-tp2-s": {
+      "publicId": "LBS-70_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "lbs-70-tp2-es": {
+      "publicId": "LBS-70_TP2_ES",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "lbs-100-tp2-e": {
+      "publicId": "LBS-100_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-100-tp2-s": {
+      "publicId": "LBS-100_TP2_S",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "lbs-100-tp2-es": {
+      "publicId": "LBS-100_TP2_ES",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "haier-hcd12cbd": {
+      "publicId": "HAIER_HCD12CBD",
+      "width": 697,
+      "height": 652,
+      "trimWidth": 697,
+      "trimHeight": 652
+    },
+    "srp-08-tp2-e": {
+      "publicId": "SRP-08_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "srp-08-tp2-g": {
+      "publicId": "SRP-08_TP2_G",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "srp-10-tp2-e": {
+      "publicId": "SRP-10_TP2_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "srp-10-tp2-g": {
+      "publicId": "SRP-10_TP2_G",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "srp-08-m-e": {
+      "publicId": "SRP-08_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "srp-08-m-g": {
+      "publicId": "SRP-08_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "srp-10-m-e": {
+      "publicId": "SRP-10_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "srp-10-m-g": {
+      "publicId": "SRP-10_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "scp-10-m-e": {
+      "publicId": "SCP-10_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "scp-10-m-g": {
+      "publicId": "SCP-10_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sr-11-tp2-plus-e": {
+      "publicId": "SR-11_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-tp2-plus-g": {
+      "publicId": "SR-11_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-tp2-plus-s": {
+      "publicId": "SR-11_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-plus-e": {
+      "publicId": "SR-14_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-plus-g": {
+      "publicId": "SR-14_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-plus-s": {
+      "publicId": "SR-14_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-plus-e": {
+      "publicId": "SR-18_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-plus-g": {
+      "publicId": "SR-18_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-plus-s": {
+      "publicId": "SR-18_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-plus-e": {
+      "publicId": "SR-22_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-plus-g": {
+      "publicId": "SR-22_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-plus-s": {
+      "publicId": "SR-22_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-tp2-plus-e": {
+      "publicId": "SR-28_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-tp2-plus-g": {
+      "publicId": "SR-28_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-tp2-plus-s": {
+      "publicId": "SR-28_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-tp2-plus-e": {
+      "publicId": "SR-35_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-tp2-plus-g": {
+      "publicId": "SR-35_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-tp2-plus-s": {
+      "publicId": "SR-35_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-tp2-plus-e": {
+      "publicId": "SR-45_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-tp2-plus-g": {
+      "publicId": "SR-45_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-tp2-plus-s": {
+      "publicId": "SR-45_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-tp2-plus-e": {
+      "publicId": "SR-60_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-tp2-plus-g": {
+      "publicId": "SR-60_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-tp2-plus-s": {
+      "publicId": "SR-60_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-tp2-plus-e": {
+      "publicId": "SR-80_TP2_PLUS_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-tp2-plus-g": {
+      "publicId": "SR-80_TP2_PLUS_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-tp2-plus-s": {
+      "publicId": "SR-80_TP2_PLUS_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-tp2-e": {
+      "publicId": "SR-11_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-tp2-g": {
+      "publicId": "SR-11_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-tp2-s": {
+      "publicId": "SR-11_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-e": {
+      "publicId": "SR-14_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-g": {
+      "publicId": "SR-14_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-s": {
+      "publicId": "SR-14_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-e": {
+      "publicId": "SR-18_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-g": {
+      "publicId": "SR-18_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-s": {
+      "publicId": "SR-18_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-e": {
+      "publicId": "SR-22_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-g": {
+      "publicId": "SR-22_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-s": {
+      "publicId": "SR-22_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-tp2-e": {
+      "publicId": "SR-28_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-tp2-g": {
+      "publicId": "SR-28_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-tp2-s": {
+      "publicId": "SR-28_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-tp2-e": {
+      "publicId": "SR-35_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-tp2-g": {
+      "publicId": "SR-35_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-tp2-s": {
+      "publicId": "SR-35_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-tp2-e": {
+      "publicId": "SR-45_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-tp2-g": {
+      "publicId": "SR-45_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-tp2-s": {
+      "publicId": "SR-45_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-tp2-e": {
+      "publicId": "SR-60_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-tp2-g": {
+      "publicId": "SR-60_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-tp2-s": {
+      "publicId": "SR-60_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-tp2-e": {
+      "publicId": "SR-80_TP2_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-tp2-g": {
+      "publicId": "SR-80_TP2_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-tp2-s": {
+      "publicId": "SR-80_TP2_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-m-e": {
+      "publicId": "SR-11_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-m-g": {
+      "publicId": "SR-11_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-11-m-s": {
+      "publicId": "SR-11_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-m-e": {
+      "publicId": "SR-14_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-m-g": {
+      "publicId": "SR-14_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-14-m-s": {
+      "publicId": "SR-14_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-m-e": {
+      "publicId": "SR-18_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-m-g": {
+      "publicId": "SR-18_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-18-m-s": {
+      "publicId": "SR-18_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-m-e": {
+      "publicId": "SR-22_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-m-g": {
+      "publicId": "SR-22_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-22-m-s": {
+      "publicId": "SR-22_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-m-e": {
+      "publicId": "SR-28_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-m-g": {
+      "publicId": "SR-28_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-28-m-s": {
+      "publicId": "SR-28_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-m-e": {
+      "publicId": "SR-35_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-m-g": {
+      "publicId": "SR-35_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-35-m-s": {
+      "publicId": "SR-35_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-m-e": {
+      "publicId": "SR-45_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-m-g": {
+      "publicId": "SR-45_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-45-m-s": {
+      "publicId": "SR-45_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-m-e": {
+      "publicId": "SR-60_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-m-g": {
+      "publicId": "SR-60_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-60-m-s": {
+      "publicId": "SR-60_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-m-e": {
+      "publicId": "SR-80_M_E",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-m-g": {
+      "publicId": "SR-80_M_G",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sr-80-m-s": {
+      "publicId": "SR-80_M_S",
+      "width": 800,
+      "height": 800,
+      "trimWidth": 800,
+      "trimHeight": 800
+    },
+    "sc-11-m-e": {
+      "publicId": "SC-11_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-11-m-g": {
+      "publicId": "SC-11_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-14-m-e": {
+      "publicId": "SC-14_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-14-m-g": {
+      "publicId": "SC-14_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-18-m-e": {
+      "publicId": "SC-18_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-18-m-g": {
+      "publicId": "SC-18_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-22-m-e": {
+      "publicId": "SC-22_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-22-m-g": {
+      "publicId": "SC-22_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-28-m-e": {
+      "publicId": "SC-28_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-28-m-g": {
+      "publicId": "SC-28_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-35-m-e": {
+      "publicId": "SC-35_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sc-35-m-g": {
+      "publicId": "SC-35_M_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sr-11-tp2-plus-hpi": {
+      "publicId": "SR-11_TP2_PLUS_HPi",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-14-tp2-plus-hpi": {
+      "publicId": "SR-14_TP2_PLUS_HPi",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-18-tp2-plus-hpi": {
+      "publicId": "SR-18_TP2_PLUS_HPi",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-22-tp2-plus-hpi": {
+      "publicId": "SR-22_TP2_PLUS_HPi",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-11-tp2-e-xp": {
+      "publicId": "SR-2-11_TP2_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-11-tp2-g-xp": {
+      "publicId": "SR-2-11_TP2_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-14-tp2-e-xp": {
+      "publicId": "SR-2-14_TP2_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-14-tp2-g-xp": {
+      "publicId": "SR-2-14_TP2_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-18-tp2-e-xp": {
+      "publicId": "SR-2-18_TP2_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-18-tp2-g-xp": {
+      "publicId": "SR-2-18_TP2_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-22-tp2-g-xp": {
+      "publicId": "SR-2-22_TP2_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-11-m-e-xp": {
+      "publicId": "SR-2-11_M_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-11-m-g-xp": {
+      "publicId": "SR-2-11_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-14-m-e-xp": {
+      "publicId": "SR-2-14_M_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-14-m-g-xp": {
+      "publicId": "SR-2-14_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-18-m-e-xp": {
+      "publicId": "SR-2-18_M_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-18-m-g-xp": {
+      "publicId": "SR-2-18_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sr-2-22-m-g-xp": {
+      "publicId": "SR-2-22_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-11-m-e-xp": {
+      "publicId": "SC-2-11_M_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-11-m-g-xp": {
+      "publicId": "SC-2-11_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-14-m-e-xp": {
+      "publicId": "SC-2-14_M_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-14-m-g-xp": {
+      "publicId": "SC-2-14_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-18-m-e-xp": {
+      "publicId": "SC-2-18_M_E_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-18-m-g-xp": {
+      "publicId": "SC-2-18_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "sc-2-22-m-g-xp": {
+      "publicId": "SC-2-22_M_G_XP",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "p-18-100-m-e": {
+      "publicId": "P-18_100_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "p-18-100-m-e-nomex": {
+      "publicId": "P-18_100_M_E_Nomex",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "p-18-120-m-e": {
+      "publicId": "P-18_120_M_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "p-18-120-m-e-nomex": {
+      "publicId": "P-18_120_M_E_Nomex",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "pi-25-100-m-e": {
+      "publicId": "PI-25_100_M_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-100-m-e-nomex": {
+      "publicId": "PI-25_100_M_E_NOMEX",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-120-m-e": {
+      "publicId": "PI-25_120_M_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-120-m-e-nomex": {
+      "publicId": "PI-25_120_M_E_NOMEX",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-140-m-e": {
+      "publicId": "PI-25_140_M_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-140-m-e-nomex": {
+      "publicId": "PI-25_140_M_E_NOMEX",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-200-m-e": {
+      "publicId": "PI-25_200_M_E",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-200-m-e-nomex": {
+      "publicId": "PI-25_200_M_E_NOMEX",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "pi-25-140-m-plus-e-nomex": {
+      "publicId": "PI-25_140_M_PLUS_E_NOMEX",
+      "width": 1327,
+      "height": 800,
+      "trimWidth": 1327,
+      "trimHeight": 800
+    },
+    "pi-25-200-m-plus-e-nomex": {
+      "publicId": "PI-25_200_M_PLUS_E_NOMEX",
+      "width": 1327,
+      "height": 800,
+      "trimWidth": 1327,
+      "trimHeight": 800
+    },
+    "ps-20-140-m-e": {
+      "publicId": "PS-20_140_M_E",
+      "width": 1274,
+      "height": 800,
+      "trimWidth": 1274,
+      "trimHeight": 800
+    },
+    "ps-20-160-m-e": {
+      "publicId": "PS-20_160_M_E",
+      "width": 1274,
+      "height": 800,
+      "trimWidth": 1274,
+      "trimHeight": 800
+    },
+    "ps-20-200-m-e": {
+      "publicId": "PS-20_200_M_E",
+      "width": 1274,
+      "height": 800,
+      "trimWidth": 1274,
+      "trimHeight": 800
+    },
+    "ps-35-140-m-e": {
+      "publicId": "PS-35_140_M_E",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-160-m-e": {
+      "publicId": "PS-35_160_M_E",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-200-m-e": {
+      "publicId": "PS-35_200_M_E",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-140-m-g": {
+      "publicId": "PS-35_140_M_G",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-160-m-g": {
+      "publicId": "PS-35_160_M_G",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-200-m-g": {
+      "publicId": "PS-35_200_M_G",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-200-m-plus-e": {
+      "publicId": "PS-35_200_M_PLUS_E",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-260-m-plus-e": {
+      "publicId": "PS-35_260_M_PLUS_E",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-330-m-plus-e": {
+      "publicId": "PS-35_330_M_PLUS_E",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-200-m-plus-g-r": {
+      "publicId": "PS-35_200_M_PLUS_G_R",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-260-m-plus-g-r": {
+      "publicId": "PS-35_260_M_PLUS_G_R",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "ps-35-330-m-plus-g-r": {
+      "publicId": "PS-35_330_M_PLUS_G_R",
+      "width": 1422,
+      "height": 800,
+      "trimWidth": 1422,
+      "trimHeight": 800
+    },
+    "psp-50-200-tp2-e": {
+      "publicId": "PSP-50_200_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-260-tp2-e": {
+      "publicId": "PSP-50_260_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-330-tp2-e": {
+      "publicId": "PSP-50_330_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-200-tp2-g": {
+      "publicId": "PSP-50_200_TP2_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-260-tp2-g": {
+      "publicId": "PSP-50_260_TP2_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-330-tp2-g": {
+      "publicId": "PSP-50_330_TP2_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-200-tp2-g-r": {
+      "publicId": "PSP-50_200_TP2_G_R",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-260-tp2-g-r": {
+      "publicId": "PSP-50_260_TP2_G_R",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-330-tp2-g-r": {
+      "publicId": "PSP-50_330_TP2_G_R",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-200-tp2-s": {
+      "publicId": "PSP-50_200_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-260-tp2-s": {
+      "publicId": "PSP-50_260_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-50-330-tp2-s": {
+      "publicId": "PSP-50_330_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-200-tp2-e": {
+      "publicId": "PSP-65_200_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-260-tp2-e": {
+      "publicId": "PSP-65_260_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-330-tp2-e": {
+      "publicId": "PSP-65_330_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-200-tp2-g-r": {
+      "publicId": "PSP-65_200_TP2_G_R",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-260-tp2-g-r": {
+      "publicId": "PSP-65_260_TP2_G_R",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-330-tp2-g-r": {
+      "publicId": "PSP-65_330_TP2_G_R",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-200-tp2-s": {
+      "publicId": "PSP-65_200_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-260-tp2-s": {
+      "publicId": "PSP-65_260_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "psp-65-330-tp2-s": {
+      "publicId": "PSP-65_330_TP2_S",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "cs-115": {
+      "publicId": "CS-115",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "cs-212": {
+      "publicId": "CS-212",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "cs-365": {
+      "publicId": "CS-365",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "csh-3": {
+      "publicId": "CSH-3",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crs-10": {
+      "publicId": "CRS-10",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crs-20": {
+      "publicId": "CRS-20",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crs-35": {
+      "publicId": "CRS-35",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crs-40": {
+      "publicId": "CRS-40",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crh-20": {
+      "publicId": "CRH-20",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crh-40": {
+      "publicId": "CRH-40",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crh-60": {
+      "publicId": "CRH-60",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crp-5": {
+      "publicId": "CRP-5",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crp-6": {
+      "publicId": "CRP-6",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "cre": {
+      "publicId": "CRE",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "crp": {
+      "publicId": "CRP",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-a-c": {
+      "publicId": "MP-A-C",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-a": {
+      "publicId": "MP-A",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-ac-plus": {
+      "publicId": "MP-AC_PLUS",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-as-c": {
+      "publicId": "MP-AS-C",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-as": {
+      "publicId": "MP-AS",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-asv-c": {
+      "publicId": "MP-ASV-C",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-asv": {
+      "publicId": "MP-ASV",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mp-4-a-c": {
+      "publicId": "MP-4_A-C",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mpl": {
+      "publicId": "MPL",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "des-f": {
+      "publicId": "DES-F",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "des-f-gc": {
+      "publicId": "DES-F-GC",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "mini-des": {
+      "publicId": "MINI-DES",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sln-18-tp2-e": {
+      "publicId": "SLN-18_TP2_E",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "sln-18-tp2-g": {
+      "publicId": "SLN-18_TP2_G",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    },
+    "wrec-80t1": {
+      "publicId": "WREC-80T1",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "wrec-80t2": {
+      "publicId": "WREC-80T2",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "wrec-80t3": {
+      "publicId": "WREC-80T3",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "wrec-150t1": {
+      "publicId": "WREC-150T1",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "wrec-150t2": {
+      "publicId": "WREC-150T2",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "wrec-150t3": {
+      "publicId": "WREC-150T3",
+      "width": 1067,
+      "height": 800,
+      "trimWidth": 1067,
+      "trimHeight": 800
+    },
+    "wrec-1000": {
+      "publicId": "WREC-1000",
+      "width": 1080,
+      "height": 1080,
+      "trimWidth": 1080,
+      "trimHeight": 1080
+    }
+  },
+  "missingSlugs": []
+}

@@ -9,11 +9,12 @@ test.describe("compare and datasheet", () => {
     await page.goto("/uk/catalog?type=washers");
 
     await expect(
-      page.getByRole("button", { name: "Порівняти" }).first(),
+      page.getByRole("checkbox", { name: /Порівняти/ }).first(),
     ).toBeVisible({ timeout: 10_000 });
 
+    const compareBoxes = page.getByRole("checkbox", { name: /Порівняти/ });
     for (let i = 0; i < 3; i += 1) {
-      await page.getByRole("button", { name: "Порівняти" }).first().click();
+      await compareBoxes.nth(i).check();
     }
 
     const tray = page.getByRole("region", { name: "Панель порівняння" });

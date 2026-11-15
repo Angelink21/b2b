@@ -6,12 +6,15 @@ import type { LeadPayload, LeadSendMeta, LeadSink } from "../types";
 function buildHtml(payload: LeadPayload): string {
   const rows: Array<[string, string]> = [
     ["Lead ID", payload.leadId],
+    ["Intent", payload.intent],
     ["Name", payload.name],
     ["Company", payload.company || "—"],
     ["Contact", payload.contact],
     ["Sector", payload.sector ?? "—"],
     ["Kg / shift", payload.kgPerShift?.toString() ?? "—"],
     ["Models", payload.modelSlugs.join(", ") || "—"],
+    ["Model label", payload.modelLabel || "—"],
+    ["Serial", payload.serialNumber || "—"],
     ["Comment", payload.comment || "—"],
     ["Locale", payload.locale],
     ["Submitted", payload.submittedAt],
@@ -43,7 +46,7 @@ export const emailSink: LeadSink = {
       body: JSON.stringify({
         from: env.LEADS_EMAIL_FROM,
         to: [env.LEADS_EMAIL_TO],
-        subject: `Quote request ${payload.leadId}`,
+        subject: `Lead (${payload.intent}) ${payload.leadId}`,
         html: buildHtml(payload),
       }),
       signal: AbortSignal.timeout(8000),

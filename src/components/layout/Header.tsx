@@ -1,34 +1,18 @@
-import { getTranslations } from "next-intl/server";
-import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
-import { Container } from "@/components/ui/Container";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { Link } from "@/i18n/navigation";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { siteConfig } from "@/config/site";
+import { getCategoryNavStats } from "@/lib/catalog/nav";
 
-export async function Header() {
-  const t = await getTranslations("nav");
+export function Header() {
+  const logo =
+    siteConfig.logo.src.length > 0
+      ? {
+          src: siteConfig.logo.src,
+          width: siteConfig.logo.width,
+          height: siteConfig.logo.height,
+        }
+      : null;
 
   return (
-    <header className="site-header">
-      <Container className="site-header-bar">
-        <Link href="/" className="site-brand">
-          {t("brand")}
-        </Link>
-        <nav aria-label={t("mainNav")} className="site-nav">
-          <Link href="/catalog" className="site-nav-link">
-            {t("catalog")}
-          </Link>
-          <Link href="/#industries" className="site-nav-link">
-            {t("industries")}
-          </Link>
-        </nav>
-        <div className="site-header-actions">
-          <LocaleSwitcher />
-          <ThemeToggle />
-          <Link href="/quote" className="btn btn-red">
-            {t("quote")}
-          </Link>
-        </div>
-      </Container>
-    </header>
+    <SiteHeader categories={getCategoryNavStats()} logo={logo} />
   );
 }

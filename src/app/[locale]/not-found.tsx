@@ -1,19 +1,24 @@
 import { getTranslations } from "next-intl/server";
+
+import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { Link } from "@/i18n/navigation";
+import { Grid } from "@/components/ui/Grid";
+import { typo } from "@/lib/typo";
 
 export default async function NotFound() {
   const t = await getTranslations("errors");
 
   return (
-    <Container className="py-24">
-      <h1>{t("notFoundTitle")}</h1>
-      <p className="mt-4 text-steel">{t("notFoundBody")}</p>
-      <p className="mt-8">
-        <Link href="/" className="btn btn-red">
-          {t("backHome")}
-        </Link>
-      </p>
+    <Container className="not-found">
+      <Grid>
+        <div className="not-found-copy">
+          <h1>{typo(t("notFoundTitle"))}</h1>
+          <p>{typo(t("notFoundBody"))}</p>
+          <Button href="/" variant="primary">
+            {t("backHome")}
+          </Button>
+        </div>
+      </Grid>
     </Container>
   );
 }

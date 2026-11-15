@@ -10,13 +10,15 @@ type RowProps = {
   title: ReactNode;
   body?: ReactNode;
   meta?: ReactNode;
+  media?: ReactNode;
   href?: string;
   className?: string;
 };
 
-export function Row({ title, body, meta, href, className = "" }: RowProps) {
+export function Row({ title, body, meta, media, href, className = "" }: RowProps) {
   const content = (
     <>
+      {media ? <span className="row-media">{media}</span> : null}
       <b className="row-title">{typoNode(title)}</b>
       {body ? <span className="row-body">{typoNode(body)}</span> : null}
       {meta ? <i className="row-meta">{typoNode(meta)}</i> : null}

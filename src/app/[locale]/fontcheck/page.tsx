@@ -15,10 +15,10 @@ export default async function FontCheckPage() {
   return (
     <Container className="py-12">
       <h1 className="font-serif font-light">{t("title")}</h1>
-      <p className="mt-8 font-serif font-light text-[32px]">{sample}</p>
-      <p className="mt-8 font-sans font-normal text-[32px]">{sample}</p>
-      <p className="mt-4 font-sans font-medium text-[32px]">{sample}</p>
-      <p className="mt-4 font-sans font-semibold text-[32px]">{sample}</p>
+      <p className="mt-6 font-serif font-light text-[32px]">{sample}</p>
+      <p className="mt-6 font-sans font-normal text-[32px]">{sample}</p>
+      <p className="mt-6 font-sans font-medium text-[32px]">{sample}</p>
+      <p className="mt-6 font-sans font-semibold text-[32px]">{sample}</p>
     </Container>
   );
 }

@@ -21,7 +21,9 @@ import {
   type CatalogGenerated,
   type CatalogIndex,
 } from "./schema";
-import { filterProducts, searchProducts, sortProducts } from "./query";
+import { facetsForCategory } from "@/config/facets";
+
+import { facetRangeBounds, filterProducts, searchProducts, sortProducts } from "./query";
 import { getModelImage } from "@/lib/images";
 
 const root = path.resolve(__dirname, "../../..");
@@ -150,13 +152,35 @@ describe("catalog API", () => {
       true,
     );
 
+    const rollers = items.filter((item) => item.category === "ironing-rollers");
+    const withStrayKg = filterProducts(rollers, {
+      category: "ironing-rollers",
+      kg: { min: 10, max: 20 },
+      allowed: facetsForCategory("ironing-rollers"),
+    });
+    expect(withStrayKg).toHaveLength(rollers.length);
+    expect(facetRangeBounds(rollers, "kg")).toBeNull();
+    expect(facetRangeBounds(rollers, "width")).not.toBeNull();
+
+    const carts = items.filter((item) => item.category === "laundry-carts");
+    expect(facetRangeBounds(carts, "volume")).not.toBeNull();
+    expect(facetRangeBounds(carts, "kg")).toBeNull();
+
     __setIndexForTests(null);
   });
 });
 
 describe("getModelImage", () => {
-  it("returns null until stage 12", () => {
+  it("returns null or a photo object without throwing", () => {
     const product = loadGenerated().products[0]!;
-    expect(getModelImage(product)).toBeNull();
+    const photo = getModelImage(product);
+    if (photo === null) {
+      expect(photo).toBeNull();
+    } else {
+      expect(photo.url).toContain("res.cloudinary.com/");
+      expect(photo.publicId.length).toBeGreaterThan(0);
+      expect(photo.width).toBeGreaterThan(0);
+      expect(photo.height).toBeGreaterThan(0);
+    }
   });
 });

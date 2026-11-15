@@ -131,6 +131,11 @@ export function normalizeRow(
     image: null,
   };
 
+  const imageId = (row["image_id"] ?? "").trim();
+  if (imageId) {
+    product.imageId = imageId;
+  }
+
   if (heatingParsed.heatingVariant !== undefined) {
     product.heatingVariant = heatingParsed.heatingVariant;
   }

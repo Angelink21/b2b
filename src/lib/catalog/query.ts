@@ -1,11 +1,66 @@
-import type { CatalogIndexItem, CategorySlug, HeatingKey } from "./schema";
+import type { FacetId, RangeFacet } from "@/config/facets";
+
+import { indexKeyMetricSortValue } from "./format";
+import {
+  CATEGORY_SLUGS,
+  type CatalogIndexItem,
+  type CategorySlug,
+  type HeatingKey,
+} from "./schema";
+
+/** Natural model-name order (LA-11 before LA-100C). */
+export const catalogNameCollator = new Intl.Collator("uk", {
+  numeric: true,
+  sensitivity: "base",
+});
+
+export function compareCatalogNames(a: string, b: string): number {
+  return catalogNameCollator.compare(a, b);
+}
+
+const CATEGORY_ORDER = new Map(
+  CATEGORY_SLUGS.map((slug, index) => [slug, index]),
+);
+
+/** Default table order: key metric ascending (then name). */
+export function defaultCatalogSort(
+  category: CategorySlug | null | undefined,
+): CatalogSort {
+  switch (category) {
+    case "washers":
+    case "dryers":
+    case "washer-dryers":
+      return { by: "kg", dir: "asc" };
+    case "flatwork-ironers":
+    case "ironing-rollers":
+      return { by: "width", dir: "asc" };
+    case "laundry-carts":
+    case "water-recovery":
+      return { by: "volume", dir: "asc" };
+    case "finishing":
+      return { by: "power", dir: "asc" };
+    default:
+      return { by: "key", dir: "asc" };
+  }
+}
+
+export type NumberRange = { min?: number; max?: number };
 
 export type CatalogFilter = {
   category?: CategorySlug | CategorySlug[];
   heating?: HeatingKey | HeatingKey[];
   /** Inclusive kg range; matches products whose [min,max] overlaps. */
-  kg?: { min?: number; max?: number };
+  kg?: NumberRange;
+  power?: NumberRange;
+  width?: NumberRange;
+  speed?: NumberRange;
+  volume?: NumberRange;
   q?: string;
+  /**
+   * When set, a range or heating value is applied only if its facet is listed.
+   * Omitted means every provided filter applies (existing callers).
+   */
+  allowed?: readonly FacetId[];
 };
 
 export type CatalogSort =
@@ -17,7 +72,8 @@ export type CatalogSort =
   | { by: "volume"; dir: "asc" | "desc" }
   | { by: "gFactor"; dir: "asc" | "desc" }
   | { by: "spinRpm"; dir: "asc" | "desc" }
-  | { by: "shaft"; dir: "asc" | "desc" };
+  | { by: "shaft"; dir: "asc" | "desc" }
+  | { by: "key"; dir: "asc" | "desc" };
 
 /** Normalize for search: lower-case, collapse spaces, treat - and / as spaces. */
 export function normalizeSearchQuery(input: string): string {
@@ -33,6 +89,69 @@ function asArray<T>(value: T | T[] | undefined): T[] | undefined {
   return Array.isArray(value) ? value : [value];
 }
 
+function facetOn(filter: CatalogFilter, facet: FacetId): boolean {
+  if (!filter.allowed) return true;
+  return filter.allowed.includes(facet);
+}
+
+function covers(span: { min: number; max: number } | null, range: NumberRange): boolean {
+  if (!span) return false;
+  const lo = range.min ?? Number.NEGATIVE_INFINITY;
+  const hi = range.max ?? Number.POSITIVE_INFINITY;
+  return span.max >= lo && span.min <= hi;
+}
+
+function coversPoint(value: number | null, range: NumberRange): boolean {
+  if (value === null) return false;
+  const lo = range.min ?? Number.NEGATIVE_INFINITY;
+  const hi = range.max ?? Number.POSITIVE_INFINITY;
+  return value >= lo && value <= hi;
+}
+
+export function facetRangeBounds(
+  items: readonly CatalogIndexItem[],
+  facet: RangeFacet,
+): { min: number; max: number } | null {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+
+  for (const item of items) {
+    const span = spanOf(item, facet);
+    if (!span) continue;
+    min = Math.min(min, span.min);
+    max = Math.max(max, span.max);
+  }
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+  return { min, max };
+}
+
+function spanOf(
+  item: CatalogIndexItem,
+  facet: RangeFacet,
+): { min: number; max: number } | null {
+  switch (facet) {
+    case "kg":
+      return item.loadKg;
+    case "power":
+      return item.powerKwMax === null
+        ? null
+        : { min: item.powerKwMax, max: item.powerKwMax };
+    case "width":
+      return item.workingWidthMm === null
+        ? null
+        : { min: item.workingWidthMm, max: item.workingWidthMm };
+    case "speed":
+      return item.workingSpeedMpm;
+    case "volume":
+      return item.volumeL === null
+        ? null
+        : { min: item.volumeL, max: item.volumeL };
+    default:
+      return null;
+  }
+}
+
 export function filterProducts<T extends CatalogIndexItem>(
   items: readonly T[],
   filter: CatalogFilter,
@@ -45,17 +164,41 @@ export function filterProducts<T extends CatalogIndexItem>(
     if (categories && categories.length > 0 && !categories.includes(item.category)) {
       return false;
     }
-    if (heatings && heatings.length > 0) {
+    if (heatings && heatings.length > 0 && facetOn(filter, "heating")) {
       if (item.heating === null || !heatings.includes(item.heating)) {
         return false;
       }
     }
-    if (filter.kg) {
-      if (!item.loadKg) return false;
-      const lo = filter.kg.min ?? Number.NEGATIVE_INFINITY;
-      const hi = filter.kg.max ?? Number.POSITIVE_INFINITY;
-      // overlap of [item.min, item.max] with [lo, hi]
-      if (item.loadKg.max < lo || item.loadKg.min > hi) return false;
+    if (filter.kg && facetOn(filter, "kg") && !covers(item.loadKg, filter.kg)) {
+      return false;
+    }
+    if (
+      filter.power &&
+      facetOn(filter, "power") &&
+      !coversPoint(item.powerKwMax, filter.power)
+    ) {
+      return false;
+    }
+    if (
+      filter.width &&
+      facetOn(filter, "width") &&
+      !coversPoint(item.workingWidthMm, filter.width)
+    ) {
+      return false;
+    }
+    if (
+      filter.speed &&
+      facetOn(filter, "speed") &&
+      !covers(item.workingSpeedMpm, filter.speed)
+    ) {
+      return false;
+    }
+    if (
+      filter.volume &&
+      facetOn(filter, "volume") &&
+      !coversPoint(item.volumeL, filter.volume)
+    ) {
+      return false;
     }
     if (q) {
       const hay = normalizeSearchQuery(item.name);
@@ -65,37 +208,77 @@ export function filterProducts<T extends CatalogIndexItem>(
   });
 }
 
+export type SortProductsOptions = {
+  /** Menu order of categories first (All view default). */
+  groupByCategory?: boolean;
+};
+
 export function sortProducts<T extends CatalogIndexItem>(
   items: readonly T[],
   sort: CatalogSort,
+  options?: SortProductsOptions,
 ): T[] {
   const dir = sort.dir === "asc" ? 1 : -1;
+  const groupByCategory = options?.groupByCategory === true;
   const copy = [...items];
 
   copy.sort((a, b) => {
-    const num = (av: number, bv: number) => (av - bv) * dir;
+    if (groupByCategory) {
+      const ai = CATEGORY_ORDER.get(a.category) ?? 999;
+      const bi = CATEGORY_ORDER.get(b.category) ?? 999;
+      if (ai !== bi) return ai - bi;
+    }
+
+    const num = (av: number, bv: number) => {
+      if (av === bv) return 0;
+      return (av - bv) * dir;
+    };
+
+    let primary = 0;
     switch (sort.by) {
       case "name":
-        return a.name.localeCompare(b.name, "uk") * dir;
+        primary = compareCatalogNames(a.name, b.name) * dir;
+        break;
       case "kg":
-        return num(a.loadKg?.max ?? -1, b.loadKg?.max ?? -1);
+        primary = num(a.loadKg?.max ?? -1, b.loadKg?.max ?? -1);
+        break;
       case "power":
-        return num(a.powerKwMax ?? -1, b.powerKwMax ?? -1);
+        primary = num(a.powerKwMax ?? -1, b.powerKwMax ?? -1);
+        break;
       case "width":
-        return num(a.workingWidthMm ?? -1, b.workingWidthMm ?? -1);
+        primary = num(a.workingWidthMm ?? -1, b.workingWidthMm ?? -1);
+        break;
       case "speed":
-        return num(a.workingSpeedMpm?.max ?? -1, b.workingSpeedMpm?.max ?? -1);
+        primary = num(
+          a.workingSpeedMpm?.max ?? -1,
+          b.workingSpeedMpm?.max ?? -1,
+        );
+        break;
       case "volume":
-        return num(a.volumeL ?? -1, b.volumeL ?? -1);
+        primary = num(a.volumeL ?? -1, b.volumeL ?? -1);
+        break;
       case "gFactor":
-        return num(a.gFactor ?? -1, b.gFactor ?? -1);
+        primary = num(a.gFactor ?? -1, b.gFactor ?? -1);
+        break;
       case "spinRpm":
-        return num(a.spinRpm ?? -1, b.spinRpm ?? -1);
+        primary = num(a.spinRpm ?? -1, b.spinRpm ?? -1);
+        break;
       case "shaft":
-        return num(a.shaftDiameterMm ?? -1, b.shaftDiameterMm ?? -1);
+        primary = num(a.shaftDiameterMm ?? -1, b.shaftDiameterMm ?? -1);
+        break;
+      case "key":
+        primary = num(
+          indexKeyMetricSortValue(a) ?? -1,
+          indexKeyMetricSortValue(b) ?? -1,
+        );
+        break;
       default:
-        return 0;
+        primary = 0;
     }
+
+    if (primary !== 0) return primary;
+    if (sort.by === "name") return 0;
+    return compareCatalogNames(a.name, b.name);
   });
 
   return copy;

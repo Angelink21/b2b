@@ -14,8 +14,8 @@ export default function LocaleError({ reset }: ErrorProps) {
   return (
     <Container className="py-24">
       <h1>{t("errorTitle")}</h1>
-      <p className="mt-4 text-steel">{t("errorBody")}</p>
-      <p className="mt-8">
+      <p className="mt-6 text-steel">{t("errorBody")}</p>
+      <p className="mt-6">
         <button type="button" className="btn btn-red" onClick={reset}>
           {t("retry")}
         </button>

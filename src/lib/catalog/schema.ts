@@ -133,6 +133,8 @@ export const productSchema = z.object({
   airflowM3h: airflowSchema.nullable(),
   noiseDb: noiseDbSchema.nullable(),
   imageKey: z.string(),
+  /** Optional explicit Cloudinary / sheet image id (CSV column `image_id`). */
+  imageId: z.string().optional(),
   image: z.null(),
 });
 

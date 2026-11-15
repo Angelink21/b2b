@@ -25,8 +25,9 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Link } from "@/i18n/navigation";
 import { SECTOR_KEYS, type SectorKey } from "@/lib/catalog/schema";
 import { parseAsModelSlugs } from "@/lib/catalog/search-params";
-import { initialLeadFormState } from "@/lib/leads";
 import { submitLead } from "@/lib/leads/actions";
+import { initialLeadFormState } from "@/lib/leads/client";
+import { useLeadClientMeta } from "@/lib/leads/client-ids";
 
 export type ModelOption = { slug: string; name: string };
 export type SectorOption = { value: SectorKey; label: string };
@@ -37,13 +38,6 @@ type QuoteFormProps = {
   turnstileSiteKey: string | null;
   idPrefix?: string;
 };
-
-function newClientId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
 
 function optionalError(
   value: string | undefined,
@@ -74,8 +68,7 @@ export function QuoteForm({
 
   /** null = follow URL param; array = user-edited chip list */
   const [modelsOverride, setModelsOverride] = useState<string[] | null>(null);
-  const [startedAt] = useState(() => String(Date.now()));
-  const [idempotencyKey] = useState(() => newClientId());
+  const { startedAt, idempotencyKey, ready: clientMetaReady } = useLeadClientMeta();
 
   const [state, formAction, pending] = useActionState(
     submitLead,
@@ -199,6 +192,7 @@ export function QuoteForm({
       noValidate
     >
       <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="intent" value="quote" />
       <input type="hidden" name="startedAt" value={startedAt} />
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
       {displayedModels.map((slug) => (
@@ -375,7 +369,12 @@ export function QuoteForm({
       ) : null}
 
       <div className="quote-form-full">
-        <Button type="submit" variant="primary" loading={pending}>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={pending}
+          disabled={!clientMetaReady || pending}
+        >
           {pending ? t("sending") : t("send")}
         </Button>
       </div>

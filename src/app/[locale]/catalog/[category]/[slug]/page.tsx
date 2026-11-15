@@ -168,11 +168,17 @@ export default async function ModelPage({ params }: PageProps) {
       <CatalogReturnLink />
 
       <DimHighlightProvider>
-      <div className="model-layout mt-8">
+      <div className="model-layout">
         <div className="model-visual">
           <ModelSharedTransition slug={`${product.slug}-visual`}>
             {photo ? (
-              <ModelImage product={product} targetMaxPx={300} />
+              <ModelImage
+                product={product}
+                targetMaxPx={300}
+                sizes="(max-width: 768px) 90vw, 300px"
+                priority
+                categoryLabel={tCat(product.category)}
+              />
             ) : (
               <DimensionDrawing
                 widthMm={dims.w}
@@ -191,7 +197,7 @@ export default async function ModelPage({ params }: PageProps) {
 
           {series?.shortDescription ? (
             <p
-              className="model-series mt-4 text-steel"
+              className="model-series text-steel"
               {...(locale === "en" ? { lang: "uk" } : {})}
             >
               {series.shortDescription}
@@ -201,7 +207,15 @@ export default async function ModelPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          <div className="mt-6">
+          <Suspense fallback={null}>
+            <ModelActions
+              slug={product.slug}
+              category={product.category}
+              locale={locale}
+            />
+          </Suspense>
+
+          <div className="model-specs">
             <ModelSpecs
               groups={groups}
               groupLabels={{
@@ -230,15 +244,7 @@ export default async function ModelPage({ params }: PageProps) {
             />
           </div>
 
-          <Suspense fallback={null}>
-            <ModelActions
-              slug={product.slug}
-              category={product.category}
-              locale={locale}
-            />
-          </Suspense>
-
-          <div className="mt-8">
+          <div className="model-family">
             <ModelFamilySwitcher
               currentSlug={product.slug}
               members={familyMembers}
@@ -259,7 +265,7 @@ export default async function ModelPage({ params }: PageProps) {
 
           {series && series.fullBullets.length > 0 ? (
             <section
-              className="model-description mt-10"
+              className="model-description"
               aria-labelledby="model-desc-heading"
             >
               <h2 id="model-desc-heading">{t("fullDescription")}</h2>
@@ -267,7 +273,7 @@ export default async function ModelPage({ params }: PageProps) {
                 <p className="model-uk-note mt-2">{t("ukCopyNote")}</p>
               ) : null}
               <ul
-                className="model-bullets mt-4"
+                className="model-bullets"
                 {...(locale === "en" ? { lang: "uk" } : {})}
               >
                 {series.fullBullets.map((bullet, index) => (
@@ -279,11 +285,11 @@ export default async function ModelPage({ params }: PageProps) {
 
           {related.length > 0 ? (
             <section
-              className="model-related mt-10"
+              className="model-related"
               aria-labelledby="model-related-heading"
             >
               <h2 id="model-related-heading">{t("related")}</h2>
-              <RowList className="mt-4">
+              <RowList className="mt-6">
                 {related.map((item) => {
                   const meta = item.loadKg
                     ? `${formatLoadKg(item.loadKg)} ${tCatalog("kg")}`

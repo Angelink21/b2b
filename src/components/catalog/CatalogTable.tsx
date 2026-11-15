@@ -1,8 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, type ReactNode } from "react";
 
+import { CompareCheckbox } from "@/components/compare/CompareCheckbox";
+import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
+import {
+  DataTable,
+  type DataTableColumn,
+  type DataTableSortState,
+} from "@/components/ui/DataTable";
 import {
   getCatalogColumns,
   type CatalogColumnId,
@@ -10,24 +17,20 @@ import {
 import { Link } from "@/i18n/navigation";
 import {
   formatIndexDimensions,
+  formatIndexKeyMetric,
   formatIndexLoadKg,
   formatIndexPower,
   formatIndexSpeed,
-  formatOrDash,
+  formatOrDashNumber,
+  indexKeyMetricSortValue,
 } from "@/lib/catalog/format";
+import { defaultCatalogSort } from "@/lib/catalog/query";
 import type { CatalogIndexItem, CategorySlug } from "@/lib/catalog/schema";
 import {
   COLUMN_TO_SORT_BY,
   SORT_BY_TO_COLUMN,
   type SortParam,
 } from "@/lib/catalog/search-params";
-import { CompareToggle } from "@/components/compare/CompareToggle";
-import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
-import {
-  DataTable,
-  type DataTableColumn,
-  type DataTableSortState,
-} from "@/components/ui/DataTable";
 
 import { saveCatalogReturn } from "./catalog-session";
 
@@ -41,16 +44,21 @@ type CatalogTableProps = {
   empty: ReactNode;
 };
 
-function sortStateFromParam(sort: SortParam | null): DataTableSortState {
-  if (!sort) return null;
-  return { id: SORT_BY_TO_COLUMN[sort.by], dir: sort.dir };
+function sortStateFromParam(
+  sort: SortParam | null,
+  category: CategorySlug | null,
+): DataTableSortState {
+  const effective = sort ?? defaultCatalogSort(category);
+  return { id: SORT_BY_TO_COLUMN[effective.by], dir: effective.dir };
 }
 
 function cellText(
   id: CatalogColumnId,
   row: CatalogIndexItem,
+  locale: string,
   tCat: (key: string) => string,
   tHeat: (key: string) => string,
+  units: { kg: string; mm: string; L: string; kW: string },
 ): string {
   switch (id) {
     case "name":
@@ -58,25 +66,27 @@ function cellText(
     case "type":
       return tCat(row.category);
     case "loadKg":
-      return formatIndexLoadKg(row.loadKg);
+      return formatIndexLoadKg(row.loadKg, locale);
     case "power":
-      return formatIndexPower(row.powerKwMax);
+      return formatIndexPower(row.powerKwMax, locale);
     case "heating":
       return row.heating ? tHeat(row.heating) : "—";
     case "dimensions":
-      return formatIndexDimensions(row.dimensionsMm);
+      return formatIndexDimensions(row.dimensionsMm, locale);
     case "gFactor":
-      return formatOrDash(row.gFactor);
+      return formatOrDashNumber(locale, row.gFactor, 0);
     case "spinRpm":
-      return formatOrDash(row.spinRpm);
+      return formatOrDashNumber(locale, row.spinRpm, 0);
     case "workingWidthMm":
-      return formatOrDash(row.workingWidthMm);
+      return formatOrDashNumber(locale, row.workingWidthMm, 0);
     case "workingSpeedMpm":
-      return formatIndexSpeed(row.workingSpeedMpm);
+      return formatIndexSpeed(row.workingSpeedMpm, locale);
     case "shaftDiameterMm":
-      return formatOrDash(row.shaftDiameterMm);
+      return formatOrDashNumber(locale, row.shaftDiameterMm, 0);
     case "volumeL":
-      return formatOrDash(row.volumeL);
+      return formatOrDashNumber(locale, row.volumeL, 0);
+    case "keyMetric":
+      return formatIndexKeyMetric(row, units, locale);
     default:
       return "—";
   }
@@ -105,6 +115,8 @@ function sortValue(
       return row.shaftDiameterMm;
     case "volumeL":
       return row.volumeL;
+    case "keyMetric":
+      return indexKeyMetricSortValue(row);
     default:
       return null;
   }
@@ -120,10 +132,22 @@ export function CatalogTable({
   empty,
 }: CatalogTableProps) {
   const t = useTranslations("catalog");
+  const tCompare = useTranslations("compare");
+  const locale = useLocale();
   const tCat = useTranslations("categories");
   const tHeat = useTranslations("heating");
+  const tUnits = useTranslations("units");
 
   const columnDefs = getCatalogColumns(category);
+  const units = useMemo(
+    () => ({
+      kg: tUnits("kg"),
+      mm: tUnits("mm"),
+      L: tUnits("L"),
+      kW: tUnits("kW"),
+    }),
+    [tUnits],
+  );
 
   const columns: DataTableColumn<CatalogIndexItem>[] = useMemo(() => {
     const headerFor = (id: CatalogColumnId): string => {
@@ -152,26 +176,43 @@ export function CatalogTable({
           return t("colShaft");
         case "volumeL":
           return t("colVolume");
+        case "keyMetric":
+          return t("colKeyMetric");
         default:
           return id;
       }
     };
 
-    const dataColumns: DataTableColumn<CatalogIndexItem>[] =
-      columnDefs.map((def) => {
-        const id = def.id;
-        return {
-          id,
-          header: headerFor(id),
-          sortable: Boolean(def.sortable),
-          sortValue: (row) => sortValue(id, row),
-          cell: (row) => {
-            if (id === "name") {
-              return (
+    return columnDefs.map((def) => {
+      const id = def.id;
+      const numeric =
+        id === "loadKg" ||
+        id === "power" ||
+        id === "gFactor" ||
+        id === "spinRpm" ||
+        id === "workingWidthMm" ||
+        id === "workingSpeedMpm" ||
+        id === "shaftDiameterMm" ||
+        id === "volumeL" ||
+        id === "keyMetric" ||
+        id === "dimensions";
+
+      const column: DataTableColumn<CatalogIndexItem> = {
+        id,
+        header: headerFor(id),
+        sortable: Boolean(def.sortable),
+        numeric,
+        sortValue: (row: CatalogIndexItem) => sortValue(id, row),
+        cell: (row: CatalogIndexItem) => {
+          if (id === "name") {
+            return (
+              <div className="catalog-name-cell">
+                <CompareCheckbox slug={row.slug} name={row.name} />
                 <ModelSharedTransition slug={row.slug}>
                   <Link
                     href={`/catalog/${row.category}/${row.slug}`}
                     className="catalog-model-link"
+                    translate="no"
                     onClick={() => {
                       saveCatalogReturn({
                         pathname: returnPathname,
@@ -183,23 +224,35 @@ export function CatalogTable({
                     {row.name}
                   </Link>
                 </ModelSharedTransition>
-              );
-            }
-            return cellText(id, row, tCat, tHeat);
-          },
-        };
-      });
-
-    return [
-      ...dataColumns,
-      {
-        id: "actions",
-        header: t("actions"),
-        sortable: false,
-        cell: (row) => <CompareToggle slug={row.slug} />,
-      },
-    ];
-  }, [columnDefs, returnPathname, returnSearch, t, tCat, tHeat]);
+              </div>
+            );
+          }
+          return cellText(id, row, locale, tCat, tHeat, units);
+        },
+      };
+      if (def.narrowHide !== undefined) {
+        column.narrowHide = def.narrowHide;
+      }
+      if (id === "name") {
+        column.leadingHeader = (
+          <span className="catalog-compare-th">
+            <span className="sr-only">{tCompare("add")}</span>
+          </span>
+        );
+      }
+      return column;
+    });
+  }, [
+    columnDefs,
+    locale,
+    returnPathname,
+    returnSearch,
+    t,
+    tCat,
+    tCompare,
+    tHeat,
+    units,
+  ]);
 
   return (
     <DataTable
@@ -209,7 +262,7 @@ export function CatalogTable({
       rowKey={(row) => row.slug}
       empty={empty}
       rowsPreSorted
-      sort={sortStateFromParam(sort)}
+      sort={sortStateFromParam(sort, category)}
       onSortChange={(next) => {
         if (!next) {
           onSortChange(null);
@@ -217,6 +270,11 @@ export function CatalogTable({
         }
         const by = COLUMN_TO_SORT_BY[next.id];
         if (!by) {
+          onSortChange(null);
+          return;
+        }
+        const def = defaultCatalogSort(category);
+        if (by === def.by && next.dir === def.dir) {
           onSortChange(null);
           return;
         }

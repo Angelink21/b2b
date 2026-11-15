@@ -5,13 +5,16 @@ import type { LeadPayload, LeadSendMeta, LeadSink } from "../types";
 
 function buildMessage(payload: LeadPayload): string {
   const lines = [
-    `*Quote* ${escapeMarkdownV2(payload.leadId)}`,
+    `*Lead* ${escapeMarkdownV2(payload.leadId)}`,
+    `Intent: ${escapeMarkdownV2(payload.intent)}`,
     `Name: ${escapeMarkdownV2(payload.name)}`,
     `Company: ${escapeMarkdownV2(payload.company || "—")}`,
     `Contact: ${escapeMarkdownV2(payload.contact)}`,
     `Sector: ${escapeMarkdownV2(payload.sector ?? "—")}`,
     `Kg: ${escapeMarkdownV2(payload.kgPerShift?.toString() ?? "—")}`,
     `Models: ${escapeMarkdownV2(payload.modelSlugs.join(", ") || "—")}`,
+    `Model: ${escapeMarkdownV2(payload.modelLabel || "—")}`,
+    `Serial: ${escapeMarkdownV2(payload.serialNumber || "—")}`,
     `Comment: ${escapeMarkdownV2(payload.comment || "—")}`,
     `Locale: ${escapeMarkdownV2(payload.locale)}`,
   ];

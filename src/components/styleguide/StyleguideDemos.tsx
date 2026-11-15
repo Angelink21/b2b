@@ -50,7 +50,7 @@ export function StyleguideRange() {
         labelMin={t("rangeMin")}
         labelMax={t("rangeMax")}
       />
-      <div className="mt-4">
+      <div className="mt-6">
         <Stat
           live
           value={`${range.min}–${range.max} ${t("unitKg")}`}

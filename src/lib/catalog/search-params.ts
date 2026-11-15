@@ -19,7 +19,8 @@ export type SortParam = {
     | "volume"
     | "gFactor"
     | "spinRpm"
-    | "shaft";
+    | "shaft"
+    | "key";
   dir: "asc" | "desc";
 };
 
@@ -33,6 +34,7 @@ const SORT_BY = [
   "gFactor",
   "spinRpm",
   "shaft",
+  "key",
 ] as const;
 
 const SORT_DIR = ["asc", "desc"] as const;
@@ -50,6 +52,7 @@ export const COLUMN_TO_SORT_BY: Partial<
   gFactor: "gFactor",
   spinRpm: "spinRpm",
   shaftDiameterMm: "shaft",
+  keyMetric: "key",
 };
 
 export const SORT_BY_TO_COLUMN: Record<SortParam["by"], string> = {
@@ -62,6 +65,7 @@ export const SORT_BY_TO_COLUMN: Record<SortParam["by"], string> = {
   gFactor: "gFactor",
   spinRpm: "spinRpm",
   shaft: "shaftDiameterMm",
+  key: "keyMetric",
 };
 
 export const parseAsKgRange = createParser({
@@ -128,8 +132,15 @@ export const parseAsModelSlugs = createParser({
   },
 });
 
+/** Shared inclusive numeric range (`min-max`) for kg, power, width, speed, volume. */
+export const parseAsNumberRange = parseAsKgRange;
+
 export const catalogParsers = {
-  kg: parseAsKgRange,
+  kg: parseAsNumberRange,
+  power: parseAsNumberRange,
+  width: parseAsNumberRange,
+  speed: parseAsNumberRange,
+  volume: parseAsNumberRange,
   type: parseAsStringLiteral(CATEGORY_SLUGS),
   heat: parseAsStringLiteral(HEATING_KEYS),
   q: parseAsString.withDefault(""),
@@ -143,6 +154,10 @@ export const compareParsers = {
 
 export type CatalogQueryState = {
   kg: KgRangeParam | null;
+  power: KgRangeParam | null;
+  width: KgRangeParam | null;
+  speed: KgRangeParam | null;
+  volume: KgRangeParam | null;
   type: (typeof CATEGORY_SLUGS)[number] | null;
   heat: (typeof HEATING_KEYS)[number] | null;
   q: string;

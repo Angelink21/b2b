@@ -7,18 +7,62 @@ import uk from "../../../messages/uk.json";
 import { routing } from "@/i18n/routing";
 
 import { initialLeadFormState } from "./form-state";
-import { processLeadSubmission } from "./submit";
+import { LEAD_INTENTS, type LeadIntent } from "./intents";
+import { processLeadSubmission, type SubmitLeadMessages } from "./submit";
 import type { LeadFormState } from "./types";
 
-const QUOTE_MESSAGES = {
-  uk: uk.quote,
-  en: en.quote,
-} as const;
+const LOCALES = { uk, en } as const;
 
-function localeFromForm(formData: FormData): keyof typeof QUOTE_MESSAGES {
+type FormMessages = {
+  errorName: string;
+  errorContact: string;
+  errorConsent: string;
+  errorComment: string;
+  errorGeneric: string;
+  errorRateLimit: string;
+  errorDelivery: string;
+  errorTurnstile: string;
+  success: string;
+};
+
+function localeFromForm(formData: FormData): keyof typeof LOCALES {
   const raw = String(formData.get("locale") ?? routing.defaultLocale);
   if (raw === "en" || raw === "uk") return raw;
   return routing.defaultLocale;
+}
+
+function intentFromForm(formData: FormData): LeadIntent {
+  const raw = String(formData.get("intent") ?? "quote");
+  return (LEAD_INTENTS as readonly string[]).includes(raw)
+    ? (raw as LeadIntent)
+    : "quote";
+}
+
+function messagesForIntent(
+  locale: keyof typeof LOCALES,
+  intent: LeadIntent,
+): SubmitLeadMessages {
+  const bag = LOCALES[locale];
+  const ns: FormMessages =
+    intent === "service"
+      ? bag.service
+      : intent === "other"
+        ? bag.contacts
+        : bag.quote;
+
+  return {
+    errorName: ns.errorName,
+    errorContact: ns.errorContact,
+    errorConsent: ns.errorConsent,
+    errorSector: bag.quote.errorSector,
+    errorKg: bag.quote.errorKg,
+    errorComment: ns.errorComment,
+    errorGeneric: ns.errorGeneric,
+    errorRateLimit: ns.errorRateLimit,
+    errorDelivery: ns.errorDelivery,
+    errorTurnstile: ns.errorTurnstile,
+    success: ns.success,
+  };
 }
 
 export async function submitLead(
@@ -27,24 +71,13 @@ export async function submitLead(
 ): Promise<LeadFormState> {
   // Avoid next-intl getLocale/getTranslations here: root-params are unavailable in Server Actions.
   const locale = localeFromForm(formData);
-  const t = QUOTE_MESSAGES[locale];
+  const intent = intentFromForm(formData);
   const headerList = await headers();
 
   return processLeadSubmission(formData, {
     locale,
     headers: headerList,
-    messages: {
-      errorName: t.errorName,
-      errorContact: t.errorContact,
-      errorConsent: t.errorConsent,
-      errorSector: t.errorSector,
-      errorKg: t.errorKg,
-      errorGeneric: t.errorGeneric,
-      errorRateLimit: t.errorRateLimit,
-      errorDelivery: t.errorDelivery,
-      errorTurnstile: t.errorTurnstile,
-      success: t.success,
-    },
+    messages: messagesForIntent(locale, intent),
   });
 }
 

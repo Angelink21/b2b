@@ -2,17 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 
-import { getCatalogColumnIds, getCatalogColumns } from "./columns";
+import {
+  assertNoRequiredNarrowHide,
+  getCatalogColumnIds,
+  getCatalogColumns,
+} from "./columns";
 
 describe("catalog columns", () => {
-  it("default (all categories) includes type and load", () => {
+  it("default (all categories) uses a compact key-metric column", () => {
     expect(getCatalogColumnIds(null)).toEqual([
       "name",
       "type",
-      "loadKg",
-      "power",
       "heating",
       "dimensions",
+      "keyMetric",
     ]);
   });
 
@@ -40,5 +43,24 @@ describe("catalog columns", () => {
       expect(cols.length).toBeGreaterThan(0);
       expect(cols[0]?.id).toBe("name");
     }
+  });
+
+  it("never marks required columns as narrowHide", () => {
+    expect(assertNoRequiredNarrowHide(getCatalogColumns(null))).toBe(true);
+    for (const slug of CATEGORY_SLUGS) {
+      expect(assertNoRequiredNarrowHide(getCatalogColumns(slug))).toBe(true);
+    }
+  });
+
+  it("dryers keep dimensions visible (not narrowHide)", () => {
+    const dims = getCatalogColumns("dryers").find((c) => c.id === "dimensions");
+    expect(dims?.narrowHide).toBeFalsy();
+  });
+
+  it("hides spin/G before power on washers", () => {
+    const cols = getCatalogColumns("washers");
+    expect(cols.find((c) => c.id === "spinRpm")?.narrowHide).toBe(1);
+    expect(cols.find((c) => c.id === "gFactor")?.narrowHide).toBe(1);
+    expect(cols.find((c) => c.id === "power")?.narrowHide).toBe(2);
   });
 });

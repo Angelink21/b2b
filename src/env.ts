@@ -24,6 +24,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
   TURNSTILE_SECRET_KEY: z.string().optional(),
   ENABLE_STYLEGUIDE: z.string().optional(),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_FOLDER: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema> & {

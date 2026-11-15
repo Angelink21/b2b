@@ -11,7 +11,7 @@ describe("sitemap and robots (S2)", () => {
     const entries = sitemap();
     const urls = entries.map((e) => e.url);
 
-    const staticPerLocale = 5; // home, catalog, compare, quote, privacy
+    const staticPerLocale = 8; // home, catalog, compare, quote, privacy, about, service, contacts
     const categoriesPerLocale = CATEGORY_SLUGS.length;
     const modelsPerLocale = getAll().length;
     const expected =
@@ -28,6 +28,9 @@ describe("sitemap and robots (S2)", () => {
 
     expect(urls.some((u) => u.endsWith("/uk"))).toBe(true);
     expect(urls.some((u) => u.endsWith("/en/catalog"))).toBe(true);
+    expect(urls.some((u) => u.endsWith("/uk/about"))).toBe(true);
+    expect(urls.some((u) => u.endsWith("/en/service"))).toBe(true);
+    expect(urls.some((u) => u.endsWith("/uk/contacts"))).toBe(true);
   });
 
   it("robots disallow styleguide and fontcheck and point to sitemap", () => {

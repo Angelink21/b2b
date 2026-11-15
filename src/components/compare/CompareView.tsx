@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
-import { Silhouette } from "@/components/ui/Silhouette";
+import { ModelImageView } from "@/components/ui/ModelImageView";
 import { Link } from "@/i18n/navigation";
 import {
   buildCompareMatrix,
@@ -113,11 +113,11 @@ export function CompareView({
       >
         {products.map((product) => (
           <figure key={product.slug} className="compare-silhouette">
-            <Silhouette
-              widthMm={product.dimensionsMm.w}
-              heightMm={product.dimensionsMm.h}
-              scale={scale}
-              title={product.name}
+            <ModelImageView
+              product={product}
+              photo={product.photo}
+              targetMaxPx={Math.round(product.dimensionsMm.h * scale)}
+              sizes="160px"
             />
             <figcaption>
               <Link href={`/catalog/${product.category}/${product.slug}`}>
@@ -167,7 +167,10 @@ export function CompareView({
                   {specLabels[row.key]}
                 </th>
                 {row.values.map((value, index) => (
-                  <td key={`${row.key}-${products[index]?.slug ?? index}`}>
+                  <td
+                    key={`${row.key}-${products[index]?.slug ?? index}`}
+                    className="is-num"
+                  >
                     {value}
                   </td>
                 ))}

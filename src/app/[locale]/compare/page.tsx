@@ -10,6 +10,7 @@ import {
   HEATING_KEYS,
 } from "@/lib/catalog/schema";
 import type { SpecFieldKey } from "@/lib/catalog/spec-groups";
+import { getModelImage } from "@/lib/images";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
 type PageProps = {
@@ -33,8 +34,6 @@ export default async function ComparePage({ params }: PageProps) {
   const tModel = await getTranslations({ locale, namespace: "model" });
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
-
-  const records = buildCompareRecords(getAll());
 
   const heatingLabels: Partial<Record<string, string>> = {};
   for (const key of HEATING_KEYS) {
@@ -65,11 +64,33 @@ export default async function ComparePage({ params }: PageProps) {
     categoryLabels[slug] = tCat(slug);
   }
 
+  const products = getAll();
+  const photos = new Map(
+    products.map((product) => {
+      const categoryLabel = categoryLabels[product.category];
+      const photo =
+        categoryLabel !== undefined
+          ? getModelImage(product, { categoryLabel })
+          : getModelImage(product);
+      if (!photo) return [product.slug, null] as const;
+      return [
+        product.slug,
+        {
+          loaderSrc: photo.loaderSrc,
+          alt: photo.alt,
+          width: photo.width,
+          height: photo.height,
+        },
+      ] as const;
+    }),
+  );
+  const records = buildCompareRecords(products, photos);
+
   return (
     <Container className="compare-page py-12">
       <h1>{t("title")}</h1>
-      <Suspense fallback={<p className="mt-8 text-steel">{t("loading")}</p>}>
-        <div className="mt-8">
+      <Suspense fallback={<p className="mt-6 text-steel">{t("loading")}</p>}>
+        <div className="mt-6">
           <CompareView
             records={records}
             heatingLabels={heatingLabels}

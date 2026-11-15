@@ -60,13 +60,10 @@ test.describe("layout alignment", () => {
       await page.goto("/uk/catalog");
       await expect(page.locator("h1")).toBeVisible();
 
-      await expectSharedLeftEdge(page, [
-        ".site-brand",
-        "h1",
-        ".catalog-kg-label",
-        ".catalog-meta",
-        ".site-footer-col",
-      ]);
+      const edges = [".site-brand", "h1", ".site-footer-col"];
+      if (width >= 1280) edges.push(".catalog-panel");
+      else edges.push(".catalog-filters-toggle", ".catalog-meta");
+      await expectSharedLeftEdge(page, edges);
       await expectNoHorizontalScroll(page);
     });
   }

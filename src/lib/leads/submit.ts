@@ -19,6 +19,7 @@ export type SubmitLeadMessages = {
   errorConsent: string;
   errorSector: string;
   errorKg: string;
+  errorComment: string;
   errorGeneric: string;
   errorRateLimit: string;
   errorDelivery: string;
@@ -42,6 +43,8 @@ function mapFieldErrors(
       errors.sector = messages.errorSector;
     if (key === "kgPerShift" && !errors.kgPerShift)
       errors.kgPerShift = messages.errorKg;
+    if (key === "comment" && !errors.comment)
+      errors.comment = messages.errorComment;
   }
   return errors;
 }
@@ -121,12 +124,15 @@ export async function processLeadSubmission(
   }
 
   const parsed = leadFieldsSchema.safeParse({
+    intent: values.intent,
     name: values.name,
     company: values.company,
     contact: values.contact,
     sector: values.sector,
     kgPerShift: values.kgPerShift,
     modelSlugs: values.modelSlugs,
+    modelLabel: values.modelLabel,
+    serialNumber: values.serialNumber,
     comment: values.comment,
     consent: values.consent ? true : false,
   });
@@ -155,12 +161,15 @@ export async function processLeadSubmission(
   const leadId = randomUUID();
   const payload: LeadPayload = {
     leadId,
+    intent: parsed.data.intent,
     name: parsed.data.name,
     company: parsed.data.company,
     contact: parsed.data.contact,
     sector: parsed.data.sector,
     kgPerShift: parsed.data.kgPerShift,
     modelSlugs: parsed.data.modelSlugs,
+    modelLabel: parsed.data.modelLabel,
+    serialNumber: parsed.data.serialNumber,
     comment: parsed.data.comment,
     locale: opts.locale,
     submittedAt: new Date().toISOString(),

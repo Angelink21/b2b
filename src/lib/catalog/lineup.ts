@@ -28,14 +28,49 @@ function isWasherWithKgAndDims(p: Product): p is WasherCandidate {
 }
 
 /**
+ * Hero lineup keeps one visual language (front-loaders with a porthole).
+ * Barrier / medical / foreign brands stay in the catalog, not on the floor row.
+ */
+export function isLineupFloorModel(p: Product): boolean {
+  return /^(LA|LAP|LN)-/i.test(p.name);
+}
+
+/** Prefer electric when available; otherwise first catalog order at that kg. */
+function pickLineupRepresentative(
+  candidates: readonly WasherCandidate[],
+): WasherCandidate {
+  const electric = candidates.filter((p) => p.heating === "electric");
+  return (electric[0] ?? candidates[0])!;
+}
+
+/**
+ * Floor-row silhouette size from catalog mm.
+ * Depth excess grows width (and a milder height bump) so models that only grow
+ * in D (e.g. LA-60C vs LA-80C) still step up between neighbors on the lineup.
+ */
+export function lineupFloorSizeMm(
+  widthMm: number,
+  depthMm: number,
+  heightMm: number,
+): { widthMm: number; heightMm: number } {
+  const excess = Math.max(0, depthMm - widthMm);
+  const floorW = Math.round(widthMm + excess * 1.75);
+  const grow = floorW / Math.max(widthMm, 1);
+  const floorH = Math.round(heightMm * (1 + (grow - 1) * 0.5));
+  return { widthMm: floorW, heightMm: floorH };
+}
+
+/**
  * Pick 8 washers evenly across unique kgMax (includes min and max).
- * Same algorithm as docs/prototype.html buildLine.
+ * Prefers LA/LAP/LN front-loaders so the floor row stays one visual language.
  */
 export function selectLineup(products: readonly Product[]): LineupModel[] {
-  const washers = products.filter(isWasherWithKgAndDims);
-  const uniqueKg = [
-    ...new Set(washers.map((m) => m.loadKg.max)),
-  ].sort((a, b) => a - b);
+  const allWashers = products.filter(isWasherWithKgAndDims);
+  const floorWashers = allWashers.filter(isLineupFloorModel);
+  const washers = floorWashers.length >= LINEUP_SIZE ? floorWashers : allWashers;
+  const uniqueKg = [...new Set(washers.map((m) => m.loadKg.max))].sort(
+    (a, b) => a - b,
+  );
 
   if (uniqueKg.length === 0) return [];
 
@@ -50,7 +85,8 @@ export function selectLineup(products: readonly Product[]): LineupModel[] {
   ];
 
   return pickedKg.map((kg) => {
-    const m = washers.find((w) => w.loadKg.max === kg)!;
+    const atKg = washers.filter((w) => w.loadKg.max === kg);
+    const m = pickLineupRepresentative(atKg);
     return {
       slug: m.slug,
       name: m.name,
@@ -64,14 +100,43 @@ export function selectLineup(products: readonly Product[]): LineupModel[] {
   });
 }
 
+/**
+ * Place a 0…1000 ruler unit on the piecewise centers of the lineup machines.
+ * Centers are fractions of the row width, one per anchor, left to right.
+ */
+export function unitToFraction(unit: number, centers: readonly number[]): number {
+  const n = centers.length;
+  if (n === 0) return 0;
+  if (n === 1) return centers[0]!;
+  const clamped = Math.min(RANGE_UNIT_MAX, Math.max(RANGE_UNIT_MIN, unit));
+  const x = (clamped / RANGE_UNIT_MAX) * (n - 1);
+  const i = Math.min(Math.floor(x), n - 2);
+  const t = x - i;
+  const start = centers[i] ?? 0;
+  const end = centers[i + 1] ?? start;
+  return start + (end - start) * t;
+}
+
+/** Inverse of unitToFraction. Pointer x on the row becomes a ruler unit. */
+export function fractionToUnit(fraction: number, centers: readonly number[]): number {
+  const n = centers.length;
+  if (n < 2) return RANGE_UNIT_MIN;
+  const first = centers[0]!;
+  const last = centers[n - 1]!;
+  const f = Math.min(last, Math.max(first, fraction));
+  let i = 0;
+  while (i < n - 2 && f > (centers[i + 1] ?? f)) i += 1;
+  const start = centers[i] ?? first;
+  const end = centers[i + 1] ?? start;
+  const t = end === start ? 0 : (f - start) / (end - start);
+  return Math.round(((i + t) / (n - 1)) * RANGE_UNIT_MAX);
+}
+
 /** Map dual-range unit (0…1000) onto nonlinear kg anchors under machines. */
 export function kgFromUnit(unit: number, anchors: readonly number[]): number {
   if (anchors.length === 0) return 0;
   if (anchors.length === 1) return anchors[0]!;
-  const clamped = Math.min(
-    RANGE_UNIT_MAX,
-    Math.max(RANGE_UNIT_MIN, unit),
-  );
+  const clamped = Math.min(RANGE_UNIT_MAX, Math.max(RANGE_UNIT_MIN, unit));
   const x = (clamped / RANGE_UNIT_MAX) * (anchors.length - 1);
   const i = Math.min(Math.floor(x), anchors.length - 2);
   const a = anchors[i]!;

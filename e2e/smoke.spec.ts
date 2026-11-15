@@ -15,7 +15,9 @@ test.describe("smoke", () => {
 
   test("language switch keeps path", async ({ page }) => {
     await page.goto("/uk/catalog");
-    const switcher = page.getByRole("link", { name: /Language|Мова/i });
+    const switcher = page
+      .getByRole("banner")
+      .getByRole("link", { name: "EN", exact: true });
     await expect(switcher).toBeVisible();
     await Promise.all([page.waitForURL(/\/en\/catalog/), switcher.click()]);
   });

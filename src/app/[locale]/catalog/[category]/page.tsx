@@ -3,11 +3,17 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
+import { CatalogSkeleton } from "@/components/catalog/CatalogSkeleton";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { routing } from "@/i18n/routing";
-import { facets, getByCategory, getIndex } from "@/lib/catalog";
+import { getByCategory, getIndex } from "@/lib/catalog";
+import {
+  formatCategoryMetricLead,
+  getCategorySummary,
+} from "@/lib/catalog/category-summary";
+import { getCategoryNavStats } from "@/lib/catalog/nav";
 import {
   CATEGORY_SLUGS,
   type CategorySlug,
@@ -53,12 +59,31 @@ export default async function CategoryCatalogPage({ params }: PageProps) {
   const t = await getTranslations("catalog");
   const tCat = await getTranslations("categories");
   const tCrumbs = await getTranslations("model");
+  const tUnits = await getTranslations("units");
 
   const items = getIndex().filter((p) => p.category === category);
   const products = getByCategory(category);
-  const f = facets(getIndex());
-  const kgBounds = f.kg ?? { min: 8, max: 130 };
   const categoryLabel = tCat(category);
+  const summary = getCategorySummary(category);
+  const lead = formatCategoryMetricLead(
+    summary,
+    locale,
+    {
+      kg: tUnits("kg"),
+      mm: tUnits("mm"),
+      L: tUnits("L"),
+      kW: tUnits("kW"),
+    },
+    {
+      kg: t("metricLeadKg"),
+      width: t("metricLeadWidth"),
+      volume: t("metricLeadVolume"),
+      power: t("metricLeadPower"),
+    },
+  );
+  const categoryCounts = Object.fromEntries(
+    getCategoryNavStats().map((stat) => [stat.slug, stat.count]),
+  ) as Record<CategorySlug, number>;
 
   return (
     <Container className="catalog-page py-12">
@@ -86,18 +111,16 @@ export default async function CategoryCatalogPage({ params }: PageProps) {
         ]}
       />
       <h1 className="mt-6">{categoryLabel}</h1>
-      <p className="catalog-lead mt-4 text-steel">
-        {tCat(`intro.${category}`)}
-      </p>
-      <Suspense fallback={<p className="mt-8 text-steel">{t("loading")}</p>}>
-        <div className="mt-8">
+      {lead ? <p className="catalog-lead mt-6 text-steel">{lead}</p> : null}
+      <div className="mt-6">
+        <Suspense fallback={<CatalogSkeleton />}>
           <CatalogExplorer
             items={items}
             lockedCategory={category}
-            kgBounds={kgBounds}
+            categoryCounts={categoryCounts}
           />
-        </div>
-      </Suspense>
+        </Suspense>
+      </div>
     </Container>
   );
 }

@@ -18,12 +18,15 @@ import type { LeadPayload } from "./types";
 
 const samplePayload: LeadPayload = {
   leadId: "11111111-1111-4111-8111-111111111111",
+  intent: "quote",
   name: "Alex",
   company: "Acme",
   contact: "alex@example.com",
   sector: "hospitals",
   kgPerShift: 40,
   modelSlugs: ["lap-08-tp2-e"],
+  modelLabel: "",
+  serialNumber: "",
   comment: "Need quote",
   locale: "uk",
   submittedAt: "2026-11-14T12:00:00.000Z",
@@ -54,6 +57,7 @@ describe("leadFieldsSchema", () => {
       modelSlugs: [],
     });
     expect(ok.success).toBe(true);
+    if (ok.success) expect(ok.data.intent).toBe("quote");
 
     const bad = leadFieldsSchema.safeParse({
       name: "",
@@ -62,6 +66,45 @@ describe("leadFieldsSchema", () => {
       modelSlugs: [],
     });
     expect(bad.success).toBe(false);
+  });
+
+  it("requires comment for service intent", () => {
+    const missing = leadFieldsSchema.safeParse({
+      intent: "service",
+      name: "Ivan",
+      contact: "ivan@example.com",
+      consent: true,
+      comment: "",
+      modelSlugs: [],
+    });
+    expect(missing.success).toBe(false);
+
+    const ok = leadFieldsSchema.safeParse({
+      intent: "service",
+      name: "Ivan",
+      contact: "ivan@example.com",
+      consent: true,
+      comment: "Drum does not spin",
+      modelLabel: "LAP-08",
+      serialNumber: "SN-1",
+      modelSlugs: [],
+    });
+    expect(ok.success).toBe(true);
+    if (ok.success) {
+      expect(ok.data.intent).toBe("service");
+      expect(ok.data.modelLabel).toBe("LAP-08");
+    }
+  });
+
+  it("allows other intent without comment", () => {
+    const ok = leadFieldsSchema.safeParse({
+      intent: "other",
+      name: "Ivan",
+      contact: "ivan@example.com",
+      consent: true,
+      modelSlugs: [],
+    });
+    expect(ok.success).toBe(true);
   });
 
   it("parses kg and rejects invalid kg", () => {

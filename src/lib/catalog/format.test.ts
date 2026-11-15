@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatCatalogNumber,
   formatDimensionsMm,
+  formatIndexDimensions,
   formatIndexLoadKg,
+  formatIndexPower,
+  formatIndexSpeed,
   formatNoiseDb,
   formatPowerKw,
   formatVoltage,
@@ -38,7 +42,25 @@ describe("catalog formatters", () => {
   });
 
   it("formats index load range", () => {
-    expect(formatIndexLoadKg({ min: 8, max: 9 })).toBe("8–9");
-    expect(formatIndexLoadKg({ min: 12, max: 12 })).toBe("12");
+    expect(formatIndexLoadKg({ min: 8, max: 9 }, "uk")).toBe("8–9");
+    expect(formatIndexLoadKg({ min: 12, max: 12 }, "uk")).toBe("12");
+  });
+
+  it("keeps one decimal for SLN-18 style load (not rounded to 17)", () => {
+    expect(formatIndexLoadKg({ min: 16.5, max: 20 }, "uk")).toBe("16,5–20");
+    expect(formatIndexLoadKg({ min: 16.5, max: 20 }, "en")).toBe("16.5–20");
+  });
+
+  it("formats catalog numbers with uk grouping and decimal comma", () => {
+    expect(formatCatalogNumber("uk", 1400)).toBe("1\u00A0400");
+    expect(formatCatalogNumber("uk", 10.84)).toBe("10,84");
+    expect(formatIndexPower(10.84, "uk")).toBe("10,84");
+    expect(formatIndexSpeed({ min: 1.5, max: 6 }, "uk")).toBe("1,5–6");
+    expect(formatIndexDimensions({ w: 1400, d: 444, h: 1110 }, "uk")).toBe(
+      "1400\u00A0×\u00A0444\u00A0×\u00A01110",
+    );
+    expect(formatIndexDimensions({ w: 1836, d: 1710, h: 2245 }, "uk")).toBe(
+      "1836\u00A0×\u00A01710\u00A0×\u00A02245",
+    );
   });
 });

@@ -7,15 +7,13 @@ import { getSiteUrl } from "./site-url";
 
 export type JsonLd = Record<string, unknown>;
 
+/** Fields that must never be invented (prices, ratings). Contact keys are allowed only when filled from siteConfig. */
 const FORBIDDEN_TOP_KEYS = [
   "offers",
   "aggregateRating",
   "review",
   "price",
   "priceCurrency",
-  "address",
-  "telephone",
-  "email",
 ] as const;
 
 export function assertNoInventedFields(node: unknown, path = "$"): string[] {
@@ -51,7 +49,42 @@ export function organizationJsonLd(): JsonLd {
   if (url) {
     data.url = url;
   }
+  const phone = siteConfig.phone.trim();
+  if (phone) data.telephone = phone;
+  const email = siteConfig.email.trim();
+  if (email) data.email = email;
+  const address = siteConfig.address.trim();
+  if (address) {
+    data.address = {
+      "@type": "PostalAddress",
+      streetAddress: address,
+    };
+  }
   return data;
+}
+
+export function aboutPageJsonLd(locale: string): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${absoluteUrl(locale, "/about")}/#about`,
+    url: absoluteUrl(locale, "/about"),
+    name: siteConfig.name,
+    isPartOf: { "@id": `${absoluteUrl(locale, "")}/#website` },
+    about: { "@id": `${getSiteUrl()}/#organization` },
+  };
+}
+
+export function contactPageJsonLd(locale: string): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": `${absoluteUrl(locale, "/contacts")}/#contact`,
+    url: absoluteUrl(locale, "/contacts"),
+    name: siteConfig.name,
+    isPartOf: { "@id": `${absoluteUrl(locale, "")}/#website` },
+    about: { "@id": `${getSiteUrl()}/#organization` },
+  };
 }
 
 export function webSiteJsonLd(locale: string): JsonLd {

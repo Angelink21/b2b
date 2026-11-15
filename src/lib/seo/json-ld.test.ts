@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { getAll, getByCategory } from "@/lib/catalog";
 import {
+  aboutPageJsonLd,
   assertNoInventedFields,
   breadcrumbListJsonLd,
+  contactPageJsonLd,
   itemListJsonLd,
   organizationJsonLd,
   productJsonLd,
@@ -12,11 +14,25 @@ import {
 } from "./json-ld";
 
 describe("JSON-LD builders (S3)", () => {
-  it("Organization has no invented contact/address fields", () => {
+  it("Organization omits empty phone/email/address", () => {
     const data = organizationJsonLd();
     expect(data["@type"]).toBe("Organization");
     expect(assertNoInventedFields(data)).toEqual([]);
     expect(data.name).toBe("Fagor Industrial");
+    expect(data.telephone).toBeUndefined();
+    expect(data.email).toBeUndefined();
+    expect(data.address).toBeUndefined();
+  });
+
+  it("AboutPage and ContactPage omit invented contacts", () => {
+    const about = aboutPageJsonLd("uk");
+    const contact = contactPageJsonLd("en");
+    expect(about["@type"]).toBe("AboutPage");
+    expect(contact["@type"]).toBe("ContactPage");
+    expect(assertNoInventedFields(about)).toEqual([]);
+    expect(assertNoInventedFields(contact)).toEqual([]);
+    expect(about.telephone).toBeUndefined();
+    expect(contact.email).toBeUndefined();
   });
 
   it("WebSite links to Organization without offers or ratings", () => {
@@ -68,7 +84,11 @@ describe("JSON-LD builders (S3)", () => {
       },
     });
     expect(data["@type"]).toBe("Product");
-    expect(data.image).toBeUndefined();
+    // Image only when sync found a Cloudinary asset for the model.
+    if (data.image !== undefined) {
+      expect(typeof data.image).toBe("string");
+      expect(String(data.image)).toMatch(/^https:\/\/res\.cloudinary\.com\//);
+    }
     expect(data.offers).toBeUndefined();
     expect(data.aggregateRating).toBeUndefined();
     expect(assertNoInventedFields(data)).toEqual([]);

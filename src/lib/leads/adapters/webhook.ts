@@ -18,12 +18,15 @@ export const webhookSink: LeadSink = {
 
     const body = JSON.stringify({
       leadId: payload.leadId,
+      intent: payload.intent,
       name: payload.name,
       company: payload.company,
       contact: payload.contact,
       sector: payload.sector,
       kgPerShift: payload.kgPerShift,
       modelSlugs: payload.modelSlugs,
+      modelLabel: payload.modelLabel,
+      serialNumber: payload.serialNumber,
       comment: payload.comment,
       locale: payload.locale,
       submittedAt: payload.submittedAt,
