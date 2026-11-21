@@ -57,3 +57,5 @@
 2026-11-19 · Snapshot `meta.fetchedAt` = `catalog.meta.json` `builtAt` (not `Date.now`) · Empty `CATALOG_CSV_URL` (e2e) hit Next blocking-prerender-current-time.
 2026-11-21 · Category registry `src/config/categories.ts` + `docs/ADD_CATEGORY.md`; `mobile-laundry` last · Single place for CSV name/slug/facets/columns/silhouette; soft sectors + uk slug translit for TO GO.
 2026-11-21 · loadKg cell that matches a known sector CSV name → sector, loadKg null · Sheet row for ПРАЛЬНЯ TO GO put «Пральні…» in kg column; avoid hard fail.
+2026-11-21 · `@vercel/analytics` for cookie-less page + custom events · Stage 11; no Sentry/Plausible second provider.
+2026-11-21 · Reject unknown `[locale]` before `messages/${locale}.json` · Local `next start` receives `/_vercel/insights` from Analytics; must not treat `_vercel` as a locale.

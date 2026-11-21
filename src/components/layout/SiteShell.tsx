@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
+import { GlobalSearchMount } from "@/components/search/GlobalSearchMount";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { MobileActionBar } from "./MobileActionBar";
 import { SiteChromeProvider } from "./SiteChromeContext";
 import { SkipLink } from "./SkipLink";
-import { GlobalSearchMount } from "@/components/search/GlobalSearchMount";
 
 type SiteShellProps = {
   children: ReactNode;
@@ -21,6 +22,7 @@ export function SiteShell({ children }: SiteShellProps) {
       <Footer />
       <GlobalSearchMount />
       <MobileActionBar />
+      <VercelAnalytics />
     </SiteChromeProvider>
   );
 }

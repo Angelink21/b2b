@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Link } from "@/i18n/navigation";
+import { trackEvent } from "@/lib/analytics/track";
 import { SECTOR_KEYS, type SectorKey } from "@/lib/catalog/schema";
 import { parseAsModelSlugs } from "@/lib/catalog/search-params";
 import { submitLead } from "@/lib/leads/actions";
@@ -81,7 +82,12 @@ export function QuoteForm({
   const baseId = useId();
 
   useEffect(() => {
+    trackEvent("quote_open");
+  }, []);
+
+  useEffect(() => {
     if (state.status !== "success") return;
+    trackEvent("quote_success");
     successRef.current?.focus();
   }, [state.status, state.leadId]);
 

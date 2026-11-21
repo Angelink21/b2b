@@ -42,6 +42,10 @@ export const viewport = {
 
 export async function generateMetadata({ params }: LocaleLayoutProps) {
   const { locale } = await params;
+  // `/_vercel/*` (Analytics beacon) can hit `[locale]` under `next start` locally.
+  if (!hasLocale(routing.locales, locale)) {
+    return {};
+  }
   const t = await getTranslations({ locale, namespace: "meta" });
 
   return {

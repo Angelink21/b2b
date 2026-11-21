@@ -516,11 +516,13 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
               className="header-search header-tool"
               aria-haspopup="dialog"
               aria-expanded={searchOpen}
-              aria-label={tSearch("open")}
+              aria-label={`${tSearch("open")} ${tSearch("shortcut")}`}
               onClick={openSearch}
             >
               <SearchGlyph />
-              <span className="header-search-hint">{tSearch("shortcut")}</span>
+              <span className="header-search-hint" aria-hidden="true">
+                {tSearch("shortcut")}
+              </span>
             </button>
             <LocaleSwitcher />
             <ThemeToggle />

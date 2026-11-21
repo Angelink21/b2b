@@ -20,7 +20,9 @@ test.describe("quote form", () => {
     await expect(form).toBeVisible();
 
     await form.getByLabel(/Компанія|Company/i).fill("Test Co");
-    await form.getByRole("button", { name: /Надіслати|Send/i }).click();
+    const submit = form.getByRole("button", { name: /Надіслати|Send/i });
+    await expect(submit).toBeEnabled();
+    await submit.click();
 
     await expect(form.getByRole("alert").first()).toBeVisible();
     await expect(form.getByLabel(/Компанія|Company/i)).toHaveValue("Test Co");
@@ -48,7 +50,9 @@ test.describe("quote form", () => {
       .fill("buyer@example.com");
     await form.locator('input[name="consent"]').check();
 
-    await form.getByRole("button", { name: /Надіслати|Send/i }).click();
+    const submit = form.getByRole("button", { name: /Надіслати|Send/i });
+    await expect(submit).toBeEnabled();
+    await submit.click();
 
     const success = page.getByRole("status");
     await expect(success).toBeVisible({ timeout: 15_000 });

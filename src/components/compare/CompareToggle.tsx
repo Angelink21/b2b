@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { trackEvent } from "@/lib/analytics/track";
 
 import { useCompareSelection } from "./useCompareSelection";
 
@@ -53,6 +54,7 @@ function CompareToggleInner({
       disabled={disabled}
       title={disabled ? t("full") : undefined}
       onClick={() => {
+        if (!pressed) trackEvent("compare_add");
         void toggle(slug);
       }}
     >

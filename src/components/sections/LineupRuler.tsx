@@ -28,6 +28,7 @@ import {
   INTRO_BUDGET_MS,
   MAGNET_THRESHOLD_UNITS,
 } from "@/config/motion";
+import { trackEvent } from "@/lib/analytics/track";
 import {
   countModelsInKgRange,
   fractionToUnit,
@@ -128,6 +129,14 @@ export function LineupRuler({
   useEffect(() => {
     loRef.current = loUnit;
     hiRef.current = hiUnit;
+  }, [loUnit, hiUnit]);
+
+  useEffect(() => {
+    if (!userMovedRef.current) return;
+    const timer = window.setTimeout(() => {
+      trackEvent("lineup_use");
+    }, 400);
+    return () => window.clearTimeout(timer);
   }, [loUnit, hiUnit]);
 
   const finishIntro = useCallback(() => {
