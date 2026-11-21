@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { formatNavLoad, getCategoryNavStats } from "./nav";
+import { CATEGORY_SLUGS } from "./schema";
+import { getSnapshotIndex } from "./index";
+import { buildCategoryNavStats, formatNavLoad } from "./nav";
 
 describe("category nav stats", () => {
   it("counts every indexed model once", () => {
-    const stats = getCategoryNavStats();
-    expect(stats).toHaveLength(8);
-    expect(stats.reduce((sum, stat) => sum + stat.count, 0)).toBe(303);
+    const index = getSnapshotIndex();
+    const stats = buildCategoryNavStats(index);
+    expect(stats).toHaveLength(CATEGORY_SLUGS.length);
+    expect(stats.reduce((sum, stat) => sum + stat.count, 0)).toBe(
+      index.length,
+    );
   });
 
   it("exposes a kg range only for washers and dryers", () => {
-    const stats = getCategoryNavStats();
+    const stats = buildCategoryNavStats(getSnapshotIndex());
     const bySlug = Object.fromEntries(stats.map((stat) => [stat.slug, stat]));
 
     expect(bySlug.washers?.loadMin).not.toBeNull();
@@ -29,6 +34,7 @@ describe("category nav stats", () => {
       "finishing",
       "water-recovery",
       "washer-dryers",
+      "mobile-laundry",
     ] as const) {
       expect(bySlug[slug]?.loadMin).toBeNull();
       expect(bySlug[slug]?.loadMax).toBeNull();

@@ -1,5 +1,6 @@
 import { deriveFamily } from "./families";
 import {
+  ParseError,
   parseAirflowM3h,
   parseDimensionsMm,
   parseHeating,
@@ -16,8 +17,10 @@ import {
 } from "./parse";
 import {
   CATEGORY_BY_CSV,
+  SECTOR_BY_CSV,
   type CatalogIndexItem,
   type Product,
+  type SectorKey,
 } from "./schema";
 
 export type CsvRow = Record<string, string | undefined>;
@@ -59,11 +62,12 @@ export type NormalizeResult = {
   product: Product;
   shortDescription: string;
   fullDescription: string;
+  warnings: string[];
 };
 
 /**
  * Normalize one CSV data row into a Product (+ raw descriptions for series).
- * Throws on unknown category or unparseable required dimensions.
+ * Throws on unknown category. Empty dimensions become 0×0×0 (UI hides the block).
  */
 export function normalizeRow(
   row: CsvRow,
@@ -84,13 +88,42 @@ export function normalizeRow(
   const family = deriveFamily(name);
   const heatingParsed = parseHeating(cell(row, "heating"));
   const voltageParsed = parseVoltage(cell(row, "voltage"));
-  const loadKg = parseLoadKg(cell(row, "loadKg"));
   const volumeL = parseVolumeL(cell(row, "volumeL"));
   const powerKw = parsePowerKw(cell(row, "powerKw"));
   const workingSpeedMpm = parseWorkingSpeedMpm(cell(row, "workingSpeedMpm"));
   const airflowM3h = parseAirflowM3h(cell(row, "airflowM3h"));
   const noiseDb = parseNoiseDb(cell(row, "noiseDb"));
   const dimensionsMm = parseDimensionsMm(cell(row, "dimensionsMm"));
+  const sectorsParsed = parseSectors(cell(row, "sectors"));
+  const sectors: SectorKey[] = [...sectorsParsed.sectors];
+  const sectorLabels: string[] = [...sectorsParsed.sectorLabels];
+  const warnings = sectorsParsed.unknown.map(
+    (label) => `Unknown sector label (kept as free text): ${label}`,
+  );
+
+  // Sheet quirk: sector CSV name pasted into Завантаження (кг).
+  const loadKgRaw = cell(row, "loadKg");
+  let loadKg: Product["loadKg"] = null;
+  const misplacedSector = loadKgRaw ? SECTOR_BY_CSV[loadKgRaw] : undefined;
+  if (misplacedSector) {
+    if (!sectors.includes(misplacedSector)) sectors.push(misplacedSector);
+    warnings.push(
+      `loadKg cell is sector "${loadKgRaw}" — treated as sector, loadKg empty`,
+    );
+  } else if (loadKgRaw) {
+    try {
+      loadKg = parseLoadKg(loadKgRaw);
+    } catch (err) {
+      if (err instanceof ParseError && !/^\d/.test(loadKgRaw)) {
+        if (!sectorLabels.includes(loadKgRaw)) sectorLabels.push(loadKgRaw);
+        warnings.push(
+          `Non-numeric loadKg ignored (kept as free sector label): ${loadKgRaw}`,
+        );
+      } else {
+        throw err;
+      }
+    }
+  }
 
   const product: Product = {
     id: slug,
@@ -100,7 +133,8 @@ export function normalizeRow(
     familyId: family.familyId,
     variantLabel: family.variantLabel,
     seriesId,
-    sectors: parseSectors(cell(row, "sectors")),
+    sectors,
+    sectorLabels,
     loadKg,
     volumeL,
     boilerL: parseOptionalNumber(cell(row, "boilerL"), "boilerL"),
@@ -127,7 +161,7 @@ export function normalizeRow(
     exhaustMm: parseOptionalNumber(cell(row, "exhaustMm"), "exhaustMm"),
     airflowM3h,
     noiseDb,
-    imageKey: cell(row, "imageKey"),
+    imageKey: cell(row, "imageKey") || name,
     image: null,
   };
 
@@ -144,6 +178,7 @@ export function normalizeRow(
     product,
     shortDescription: cell(row, "shortDescription"),
     fullDescription: cell(row, "fullDescription"),
+    warnings,
   };
 }
 

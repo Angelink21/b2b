@@ -19,7 +19,7 @@
     "modelOgAlt": "{name} — Fagor Industrial",
     "homeOgAlt": "Fagor Industrial — equipment lineup",
     "aboutTitle": "About the company",
-    "aboutDescription": "Fagor Industrial partner in Ukraine: industrial laundry equipment and engineering support.",
+    "aboutDescription": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
     "serviceTitle": "Service and support",
     "serviceDescription": "Request service for Fagor Industrial equipment: describe the model and issue.",
     "contactsTitle": "Contacts",
@@ -51,6 +51,23 @@
     "closeMenu": "Close menu",
     "allModels": "All models"
   },
+  "search": {
+    "open": "Search models",
+    "shortcut": "Ctrl+K",
+    "placeholder": "Model name…",
+    "results": "Search results",
+    "loading": "Loading index…",
+    "noResults": "No models found.",
+    "browseCatalog": "Open catalog",
+    "requestQuote": "Request quote",
+    "recent": "Recently viewed",
+    "categories": "Categories"
+  },
+  "mobileBar": {
+    "label": "Quick actions",
+    "quote": "Request quote",
+    "call": "Call"
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",
@@ -61,6 +78,10 @@
     "subtitle": "Drag the load range: matching models step forward and the catalog filters itself.",
     "catalogCta": "Open the catalog",
     "scaleNote": "All machines drawn at one scale",
+    "presetsLabel": "Quick ranges",
+    "presetTo": "up to {kg} kg",
+    "presetBetween": "{from}–{to} kg",
+    "presetFrom": "from {kg} kg",
     "stepsHeading": "How we work",
     "step1Title": "Sized to your shift",
     "step1Body": "Engineering selection against your linen volumes — lineup and catalog by kilograms.",
@@ -89,13 +110,34 @@
     "advantage4Title": "Local stock and service",
     "advantage4Body": "Genuine spare parts in Ukraine and on-site engineer visits.",
     "casesHeading": "Case studies",
+    "casesLead": "Typical lineup-selection scenarios — without naming specific venues.",
+    "cases": {
+      "hotel": {
+        "title": "Hotel laundry",
+        "body": "Sizing washers and dryers to daily volumes of bed linen and towels: one load scale and a clear specification for the quote."
+      },
+      "healthcare": {
+        "title": "Healthcare facility",
+        "body": "Wash–dry selection with hygiene-oriented programs and on-site service support for the installed fleet."
+      },
+      "selfService": {
+        "title": "Self-service laundry",
+        "body": "Compact washer-dryer setups with high turnover: a practical start on a small floor plate and a clear path to expand the park."
+      },
+      "central": {
+        "title": "Central laundry",
+        "body": "A wash, dry, and finishing cascade for large shift volumes — from ironers and rollers to carts and water recovery."
+      }
+    },
     "lineupLabel": "Washer lineup by load capacity",
     "machineCaption": "{kg} kg · {w}×{d}×{h} mm",
     "ariaMin": "Minimum load",
     "ariaMax": "Maximum load",
     "ariaValueText": "from {from} to {to} kg",
     "quoteCta": "Get a quote · {count, plural, one {#} other {#}}",
-    "quoteLink": "Get a quote"
+    "quoteLink": "Get a quote",
+    "rangeStripHeading": "Models in this range",
+    "rangeStripDetails": "Learn more"
   },
   "catalog": {
     "title": "Catalog",
@@ -161,7 +203,15 @@
     "colShaft": "Shaft, mm",
     "colVolume": "Volume, l",
     "colKeyMetric": "Key spec",
-    "actions": "Actions"
+    "actions": "Actions",
+    "dimensionFilters": "Room dimensions",
+    "dimensionMaxW": "Max width, mm",
+    "dimensionMaxD": "Max depth, mm",
+    "dimensionMaxH": "Max height, mm",
+    "activeDimensionW": "width up to {value} mm",
+    "activeDimensionD": "depth up to {value} mm",
+    "activeDimensionH": "height up to {value} mm",
+    "hiddenWithoutDimensions": "Without dimensions: {count, plural, one {# model hidden} other {# models hidden}}"
   },
   "compare": {
     "title": "Compare models",
@@ -183,7 +233,30 @@
     "tableCaption": "Specification comparison",
     "field": "Specification",
     "silhouettesLabel": "Silhouettes at one scale",
-    "loading": "Loading comparison…"
+    "loading": "Loading comparison…",
+    "floorPlanner": {
+      "title": "Floor layout planner",
+      "lead": "Top view: rectangles from W×D dimensions. Drag, rotate, or remove a machine from the plan.",
+      "fieldsLabel": "Room dimensions",
+      "roomWidth": "Room width, m",
+      "roomLength": "Room length, m",
+      "machineGap": "Gap between machines, mm",
+      "summaryArea": "Machine footprint — {area} m²",
+      "summaryShare": "{percent}% of room floor area",
+      "overlap": "Overlap",
+      "outside": "Outside",
+      "reset": "Reset",
+      "print": "Print",
+      "rotate": "Rotate 90°",
+      "quote": "Get a quote for these models",
+      "canvasLabel": "Room plan with machines",
+      "machineLabel": "{name}, {size} mm",
+      "unitMm": "mm",
+      "hint": "Arrow keys move the selected machine by 50 mm, R rotates, Delete removes it from the plan. Pinch or +/- zoom the view.",
+      "zoomLabel": "Plan zoom",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    }
   },
   "categories": {
     "washers": "Washers",
@@ -193,7 +266,19 @@
     "ironing-rollers": "Ironing rollers",
     "finishing": "Finishing",
     "water-recovery": "Water recovery",
-    "washer-dryers": "Washer-dryers"
+    "washer-dryers": "Washer-dryers",
+    "mobile-laundry": "Mobile laundry"
+  },
+  "categoryIntros": {
+    "washers": "Industrial washers for hotels, hospitals, and commercial laundries. Compare models by load in kilograms, heating type, and dimensions.",
+    "dryers": "Dryers for different shift volumes and heating types. Match drum size and power so drying does not bottleneck the wash line.",
+    "flatwork-ironers": "Flatwork ironers for bed linen and large textiles. Use working width and throughput speed as the primary filters.",
+    "laundry-carts": "Carts for moving soiled and clean linen inside the laundry. They help shape zone-to-zone logistics without extra handling.",
+    "ironing-rollers": "Ironing rollers for finishing table linen and mid-format textiles. Compare shaft width and line throughput.",
+    "finishing": "Finishing equipment — from presses to dedicated stations. Completes the cycle after drying and ironing.",
+    "water-recovery": "Water-recovery systems to cut consumption in industrial laundries. Sized to the washer circuit and local connections.",
+    "washer-dryers": "Washer-dryers in one cabinet — when floor space is tight but you still need a full cycle without a separate drying zone.",
+    "mobile-laundry": "Modular mobile laundries for temporary and remote sites. Compare kit contents and connection power. (needs-review)"
   },
   "heating": {
     "electric": "Electric",
@@ -325,11 +410,13 @@
   "about": {
     "breadcrumbs": "Breadcrumb",
     "title": "About the company",
-    "lead": "Official partner and distributor of Fagor Industrial professional equipment in Ukraine.",
+    "lead": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
+    "historyHeading": "Experience since 1994",
+    "historyBody": "For more than three decades we have helped hotels, hospitals, commercial and central laundries build lineups around real linen volume per shift. From the first consultation through commissioning and service we stay an on-site engineering partner — without loud promises we cannot confirm in a quote.",
     "expertiseHeading": "Expertise and focus",
-    "expertiseBody": "We specialise in industrial laundry equipment: washers, dryers, finishing, and related machinery for hotels, hospitals, self-service laundries, and commercial sites.",
+    "expertiseBody": "We specialise in Fagor Professional industrial laundry equipment: washers, dryers, finishing, and related machinery. The on-site catalog is built so a buyer can quickly compare models by kilograms, heating, and dimensions.",
     "infraHeading": "Infrastructure in Ukraine",
-    "infraBody": "We support on-site projects and logistics of original parts — warehouse details and contacts are published once confirmed.",
+    "infraBody": "Office and warehouse in Vyshneve (Kyiv region): we support on-site projects, logistics of original parts, and equipment pickup by prior arrangement.",
     "infraAddressLabel": "Address: ",
     "mapLink": "Open in maps",
     "standardsHeading": "Engineering standards",
@@ -398,7 +485,7 @@
   "contacts": {
     "breadcrumbs": "Breadcrumb",
     "title": "Contacts",
-    "lead": "Write to us with the form. Phone, email, and address will appear once confirmed.",
+    "lead": "Phone, email, warehouse address in Vyshneve, and a contact form.",
     "formHeading": "Write to us",
     "detailsHeading": "Details",
     "phone": "Phone",

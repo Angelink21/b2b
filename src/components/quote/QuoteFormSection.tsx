@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { getEnv } from "@/env";
-import { getAll } from "@/lib/catalog";
+import { getAll } from "@/lib/catalog/queries";
 import { SECTOR_KEYS } from "@/lib/catalog/schema";
 import { typo } from "@/lib/typo";
 
@@ -23,7 +23,7 @@ export async function QuoteFormSection({
   const ti = await getTranslations("industries");
   const env = getEnv();
 
-  const modelCatalog = getAll().map((product) => ({
+  const modelCatalog = (await getAll()).map((product) => ({
     slug: product.slug,
     name: product.name,
   }));

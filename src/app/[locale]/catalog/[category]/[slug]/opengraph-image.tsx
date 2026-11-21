@@ -1,7 +1,11 @@
 import { ImageResponse } from "next/og";
 
+import {
+  GENERIC_SILHOUETTE_MM,
+  hasRealDimensions,
+} from "@/config/categories";
 import { siteConfig } from "@/config/site";
-import { getBySlug } from "@/lib/catalog";
+import { getBySlug } from "@/lib/catalog/queries";
 import { HEATING_KEYS, type HeatingKey } from "@/lib/catalog/schema";
 import { getModelImage } from "@/lib/images";
 import { seoMessages } from "@/lib/seo/messages";
@@ -19,7 +23,7 @@ type Props = {
 export default async function Image({ params }: Props) {
   const { locale, category, slug } = await params;
   const messages = seoMessages(locale);
-  const product = getBySlug(slug);
+  const product = await getBySlug(slug);
 
   if (!product || product.category !== category) {
     return new ImageResponse(
@@ -68,8 +72,16 @@ export default async function Image({ params }: Props) {
     />
   ) : (
     <OgSilhouette
-      widthMm={product.dimensionsMm.w}
-      heightMm={product.dimensionsMm.h}
+      widthMm={
+        hasRealDimensions(product.dimensionsMm)
+          ? product.dimensionsMm.w
+          : GENERIC_SILHOUETTE_MM.w
+      }
+      heightMm={
+        hasRealDimensions(product.dimensionsMm)
+          ? product.dimensionsMm.h
+          : GENERIC_SILHOUETTE_MM.h
+      }
       maxPx={320}
     />
   );

@@ -16,7 +16,13 @@ type ModelImagePhotoProps = {
   priority?: boolean;
   className?: string;
   /** When load fails, fall back to silhouette if dims are known. */
-  silhouette?: { widthMm: number; heightMm: number; targetMaxPx: number; title: string };
+  silhouette?: {
+    widthMm: number;
+    heightMm: number;
+    targetMaxPx: number;
+    title: string;
+    variant?: "porthole" | "generic";
+  };
 };
 
 /**
@@ -41,6 +47,7 @@ export function ModelImagePhoto({
         heightMm={silhouette.heightMm}
         targetMaxPx={silhouette.targetMaxPx}
         title={silhouette.title}
+        variant={silhouette.variant ?? "porthole"}
       />
     );
   }

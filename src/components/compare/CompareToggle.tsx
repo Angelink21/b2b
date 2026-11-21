@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
@@ -12,7 +13,27 @@ type CompareToggleProps = {
   size?: "md" | "sm";
 };
 
-export function CompareToggle({
+function CompareToggleFallback({
+  className = "",
+  size = "sm",
+}: Pick<CompareToggleProps, "className" | "size">) {
+  const t = useTranslations("compare");
+  return (
+    <Button
+      type="button"
+      variant="secondary"
+      size={size}
+      className={className}
+      disabled
+      aria-hidden="true"
+      tabIndex={-1}
+    >
+      {t("add")}
+    </Button>
+  );
+}
+
+function CompareToggleInner({
   slug,
   className = "",
   size = "sm",
@@ -37,5 +58,18 @@ export function CompareToggle({
     >
       {pressed ? t("inCompare") : t("add")}
     </Button>
+  );
+}
+
+/** Suspense boundary required: `useCompareSelection` → nuqs → `useSearchParams`. */
+export function CompareToggle(props: CompareToggleProps) {
+  const fallbackProps: Pick<CompareToggleProps, "className" | "size"> = {};
+  if (props.className !== undefined) fallbackProps.className = props.className;
+  if (props.size !== undefined) fallbackProps.size = props.size;
+
+  return (
+    <Suspense fallback={<CompareToggleFallback {...fallbackProps} />}>
+      <CompareToggleInner {...props} />
+    </Suspense>
   );
 }

@@ -1,3 +1,7 @@
+import {
+  GENERIC_SILHOUETTE_MM,
+  hasRealDimensions,
+} from "@/config/categories";
 import { silhouetteScale } from "@/lib/silhouette";
 
 import type { CategorySlug, Product } from "./schema";
@@ -177,8 +181,10 @@ export function sharedSilhouetteScale(
   }
   let maxMm = 0;
   for (const product of products) {
-    const { w, h } = product.dimensionsMm;
-    maxMm = Math.max(maxMm, w, h);
+    const dims = hasRealDimensions(product.dimensionsMm)
+      ? product.dimensionsMm
+      : GENERIC_SILHOUETTE_MM;
+    maxMm = Math.max(maxMm, dims.w, dims.h);
   }
   return silhouetteScale({ w: maxMm, h: maxMm }, targetMaxPx);
 }

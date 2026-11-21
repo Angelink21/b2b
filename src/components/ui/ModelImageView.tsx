@@ -1,5 +1,10 @@
 import type { ModelImage as ModelImageData } from "@/lib/images/types";
 import { IMAGE_FALLBACK_ASPECT_RATIO } from "@/lib/images/types";
+import {
+  GENERIC_SILHOUETTE_MM,
+  getCategoryDef,
+  hasRealDimensions,
+} from "@/config/categories";
 import type { Product } from "@/lib/catalog/schema";
 import type { CSSProperties } from "react";
 
@@ -7,7 +12,7 @@ import { ModelImagePhoto } from "./ModelImagePhoto";
 import { Silhouette } from "./Silhouette";
 
 export type ModelImageViewProps = {
-  product: Pick<Product, "name" | "dimensionsMm">;
+  product: Pick<Product, "name" | "dimensionsMm" | "category">;
   photo: Pick<
     ModelImageData,
     "loaderSrc" | "alt" | "width" | "height"
@@ -37,39 +42,37 @@ export function ModelImageView({
   sizes,
   priority = false,
 }: ModelImageViewProps) {
-  const dims = product.dimensionsMm;
+  const real = hasRealDimensions(product.dimensionsMm);
+  const dims = real ? product.dimensionsMm : GENERIC_SILHOUETTE_MM;
+  const variant = getCategoryDef(product.category)?.silhouette ?? "porthole";
 
   const ratio =
     aspectRatio ??
     (photo && photo.width > 1 && photo.height > 1
       ? `${photo.width} / ${photo.height}`
-      : dims
-        ? `${dims.w} / ${dims.h}`
-        : IMAGE_FALLBACK_ASPECT_RATIO);
+      : `${dims.w} / ${dims.h}`);
 
   const boxStyle: CSSProperties | undefined = fillWell
     ? undefined
-    : { aspectRatio: ratio };
+    : { aspectRatio: ratio || IMAGE_FALLBACK_ASPECT_RATIO };
   const boxClass = [
     "model-image",
     fillWell ? "model-image-well" : "",
     photo ? "model-image-has-photo" : "",
-    !photo && dims ? "model-image-silhouette" : "",
-    !photo && !dims ? "model-image-empty" : "",
+    !photo ? "model-image-silhouette" : "",
     className,
   ]
     .filter(Boolean)
     .join(" ");
 
   if (photo) {
-    const silhouette = dims
-      ? {
-          widthMm: dims.w,
-          heightMm: dims.h,
-          targetMaxPx,
-          title: product.name,
-        }
-      : undefined;
+    const silhouette = {
+      widthMm: dims.w,
+      heightMm: dims.h,
+      targetMaxPx,
+      title: product.name,
+      variant,
+    };
 
     return (
       <div className={boxClass} style={boxStyle}>
@@ -80,16 +83,12 @@ export function ModelImageView({
             width={photo.width}
             height={photo.height}
             priority={priority}
+            silhouette={silhouette}
             {...(sizes !== undefined ? { sizes } : {})}
-            {...(silhouette !== undefined ? { silhouette } : {})}
           />
         </div>
       </div>
     );
-  }
-
-  if (!dims) {
-    return <div className={boxClass} style={boxStyle} aria-hidden />;
   }
 
   return (
@@ -99,6 +98,7 @@ export function ModelImageView({
         heightMm={dims.h}
         targetMaxPx={targetMaxPx}
         title={product.name}
+        variant={variant}
       />
     </div>
   );

@@ -1,9 +1,9 @@
 # Images report
 
-Generated: 2026-11-15T17:03:57.202Z
+Generated: 2026-11-21T18:32:25.987Z
 
-Photos found: **303** / 303
-Models without photos: **0**
+Photos found: **303** / 304
+Models without photos: **1**
 
 ## Naming scheme (chosen from step-0 probe)
 
@@ -33,7 +33,7 @@ Lineup slugs (LA/LAP/LN front-loaders only):
 
 ## Models without photos
 
-_(none)_
+- ПРАЛЬНЯ TO GO (`pralnia-to-go`)
 
 ## Aspect-ratio warnings (>8% vs Ш/В)
 

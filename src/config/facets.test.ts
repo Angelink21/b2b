@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { facetAllowed, facetsForCategory, sortAllowed } from "./facets";
+import {
+  dimensionFilterAllowed,
+  facetAllowed,
+  facetsForCategory,
+  sortAllowed,
+} from "./facets";
 
 describe("catalog facets", () => {
   it("gives washers kilograms, heating, and power", () => {
@@ -23,6 +28,11 @@ describe("catalog facets", () => {
 
   it("shows only heating when no category is selected", () => {
     expect(facetsForCategory(null)).toEqual(["heating"]);
+  });
+
+  it("enables overall dimensions for washers", () => {
+    expect(dimensionFilterAllowed("washers")).toBe(true);
+    expect(dimensionFilterAllowed(null)).toBe(false);
   });
 
   it("drops a sort the category table cannot show", () => {

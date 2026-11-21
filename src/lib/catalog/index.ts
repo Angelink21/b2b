@@ -1,3 +1,9 @@
+/**
+ * Build-snapshot catalog accessors (sync).
+ * Runtime pages should use `@/lib/catalog/queries` (async `getCatalog()`).
+ * `generateStaticParams` must keep using these snapshot helpers.
+ */
+
 import generated from "@/data/catalog.generated.json";
 import indexJson from "@/data/catalog.index.json";
 
@@ -17,19 +23,19 @@ type IndexData = CatalogIndex;
 let cachedCatalog: CatalogData | null = null;
 let cachedIndex: IndexData | null = null;
 
-function loadCatalog(): CatalogData {
+function loadSnapshotCatalog(): CatalogData {
   if (cachedCatalog) return cachedCatalog;
   cachedCatalog = generated as CatalogData;
   return cachedCatalog;
 }
 
-function loadIndex(): IndexData {
+function loadSnapshotIndex(): IndexData {
   if (cachedIndex) return cachedIndex;
   cachedIndex = indexJson as IndexData;
   return cachedIndex;
 }
 
-/** Test/build helper: inject catalog without reading disk. */
+/** Test helper: inject snapshot catalog without reading disk. */
 export function __setCatalogForTests(data: CatalogData | null): void {
   cachedCatalog = data;
 }
@@ -38,36 +44,32 @@ export function __setIndexForTests(data: IndexData | null): void {
   cachedIndex = data;
 }
 
-export function getAll(): Product[] {
-  return loadCatalog().products;
+export function getSnapshotAll(): Product[] {
+  return loadSnapshotCatalog().products;
 }
 
-export function getSeriesAll(): Series[] {
-  return loadCatalog().series;
+export function getSnapshotSeriesAll(): Series[] {
+  return loadSnapshotCatalog().series;
 }
 
-export function getSeriesById(id: string): Series | undefined {
-  return loadCatalog().series.find((s) => s.id === id);
+export function getSnapshotSeriesById(id: string): Series | undefined {
+  return loadSnapshotCatalog().series.find((s) => s.id === id);
 }
 
-export function getBySlug(slug: string): Product | undefined {
-  return loadCatalog().products.find((p) => p.slug === slug);
+export function getSnapshotBySlug(slug: string): Product | undefined {
+  return loadSnapshotCatalog().products.find((p) => p.slug === slug);
 }
 
-export function getByCategory(category: CategorySlug): Product[] {
-  return loadCatalog().products.filter((p) => p.category === category);
+export function getSnapshotByCategory(category: CategorySlug): Product[] {
+  return loadSnapshotCatalog().products.filter((p) => p.category === category);
 }
 
-export function getFamily(familyId: string): Product[] {
-  return loadCatalog().products.filter((p) => p.familyId === familyId);
+export function getSnapshotFamily(familyId: string): Product[] {
+  return loadSnapshotCatalog().products.filter((p) => p.familyId === familyId);
 }
 
-/**
- * Related models: same category, nearest by loadKg.max (or power if no kg),
- * excluding the same family. Returns up to `n` items.
- */
-export function getRelated(slug: string, n: number): Product[] {
-  const all = loadCatalog().products;
+export function getSnapshotRelated(slug: string, n: number): Product[] {
+  const all = loadSnapshotCatalog().products;
   const self = all.find((p) => p.slug === slug);
   if (!self || n <= 0) return [];
 
@@ -101,7 +103,7 @@ export type Facets = {
 };
 
 export function facets(items?: readonly CatalogIndexItem[]): Facets {
-  const list = items ?? loadIndex().products;
+  const list = items ?? loadSnapshotIndex().products;
   const categories: Partial<Record<CategorySlug, number>> = {};
   const heating: Record<string, number> = {};
   let kgMin = Number.POSITIVE_INFINITY;
@@ -128,8 +130,19 @@ export function facets(items?: readonly CatalogIndexItem[]): Facets {
   };
 }
 
-export function getIndex(): CatalogIndexItem[] {
-  return loadIndex().products;
+export function getSnapshotIndex(): CatalogIndexItem[] {
+  return loadSnapshotIndex().products;
 }
 
 export { filterProducts };
+
+/**
+ * Runtime `getCatalog()`: `@/lib/catalog/get-catalog` (server-only).
+ * Async accessors: `@/lib/catalog/queries`.
+ */
+export type {
+  CatalogRuntimeData,
+  CatalogRuntimeMeta,
+  CatalogRuntimeResult,
+  CatalogRuntimeSource,
+} from "./runtime";

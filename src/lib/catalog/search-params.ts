@@ -135,12 +135,26 @@ export const parseAsModelSlugs = createParser({
 /** Shared inclusive numeric range (`min-max`) for kg, power, width, speed, volume. */
 export const parseAsNumberRange = parseAsKgRange;
 
+const parseAsPositiveMm = createParser({
+  parse(queryValue: string): number | null {
+    const n = Number(queryValue.trim());
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return Math.round(n);
+  },
+  serialize(value: number): string {
+    return String(value);
+  },
+});
+
 export const catalogParsers = {
   kg: parseAsNumberRange,
   power: parseAsNumberRange,
   width: parseAsNumberRange,
   speed: parseAsNumberRange,
   volume: parseAsNumberRange,
+  w: parseAsPositiveMm,
+  d: parseAsPositiveMm,
+  h: parseAsPositiveMm,
   type: parseAsStringLiteral(CATEGORY_SLUGS),
   heat: parseAsStringLiteral(HEATING_KEYS),
   q: parseAsString.withDefault(""),
@@ -158,6 +172,9 @@ export type CatalogQueryState = {
   width: KgRangeParam | null;
   speed: KgRangeParam | null;
   volume: KgRangeParam | null;
+  w: number | null;
+  d: number | null;
+  h: number | null;
   type: (typeof CATEGORY_SLUGS)[number] | null;
   heat: (typeof HEATING_KEYS)[number] | null;
   q: string;

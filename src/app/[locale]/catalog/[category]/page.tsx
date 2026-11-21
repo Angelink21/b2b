@@ -8,12 +8,13 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { routing } from "@/i18n/routing";
-import { getByCategory, getIndex } from "@/lib/catalog";
+import { formatCategoryMetricLead } from "@/lib/catalog/category-summary";
 import {
-  formatCategoryMetricLead,
+  getByCategory,
+  getCategoryNavStats,
   getCategorySummary,
-} from "@/lib/catalog/category-summary";
-import { getCategoryNavStats } from "@/lib/catalog/nav";
+  getIndex,
+} from "@/lib/catalog/queries";
 import {
   CATEGORY_SLUGS,
   type CategorySlug,
@@ -23,6 +24,7 @@ import {
   itemListJsonLd,
 } from "@/lib/seo/json-ld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import { typo } from "@/lib/typo";
 
 type PageProps = {
   params: Promise<{ locale: string; category: string }>;
@@ -58,13 +60,19 @@ export default async function CategoryCatalogPage({ params }: PageProps) {
 
   const t = await getTranslations("catalog");
   const tCat = await getTranslations("categories");
+  const tIntro = await getTranslations("categoryIntros");
   const tCrumbs = await getTranslations("model");
   const tUnits = await getTranslations("units");
+  const intro = tIntro(category);
 
-  const items = getIndex().filter((p) => p.category === category);
-  const products = getByCategory(category);
+  const [index, products, summary, stats] = await Promise.all([
+    getIndex(),
+    getByCategory(category),
+    getCategorySummary(category),
+    getCategoryNavStats(),
+  ]);
+  const items = index.filter((p) => p.category === category);
   const categoryLabel = tCat(category);
-  const summary = getCategorySummary(category);
   const lead = formatCategoryMetricLead(
     summary,
     locale,
@@ -82,7 +90,7 @@ export default async function CategoryCatalogPage({ params }: PageProps) {
     },
   );
   const categoryCounts = Object.fromEntries(
-    getCategoryNavStats().map((stat) => [stat.slug, stat.count]),
+    stats.map((stat) => [stat.slug, stat.count]),
   ) as Record<CategorySlug, number>;
 
   return (
@@ -111,7 +119,16 @@ export default async function CategoryCatalogPage({ params }: PageProps) {
         ]}
       />
       <h1 className="mt-6">{categoryLabel}</h1>
-      {lead ? <p className="catalog-lead mt-6 text-steel">{lead}</p> : null}
+      {intro ? (
+        <p className="catalog-intro mt-6 text-pretty">{typo(intro)}</p>
+      ) : null}
+      {lead ? (
+        <p
+          className={`catalog-lead text-steel ${intro ? "mt-2" : "mt-6"}`}
+        >
+          {lead}
+        </p>
+      ) : null}
       <div className="mt-6">
         <Suspense fallback={<CatalogSkeleton />}>
           <CatalogExplorer

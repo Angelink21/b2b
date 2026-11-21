@@ -12,6 +12,8 @@ export type SilhouetteProps = {
   targetMaxPx?: number;
   /** Explicit scale override (e.g. shared lineup scale). */
   scale?: number;
+  /** `generic` = box without porthole (modules / non-washer gear). */
+  variant?: "porthole" | "generic";
   className?: string;
   title?: string;
 };
@@ -53,6 +55,7 @@ export function Silhouette({
   heightMm,
   targetMaxPx = 190,
   scale: scaleProp,
+  variant = "porthole",
   className = "",
   title,
 }: SilhouetteProps) {
@@ -73,6 +76,7 @@ export function Silhouette({
   const key = Math.max(3, panelH * 0.22);
   const doorY = Math.min(cy, bodyH - r - 2);
   const glint = `M ${cx - rInner * 0.35} ${doorY - rInner * 0.15} A ${rInner * 0.5} ${rInner * 0.5} 0 0 1 ${cx + rInner * 0.2} ${doorY - rInner * 0.45}`;
+  const generic = variant === "generic";
 
   return (
     <svg
@@ -99,26 +103,43 @@ export function Silhouette({
         height={panelH}
         className="silhouette-panel"
       />
-      <rect
-        x={pad + 3}
-        y={pad + (panelH - displayH) / 2}
-        width={displayW}
-        height={displayH}
-        className="silhouette-display"
-      />
-      {[0, 1, 2].map((index) => (
+      {!generic ? (
+        <>
+          <rect
+            x={pad + 3}
+            y={pad + (panelH - displayH) / 2}
+            width={displayW}
+            height={displayH}
+            className="silhouette-display"
+          />
+          {[0, 1, 2].map((index) => (
+            <rect
+              key={index}
+              x={width - pad - 3 - key}
+              y={pad + 3 + index * (key + 2)}
+              width={key}
+              height={key}
+              className="silhouette-key"
+            />
+          ))}
+          <circle cx={cx} cy={doorY} r={r} className="silhouette-port" />
+          <circle
+            cx={cx}
+            cy={doorY}
+            r={rInner}
+            className="silhouette-port-inner"
+          />
+          <path d={glint} className="silhouette-glint" />
+        </>
+      ) : (
         <rect
-          key={index}
-          x={width - pad - 3 - key}
-          y={pad + 3 + index * (key + 2)}
-          width={key}
-          height={key}
-          className="silhouette-key"
+          x={pad}
+          y={pad + panelH + pad}
+          width={width - pad * 2}
+          height={Math.max(8, bodyH - panelH - pad * 3)}
+          className="silhouette-panel"
         />
-      ))}
-      <circle cx={cx} cy={doorY} r={r} className="silhouette-port" />
-      <circle cx={cx} cy={doorY} r={rInner} className="silhouette-port-inner" />
-      <path d={glint} className="silhouette-glint" />
+      )}
       <rect
         x={pad}
         y={bodyH}

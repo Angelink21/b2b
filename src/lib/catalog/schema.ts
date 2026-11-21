@@ -1,28 +1,13 @@
 import { z } from "zod";
 
-export const CATEGORY_SLUGS = [
-  "washers",
-  "dryers",
-  "flatwork-ironers",
-  "laundry-carts",
-  "ironing-rollers",
-  "finishing",
-  "water-recovery",
-  "washer-dryers",
-] as const;
+import {
+  CATEGORY_BY_CSV,
+  CATEGORY_SLUGS,
+  type CategorySlug,
+} from "@/config/categories";
 
-export type CategorySlug = (typeof CATEGORY_SLUGS)[number];
-
-export const CATEGORY_BY_CSV: Readonly<Record<string, CategorySlug>> = {
-  "Пральні машини": "washers",
-  "Сушильні машини": "dryers",
-  "Прасувальні каландри": "flatwork-ironers",
-  "Візки для пральні": "laundry-carts",
-  "Прасувальні катки": "ironing-rollers",
-  "Фінішна обробка": "finishing",
-  "Система регенерації води": "water-recovery",
-  "Прально-сушильне обладнання": "washer-dryers",
-};
+export { CATEGORY_BY_CSV, CATEGORY_SLUGS, type CategorySlug };
+export { isCategorySlug } from "@/config/categories";
 
 export const SECTOR_KEYS = [
   "hospitals",
@@ -96,24 +81,37 @@ export const airflowSchema = z.object({
   multiplier: z.number().optional(),
 });
 
+export const descriptionBlockSchema = z.object({
+  kind: z.enum(["heading", "bullet"]),
+  text: z.string(),
+});
+
+export type DescriptionBlock = z.infer<typeof descriptionBlockSchema>;
+
 export const seriesSchema = z.object({
   id: z.string(),
   shortDescription: z.string(),
   fullDescription: z.string(),
   fullBullets: z.array(z.string()),
+  /** Present after rebuild; older snapshots omit this. */
+  fullBlocks: z.array(descriptionBlockSchema).optional(),
 });
 
 export type Series = z.infer<typeof seriesSchema>;
 
+const categoryEnum = z.enum(CATEGORY_SLUGS);
+
 export const productSchema = z.object({
   id: z.string(),
-  slug: z.string(),
+  slug: z.string().min(1),
   name: z.string(),
-  category: z.enum(CATEGORY_SLUGS),
+  category: categoryEnum,
   familyId: z.string(),
   variantLabel: z.string().nullable(),
   seriesId: z.string(),
   sectors: z.array(z.enum(SECTOR_KEYS)),
+  /** Free-text sector labels from the sheet (not used as filters). */
+  sectorLabels: z.array(z.string()).optional(),
   loadKg: loadKgSchema.nullable(),
   volumeL: volumeLSchema.nullable(),
   boilerL: z.number().nullable(),
@@ -143,7 +141,7 @@ export type Product = z.infer<typeof productSchema>;
 export const catalogIndexItemSchema = z.object({
   slug: z.string(),
   name: z.string(),
-  category: z.enum(CATEGORY_SLUGS),
+  category: categoryEnum,
   heating: z.enum(HEATING_KEYS).nullable(),
   loadKg: z
     .object({

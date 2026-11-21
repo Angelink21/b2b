@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getBySlug } from "@/lib/catalog";
+import { getSnapshotBySlug as getBySlug } from "@/lib/catalog";
 
 import { FEATURED_SLUGS } from "./featured";
 

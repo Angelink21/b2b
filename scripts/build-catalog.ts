@@ -1,6 +1,7 @@
 /**
  * CSV → JSON catalog pipeline.
  * Source: CATALOG_CSV_URL (published Google Sheet) or data/products_clean.csv.
+ * Shared parse/validate lives in src/lib/catalog/pipeline.ts.
  */
 import { spawnSync } from "node:child_process";
 import { promisify } from "node:util";
@@ -9,32 +10,24 @@ import fs from "node:fs";
 import path from "node:path";
 
 import {
-  applyGoogleSheetQuirks,
   CatalogCsvError,
-  checkCsvHeaders,
   describeCsvUrl,
   fetchCatalogCsvText,
-  parseCatalogCsvText,
   type CsvSourceKind,
 } from "../src/lib/catalog/csv-source";
 import { deriveFamily } from "../src/lib/catalog/families";
 import {
-  CSV_COLUMNS,
-  isEmptyRow,
-  normalizeRow,
-  toIndexItem,
-  type CsvRow,
-} from "../src/lib/catalog/normalize";
-import { ParseError } from "../src/lib/catalog/parse";
+  buildCatalogFromCsvText,
+  checkCatalogShrink,
+  looksLikeHtmlNotCsv,
+  toCatalogPayloads,
+  type CatalogPipelineWarning,
+} from "../src/lib/catalog/pipeline";
 import {
-  catalogGeneratedSchema,
-  catalogIndexSchema,
   CATEGORY_SLUGS,
-  type CatalogIndexItem,
   type CategorySlug,
   type Product,
 } from "../src/lib/catalog/schema";
-import { buildSeriesRegistry } from "../src/lib/catalog/series";
 import {
   diffCatalogByName,
   emptySlugHistory,
@@ -53,7 +46,7 @@ const OUT_META = path.join(ROOT, "src", "data", "catalog.meta.json");
 const OUT_SLUG_HISTORY = path.join(ROOT, "src", "data", "slug-history.json");
 const OUT_REPORT = path.join(ROOT, "docs", "CATALOG_REPORT.md");
 
-type Warning = { level: "warn" | "needs-review"; message: string };
+type Warning = CatalogPipelineWarning;
 
 type CatalogMeta = {
   version: 1;
@@ -107,50 +100,23 @@ function toIdentity(p: Product): CatalogIdentityRow {
   return row;
 }
 
-async function loadCsvRows(): Promise<{
-  rows: CsvRow[];
+async function loadCsvText(): Promise<{
+  text: string;
   source: CsvSourceKind;
-  warnings: Warning[];
 }> {
-  const warnings: Warning[] = [];
   const url = process.env.CATALOG_CSV_URL?.trim();
-  let text: string;
-  let source: CsvSourceKind;
 
   if (url) {
-    source = "remote";
     console.log(`[catalog:build] Fetching CSV from ${describeCsvUrl(url)}`);
-    text = await fetchCatalogCsvText(url);
-  } else {
-    source = "local";
-    console.log("[catalog:build] Reading", CSV_PATH);
-    if (!fs.existsSync(CSV_PATH)) {
-      fail(`CSV not found: ${CSV_PATH}`);
-    }
-    text = fs.readFileSync(CSV_PATH, "utf8");
+    const text = await fetchCatalogCsvText(url);
+    return { text, source: "remote" };
   }
 
-  const parsed = parseCatalogCsvText(text);
-  const headerCheck = checkCsvHeaders(parsed.headers);
-  if (headerCheck.unexpected.length > 0) {
-    warnings.push({
-      level: "warn",
-      message: `Ignoring extra CSV columns: ${headerCheck.unexpected.join(", ")}`,
-    });
+  console.log("[catalog:build] Reading", CSV_PATH);
+  if (!fs.existsSync(CSV_PATH)) {
+    fail(`CSV not found: ${CSV_PATH}`);
   }
-  const quirks = applyGoogleSheetQuirks(parsed.rows);
-  for (const w of quirks.warnings) {
-    warnings.push({ level: "warn", message: `${w.model}: ${w.message}` });
-  }
-  if (parsed.hasImageId) {
-    warnings.push({
-      level: "warn",
-      message:
-        "Optional column image_id present — used for photo matching and slug redirects",
-    });
-  }
-
-  return { rows: quirks.rows, source, warnings };
+  return { text: fs.readFileSync(CSV_PATH, "utf8"), source: "local" };
 }
 
 function emptyFieldStats(products: Product[]): Record<string, number> {
@@ -374,91 +340,49 @@ function writeReport(opts: {
   fs.writeFileSync(OUT_REPORT, `${lines.join("\n")}\n`, "utf8");
 }
 
-function assertNotShrunk(modelCount: number, prevMeta: CatalogMeta | null): void {
-  if (!prevMeta || prevMeta.modelCount <= 0) return;
-  const ratio = modelCount / prevMeta.modelCount;
-  if (ratio >= 0.8) return;
-  if (process.env.CATALOG_ALLOW_SHRINK === "1") {
-    console.warn(
-      `[catalog:build] WARN: catalog shrank to ${modelCount} from ${prevMeta.modelCount} (allowed by CATALOG_ALLOW_SHRINK=1)`,
-    );
-    return;
-  }
-  fail(
-    `каталог подозрительно уменьшился: ${modelCount} моделей (было ${prevMeta.modelCount}, ${(ratio * 100).toFixed(1)}% < 80%). Обход: CATALOG_ALLOW_SHRINK=1`,
-  );
-}
-
 async function main(): Promise<void> {
   loadDotEnv(path.join(ROOT, ".env.local"));
 
-  // Touch CSV_COLUMNS so the mapping stays referenced
-  void CSV_COLUMNS;
-
-  let loaded: Awaited<ReturnType<typeof loadCsvRows>>;
+  let text: string;
+  let source: CsvSourceKind;
   try {
-    loaded = await loadCsvRows();
+    ({ text, source } = await loadCsvText());
   } catch (err) {
     if (err instanceof CatalogCsvError) fail(err.message);
     fail(err instanceof Error ? err.message : String(err));
   }
 
-  const { rows, source } = loaded;
-  const warnings: Warning[] = [...loaded.warnings];
-  let discardedEmptyRows = 0;
-
-  const dataRows: CsvRow[] = [];
-  for (const row of rows) {
-    if (isEmptyRow(row)) {
-      discardedEmptyRows += 1;
-      continue;
-    }
-    dataRows.push(row);
+  if (looksLikeHtmlNotCsv(text)) {
+    fail("CSV source returned HTML instead of CSV (check publish access)");
   }
 
-  const seriesInputs = dataRows.map((row) => ({
-    shortDescription: (row[CSV_COLUMNS.shortDescription] ?? "").trim(),
-    fullDescription: (row[CSV_COLUMNS.fullDescription] ?? "").trim(),
-  }));
-  const seriesRegistry = buildSeriesRegistry(seriesInputs);
-
-  const products: Product[] = [];
-  const slugSet = new Set<string>();
-
-  for (const row of dataRows) {
-    const name = (row[CSV_COLUMNS.name] ?? "").trim();
-    try {
-      const seriesId = seriesRegistry.seriesIdFor(
-        row[CSV_COLUMNS.shortDescription],
-        row[CSV_COLUMNS.fullDescription],
-      );
-      const { product } = normalizeRow(row, seriesId);
-
-      if (slugSet.has(product.slug)) {
-        fail(`Duplicate slug: ${product.slug} (model ${product.name})`);
-      }
-      slugSet.add(product.slug);
-
-      if (!product.imageKey) {
-        warnings.push({
-          level: "warn",
-          message: `Missing imageKey for ${product.name}`,
-        });
-      }
-
-      products.push(product);
-    } catch (err) {
-      if (err instanceof ParseError) {
-        fail(
-          `${err.field} on "${name}": ${err.message} (raw=${JSON.stringify(err.raw)})`,
-        );
-      }
-      fail(`Row "${name}": ${err instanceof Error ? err.message : String(err)}`);
-    }
+  let pipeline;
+  try {
+    pipeline = buildCatalogFromCsvText(text, { mode: "build" });
+  } catch (err) {
+    if (err instanceof CatalogCsvError) fail(err.message);
+    if (err instanceof Error) fail(err.message);
+    fail(String(err));
   }
+
+  if (!pipeline.ok) {
+    fail(pipeline.errors.join("; "));
+  }
+
+  const { products, series, discardedEmptyRows, warnings, seriesCoverage } =
+    pipeline;
 
   const prevMeta = readJsonIfExists<CatalogMeta>(OUT_META);
-  assertNotShrunk(products.length, prevMeta);
+  const shrink = checkCatalogShrink(products.length, prevMeta?.modelCount);
+  if (!shrink.ok) {
+    if (process.env.CATALOG_ALLOW_SHRINK === "1") {
+      console.warn(
+        `[catalog:build] WARN: catalog shrank to ${products.length} from ${prevMeta?.modelCount} (allowed by CATALOG_ALLOW_SHRINK=1)`,
+      );
+    } else {
+      fail(shrink.message);
+    }
+  }
 
   const prevGenerated = readJsonIfExists<{ products: Product[] }>(OUT_GENERATED);
   const prevIdentities = (prevGenerated?.products ?? []).map(toIdentity);
@@ -476,26 +400,16 @@ async function main(): Promise<void> {
     nextIdentities,
   );
 
+  const buildWarnings: Warning[] = [...warnings];
   if (products.length !== (prevMeta?.modelCount ?? 303)) {
-    warnings.push({
+    buildWarnings.push({
       level: "warn",
       message: `Model count ${products.length} (previous snapshot ${prevMeta?.modelCount ?? "none"})`,
     });
   }
 
-  const indexProducts: CatalogIndexItem[] = products.map(toIndexItem);
-
-  const generated = catalogGeneratedSchema.parse({
-    version: 1 as const,
-    generatedAt: new Date().toISOString(),
-    products,
-    series: seriesRegistry.series,
-  });
-
-  const index = catalogIndexSchema.parse({
-    version: 1 as const,
-    products: indexProducts,
-  });
+  const generatedAt = new Date().toISOString();
+  const { generated, index } = toCatalogPayloads(pipeline, generatedAt);
 
   const meta: CatalogMeta = {
     version: 1,
@@ -521,10 +435,10 @@ async function main(): Promise<void> {
 
   writeReport({
     products,
-    seriesCount: seriesRegistry.series.length,
-    seriesCoverage: seriesRegistry.coverage,
+    seriesCount: series.length,
+    seriesCoverage,
     familyReport,
-    warnings,
+    warnings: buildWarnings,
     indexBytes: Buffer.byteLength(indexJson, "utf8"),
     indexGzip,
     discardedEmptyRows,
@@ -537,7 +451,7 @@ async function main(): Promise<void> {
   console.log(`  source:     ${source}`);
   console.log(`  models:     ${products.length}`);
   console.log(`  categories: ${CATEGORY_SLUGS.length}`);
-  console.log(`  series:     ${seriesRegistry.series.length}`);
+  console.log(`  series:     ${series.length}`);
   console.log(
     `  families:   ${familyReport.familyCount} (${familyReport.multiVariantFamilies.length} multi-variant)`,
   );

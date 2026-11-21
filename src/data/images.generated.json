@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-15T17:03:57.202Z",
+  "generatedAt": "2026-11-21T18:32:25.987Z",
   "cloudName": "dibou5rke",
   "folder": "",
   "fallbackAspectRatio": "4 / 5",
@@ -2127,5 +2127,7 @@
       "trimHeight": 1080
     }
   },
-  "missingSlugs": []
+  "missingSlugs": [
+    "pralnia-to-go"
+  ]
 }

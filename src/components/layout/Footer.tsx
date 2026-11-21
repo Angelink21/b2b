@@ -4,7 +4,12 @@ import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Grid } from "@/components/ui/Grid";
-import { siteConfig, visibleContact } from "@/config/site";
+import {
+  siteConfig,
+  telHref,
+  visibleContact,
+  visiblePhones,
+} from "@/config/site";
 import { Link } from "@/i18n/navigation";
 import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 import { typo } from "@/lib/typo";
@@ -27,10 +32,10 @@ export async function Footer() {
   const tNav = await getTranslations("nav");
   const tCat = await getTranslations("categories");
   const year = await copyrightYear();
-  const phone = visibleContact(siteConfig.phone);
+  const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
   const address = visibleContact(siteConfig.address);
-  const hasContact = Boolean(phone || email || address);
+  const hasContact = Boolean(phones.length > 0 || email || address);
 
   return (
     <footer className="site-footer">
@@ -61,39 +66,39 @@ export async function Footer() {
             </ul>
           </nav>
 
-          <div className="site-footer-col site-footer-col--contacts">
+          <div className="site-footer-col site-footer-col--quote">
+            <h2>{tNav("quote")}</h2>
+            <p className="site-footer-quote-prompt">{typo(t("quotePrompt"))}</p>
+            <Button href="/quote" variant="primary">
+              {tNav("quote")}
+            </Button>
+          </div>
+
+          <div className="site-footer-col site-footer-col--brand">
+            <h2 translate="no">{siteConfig.name}</h2>
             {hasContact ? (
-              <>
-                <h2>{tNav("contacts")}</h2>
-                <ul className="site-footer-links">
-                  {phone ? (
-                    <li>
-                      <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>{phone}</a>
-                    </li>
-                  ) : null}
-                  {email ? (
-                    <li>
-                      <a href={`mailto:${email}`}>{email}</a>
-                    </li>
-                  ) : null}
-                  {address ? (
-                    <li>
-                      <p className="site-footer-address">{address}</p>
-                    </li>
-                  ) : null}
-                </ul>
-              </>
-            ) : (
-              <div className="site-footer-quote">
-                <p>{typo(t("quotePrompt"))}</p>
-                <Button href="/quote" variant="primary">
-                  {tNav("quote")}
-                </Button>
-              </div>
-            )}
+              <ul className="site-footer-links">
+                {phones.map((phone) => (
+                  <li key={phone}>
+                    <a href={telHref(phone)}>{phone}</a>
+                  </li>
+                ))}
+                {email ? (
+                  <li>
+                    <a href={`mailto:${email}`}>{email}</a>
+                  </li>
+                ) : null}
+                {address ? (
+                  <li>
+                    <p className="site-footer-address">{address}</p>
+                  </li>
+                ) : null}
+              </ul>
+            ) : null}
           </div>
 
           <div className="site-footer-base">
+            <p className="footer-legal">{siteConfig.name}</p>
             <Link href="/privacy" className="footer-privacy">
               {t("privacy")}
             </Link>

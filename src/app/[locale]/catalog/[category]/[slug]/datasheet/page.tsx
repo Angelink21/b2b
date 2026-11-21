@@ -5,13 +5,19 @@ import { ModelSpecs } from "@/components/catalog/ModelSpecs";
 import { PrintButton } from "@/components/catalog/PrintButton";
 import { Button } from "@/components/ui/Button";
 import { DimensionDrawing } from "@/components/ui/DimensionDrawing";
-import { routing } from "@/i18n/routing";
-import { getAll, getBySlug } from "@/lib/catalog";
+import { Silhouette } from "@/components/ui/Silhouette";
+import {
+  GENERIC_SILHOUETTE_MM,
+  getCategoryDef,
+  hasRealDimensions,
+} from "@/config/categories";
+import { getBySlug } from "@/lib/catalog/queries";
 import {
   CATEGORY_SLUGS,
   HEATING_KEYS,
   type CategorySlug,
 } from "@/lib/catalog/schema";
+import { buildModelStaticParams } from "@/lib/catalog/static-params";
 import { buildSpecGroups } from "@/lib/catalog/spec-groups";
 
 type PageProps = {
@@ -22,20 +28,14 @@ function isCategorySlug(value: string): value is CategorySlug {
   return (CATEGORY_SLUGS as readonly string[]).includes(value);
 }
 
+/** Snapshot only — do not call runtime `getCatalog()` here. */
 export function generateStaticParams() {
-  const products = getAll();
-  return routing.locales.flatMap((locale) =>
-    products.map((product) => ({
-      locale,
-      category: product.category,
-      slug: product.slug,
-    })),
-  );
+  return buildModelStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale, category, slug } = await params;
-  const product = getBySlug(slug);
+  const product = await getBySlug(slug);
   if (!product || product.category !== category) {
     return {};
   }
@@ -51,7 +51,7 @@ export default async function DatasheetPage({ params }: PageProps) {
   const { locale, category, slug } = await params;
   if (!isCategorySlug(category)) notFound();
 
-  const product = getBySlug(slug);
+  const product = await getBySlug(slug);
   if (!product || product.category !== category) notFound();
 
   const t = await getTranslations({ locale, namespace: "model" });
@@ -65,6 +65,10 @@ export default async function DatasheetPage({ params }: PageProps) {
   }
   const groups = buildSpecGroups(product, heatingLabels);
   const dims = product.dimensionsMm;
+  const realDims = hasRealDimensions(dims);
+  const drawDims = realDims ? dims : GENERIC_SILHOUETTE_MM;
+  const silhouetteKind =
+    getCategoryDef(product.category)?.silhouette ?? "porthole";
 
   return (
     <div className="datasheet-page">
@@ -89,12 +93,22 @@ export default async function DatasheetPage({ params }: PageProps) {
 
         <div className="datasheet-layout">
           <div className="datasheet-drawing">
-            <DimensionDrawing
-              widthMm={dims.w}
-              heightMm={dims.h}
-              targetMaxPx={280}
-              title={product.name}
-            />
+            {realDims ? (
+              <DimensionDrawing
+                widthMm={dims.w}
+                heightMm={dims.h}
+                targetMaxPx={280}
+                title={product.name}
+              />
+            ) : (
+              <Silhouette
+                widthMm={drawDims.w}
+                heightMm={drawDims.h}
+                targetMaxPx={280}
+                title={product.name}
+                variant={silhouetteKind}
+              />
+            )}
           </div>
           <div className="datasheet-specs">
             <ModelSpecs

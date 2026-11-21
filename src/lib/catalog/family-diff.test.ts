@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAll, getFamily } from "./index";
+import { getSnapshotAll as getAll, getSnapshotFamily as getFamily } from "./index";
 import { summarizeFamily } from "./family-diff";
 
 describe("summarizeFamily", () => {

@@ -64,8 +64,17 @@ export default async function AboutPage() {
           <p className="company-lead text-pretty">{typo(t("lead"))}</p>
         </header>
 
+        <section className="company-block" aria-labelledby="about-history">
+          <div className="about-prose">
+            <h2 id="about-history" className="text-balance">
+              {typo(t("historyHeading"))}
+            </h2>
+            <p className="text-pretty">{typo(t("historyBody"))}</p>
+          </div>
+        </section>
+
         <section className="company-block" aria-labelledby="about-expertise">
-          <div className="about-prose premium-frame">
+          <div className="about-prose">
             <h2 id="about-expertise" className="text-balance">
               {typo(t("expertiseHeading"))}
             </h2>
@@ -74,7 +83,7 @@ export default async function AboutPage() {
         </section>
 
         <section className="company-block" aria-labelledby="about-infra">
-          <div className="about-prose premium-frame">
+          <div className="about-prose">
             <h2 id="about-infra" className="text-balance">
               {typo(t("infraHeading"))}
             </h2>
@@ -97,7 +106,7 @@ export default async function AboutPage() {
         </section>
 
         <section className="company-block" aria-labelledby="about-standards">
-          <div className="about-prose premium-frame">
+          <div className="about-prose">
             <h2 id="about-standards" className="text-balance">
               {typo(t("standardsHeading"))}
             </h2>

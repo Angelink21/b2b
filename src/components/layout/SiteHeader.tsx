@@ -10,6 +10,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import { useSiteChrome } from "@/components/layout/SiteChromeContext";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Container } from "@/components/ui/Container";
@@ -35,6 +36,8 @@ type LogoProp = {
 type SiteHeaderProps = {
   categories: CategoryNavStat[];
   logo: LogoProp | null;
+  /** White wordmark for `data-theme="dark"`; falls back to `logo` when null. */
+  logoDark: LogoProp | null;
 };
 
 const PAGE_LINKS = [
@@ -69,6 +72,22 @@ function Chevron({ open }: { open: boolean }) {
         stroke="currentColor"
         strokeWidth="1.5"
       />
+    </svg>
+  );
+}
+
+function SearchGlyph() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 20 20" aria-hidden="true">
+      <circle
+        cx="8.5"
+        cy="8.5"
+        r="5.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path d="M13 13l5 5" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -158,9 +177,11 @@ function CategoryList({
   );
 }
 
-export function SiteHeader({ categories, logo }: SiteHeaderProps) {
+export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
   const tNav = useTranslations("nav");
+  const tSearch = useTranslations("search");
   const pathname = usePathname();
+  const { menuOpen, setMenuOpen, openSearch, searchOpen } = useSiteChrome();
   const headerRef = useRef<HTMLElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const catalogRef = useRef<HTMLDivElement>(null);
@@ -174,13 +195,39 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
 
   const [stuck, setStuck] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [catalogAccOpen, setCatalogAccOpen] = useState(false);
   const [canHover, setCanHover] = useState(false);
   const [navReady, setNavReady] = useState(false);
 
   const catalogCurrent = isCurrentPath(pathname, "/catalog");
   const quoteCurrent = isCurrentPath(pathname, "/quote");
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (searchOpen) return;
+      const target = event.target;
+      if (
+        target instanceof HTMLElement &&
+        target.closest(
+          "input, textarea, select, [contenteditable='true'], [role='dialog']",
+        )
+      ) {
+        return;
+      }
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        openSearch();
+        return;
+      }
+      if (event.key === "/") {
+        event.preventDefault();
+        openSearch();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openSearch, searchOpen]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -213,7 +260,7 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
       hover.removeEventListener("change", sync);
       desktop.removeEventListener("change", sync);
     };
-  }, []);
+  }, [setMenuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -232,7 +279,7 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
       root.style.overflow = prevHtml;
       document.body.style.overflow = prevBody;
     };
-  }, [menuOpen]);
+  }, [menuOpen, setMenuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -274,7 +321,7 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
 
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
+  }, [menuOpen, setMenuOpen]);
 
   useEffect(() => {
     if (!megaOpen) return;
@@ -383,13 +430,26 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
         <Container className="site-header-bar">
           <Link href="/" className="site-brand" translate="no">
             {logo ? (
-              <Image
-                src={logo.src}
-                alt={brand}
-                width={logo.width}
-                height={logo.height}
-                priority
-              />
+              <span className="site-brand-logos">
+                <span className="site-brand-logo site-brand-logo--light">
+                  <Image
+                    src={logo.src}
+                    alt={brand}
+                    width={logo.width}
+                    height={logo.height}
+                    priority
+                  />
+                </span>
+                <span className="site-brand-logo site-brand-logo--dark" aria-hidden>
+                  <Image
+                    src={(logoDark ?? logo).src}
+                    alt=""
+                    width={(logoDark ?? logo).width}
+                    height={(logoDark ?? logo).height}
+                    priority
+                  />
+                </span>
+              </span>
             ) : (
               brand
             )}
@@ -451,6 +511,17 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
           </nav>
 
           <div className="site-header-actions">
+            <button
+              type="button"
+              className="header-search header-tool"
+              aria-haspopup="dialog"
+              aria-expanded={searchOpen}
+              aria-label={tSearch("open")}
+              onClick={openSearch}
+            >
+              <SearchGlyph />
+              <span className="header-search-hint">{tSearch("shortcut")}</span>
+            </button>
             <LocaleSwitcher />
             <ThemeToggle />
             <Link
@@ -469,7 +540,7 @@ export function SiteHeader({ categories, logo }: SiteHeaderProps) {
               aria-label={menuOpen ? tNav("closeMenu") : tNav("menu")}
               onClick={() => {
                 setCatalogAccOpen(false);
-                setMenuOpen((open) => !open);
+                setMenuOpen(!menuOpen);
               }}
             >
               <MenuGlyph open={menuOpen} />

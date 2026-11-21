@@ -31,6 +31,9 @@ export default defineConfig({
       LEADS_RATE_LIMIT_MAX: "200",
       // Keep the production build away from the dev server's `.next`.
       NEXT_DIST_DIR: ".next-e2e",
+      // Never hit Google Sheets during e2e — serve the build snapshot only.
+      CATALOG_CSV_URL: "",
+      CATALOG_STATUS_SECRET: "",
     },
   },
   projects: [

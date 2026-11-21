@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { CompareView } from "@/components/compare/CompareView";
 import { Container } from "@/components/ui/Container";
-import { getAll } from "@/lib/catalog";
+import { getAll } from "@/lib/catalog/queries";
 import { buildCompareRecords } from "@/lib/catalog/compare";
 import {
   CATEGORY_SLUGS,
@@ -64,7 +64,7 @@ export default async function ComparePage({ params }: PageProps) {
     categoryLabels[slug] = tCat(slug);
   }
 
-  const products = getAll();
+  const products = await getAll();
   const photos = new Map(
     products.map((product) => {
       const categoryLabel = categoryLabels[product.category];

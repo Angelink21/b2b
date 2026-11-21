@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 import { siteConfig } from "@/config/site";
-import { getByCategory } from "@/lib/catalog";
+import { getByCategory } from "@/lib/catalog/queries";
 import {
   CATEGORY_SLUGS,
   type CategorySlug,
@@ -28,7 +28,9 @@ export default async function Image({ params }: Props) {
   const label = isCategorySlug(category)
     ? messages.categories[category]
     : category;
-  const products = isCategorySlug(category) ? getByCategory(category) : [];
+  const products = isCategorySlug(category)
+    ? await getByCategory(category)
+    : [];
   const sample = products[0];
   const description = messages.meta.categoryDescription.replace(
     "{category}",

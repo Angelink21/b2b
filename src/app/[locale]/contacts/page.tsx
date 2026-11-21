@@ -6,7 +6,13 @@ import { QuoteFormFallback } from "@/components/quote/QuoteForm";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
-import { siteConfig, visibleContact } from "@/config/site";
+import {
+  localizedHours,
+  siteConfig,
+  telHref,
+  visibleContact,
+  visiblePhones,
+} from "@/config/site";
 import { getEnv } from "@/env";
 import {
   breadcrumbListJsonLd,
@@ -37,11 +43,11 @@ export default async function ContactsPage() {
   const tNav = await getTranslations("nav");
   const env = getEnv();
 
-  const phone = visibleContact(siteConfig.phone);
+  const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
   const address = visibleContact(siteConfig.address);
-  const hours = visibleContact(siteConfig.hours);
-  const hasDetails = Boolean(phone || email || address || hours);
+  const hours = localizedHours(locale);
+  const hasDetails = Boolean(phones.length > 0 || email || address || hours);
   const mapEmbedSrc = address
     ? `https://www.google.com/maps?q=${encodeURIComponent(address)}&z=15&output=embed`
     : null;
@@ -97,11 +103,17 @@ export default async function ContactsPage() {
             {hasDetails ? (
               <div className="contacts-details-card premium-frame">
                 <dl className="company-contact-dl">
-                  {phone ? (
+                  {phones.length > 0 ? (
                     <>
                       <dt>{t("phone")}</dt>
                       <dd>
-                        <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
+                        <ul className="contact-phones">
+                          {phones.map((phone) => (
+                            <li key={phone}>
+                              <a href={telHref(phone)}>{phone}</a>
+                            </li>
+                          ))}
+                        </ul>
                       </dd>
                     </>
                   ) : null}
@@ -134,7 +146,7 @@ export default async function ContactsPage() {
                   {hours ? (
                     <>
                       <dt>{t("hours")}</dt>
-                      <dd>{hours}</dd>
+                      <dd className="contact-hours">{hours}</dd>
                     </>
                   ) : null}
                 </dl>

@@ -1,30 +1,13 @@
-import type { CategorySlug } from "@/lib/catalog/schema";
+import {
+  CATEGORY_DEFS,
+  getCategoryDef,
+  type CategoryColumnDef,
+  type CategoryColumnId,
+  type CategorySlug,
+} from "@/config/categories";
 
-/** Column ids used in the catalog table and URL sort. */
-export type CatalogColumnId =
-  | "name"
-  | "type"
-  | "loadKg"
-  | "power"
-  | "heating"
-  | "dimensions"
-  | "gFactor"
-  | "spinRpm"
-  | "workingWidthMm"
-  | "workingSpeedMpm"
-  | "shaftDiameterMm"
-  | "volumeL"
-  | "keyMetric";
-
-export type CatalogColumnDef = {
-  id: CatalogColumnId;
-  sortable?: boolean;
-  /**
-   * Progressive hide via container query (never on required cols).
-   * 1 = hide first (spin / G / speed / shaft); 2 = hide last (power).
-   */
-  narrowHide?: 1 | 2;
-};
+export type CatalogColumnId = CategoryColumnId;
+export type CatalogColumnDef = CategoryColumnDef;
 
 /** Required columns that must never use narrowHide. */
 const REQUIRED_IDS = new Set<CatalogColumnId>([
@@ -47,74 +30,11 @@ const DEFAULT_COLUMNS: readonly CatalogColumnDef[] = [
   { id: "keyMetric", sortable: true },
 ] as const;
 
-const BY_CATEGORY: Readonly<Record<CategorySlug, readonly CatalogColumnDef[]>> =
-  {
-    washers: [
-      { id: "name", sortable: true },
-      { id: "loadKg", sortable: true },
-      { id: "power", sortable: true, narrowHide: 2 },
-      { id: "gFactor", sortable: true, narrowHide: 1 },
-      { id: "spinRpm", sortable: true, narrowHide: 1 },
-      { id: "heating" },
-      { id: "dimensions" },
-    ],
-    "washer-dryers": [
-      { id: "name", sortable: true },
-      { id: "loadKg", sortable: true },
-      { id: "power", sortable: true, narrowHide: 2 },
-      { id: "gFactor", sortable: true, narrowHide: 1 },
-      { id: "spinRpm", sortable: true, narrowHide: 1 },
-      { id: "heating" },
-      { id: "dimensions" },
-    ],
-    dryers: [
-      { id: "name", sortable: true },
-      { id: "loadKg", sortable: true },
-      { id: "power", sortable: true, narrowHide: 2 },
-      { id: "heating" },
-      { id: "dimensions" },
-    ],
-    "flatwork-ironers": [
-      { id: "name", sortable: true },
-      { id: "workingWidthMm", sortable: true },
-      { id: "workingSpeedMpm", sortable: true, narrowHide: 1 },
-      { id: "shaftDiameterMm", sortable: true, narrowHide: 1 },
-      { id: "power", sortable: true, narrowHide: 2 },
-      { id: "heating" },
-      { id: "dimensions" },
-    ],
-    "ironing-rollers": [
-      { id: "name", sortable: true },
-      { id: "workingWidthMm", sortable: true },
-      { id: "workingSpeedMpm", sortable: true, narrowHide: 1 },
-      { id: "shaftDiameterMm", sortable: true, narrowHide: 1 },
-      { id: "power", sortable: true, narrowHide: 2 },
-      { id: "heating" },
-      { id: "dimensions" },
-    ],
-    "laundry-carts": [
-      { id: "name", sortable: true },
-      { id: "volumeL", sortable: true },
-      { id: "dimensions" },
-    ],
-    "water-recovery": [
-      { id: "name", sortable: true },
-      { id: "volumeL", sortable: true },
-      { id: "dimensions" },
-    ],
-    finishing: [
-      { id: "name", sortable: true },
-      { id: "power", sortable: true },
-      { id: "heating" },
-      { id: "dimensions" },
-    ],
-  };
-
 export function getCatalogColumns(
   category: CategorySlug | null | undefined,
 ): readonly CatalogColumnDef[] {
   if (!category) return DEFAULT_COLUMNS;
-  return BY_CATEGORY[category] ?? DEFAULT_COLUMNS;
+  return getCategoryDef(category)?.columns ?? DEFAULT_COLUMNS;
 }
 
 export function getCatalogColumnIds(
@@ -123,11 +43,20 @@ export function getCatalogColumnIds(
   return getCatalogColumns(category).map((c) => c.id);
 }
 
-/** Test helper: required columns must never be marked narrowHide. */
-export function assertNoRequiredNarrowHide(
-  cols: readonly CatalogColumnDef[],
-): boolean {
-  return cols.every(
-    (c) => c.narrowHide === undefined || !REQUIRED_IDS.has(c.id),
-  );
+export function assertNoNarrowHideOnRequired(
+  columns: readonly CatalogColumnDef[],
+): true {
+  for (const col of columns) {
+    if (col.narrowHide && REQUIRED_IDS.has(col.id)) {
+      throw new Error(`narrowHide forbidden on required column ${col.id}`);
+    }
+  }
+  return true;
 }
+
+/** @deprecated Prefer assertNoNarrowHideOnRequired */
+export const assertNoRequiredNarrowHide = assertNoNarrowHideOnRequired;
+
+export const BY_CATEGORY = Object.fromEntries(
+  CATEGORY_DEFS.map((d) => [d.slug, d.columns]),
+) as unknown as Readonly<Record<CategorySlug, readonly CatalogColumnDef[]>>;

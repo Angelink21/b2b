@@ -1,12 +1,16 @@
-export type CaseEntry = {
-  slug: string;
-  title: string;
-};
-
 /**
- * Case studies live under content/cases.
- * Empty directory → home cases section stays hidden.
+ * Case study ids mapped to `home.cases.*` message keys.
+ * Empty list → home cases section stays hidden.
  */
-export function listCases(): CaseEntry[] {
-  return [];
+export const CASE_IDS = [
+  "hotel",
+  "healthcare",
+  "selfService",
+  "central",
+] as const;
+
+export type CaseId = (typeof CASE_IDS)[number];
+
+export function listCaseIds(): readonly CaseId[] {
+  return CASE_IDS;
 }

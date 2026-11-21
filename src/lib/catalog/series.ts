@@ -61,6 +61,7 @@ export function buildSeriesRegistry(rows: SeriesInput[]): {
         shortDescription: shortText,
         fullDescription: fullText,
         fullBullets: fullNorm.bullets,
+        fullBlocks: fullNorm.blocks,
       });
     }
   }

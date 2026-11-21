@@ -20,6 +20,13 @@ body:has(.datasheet-page) #main {
   margin: 12mm;
 }
 
+body:has(.compare-page) .site-header,
+body:has(.compare-page) .site-footer,
+body:has(.compare-page) .skip-link,
+body:has(.compare-page) .compare-tray {
+  display: none !important;
+}
+
 @media print {
   .no-print,
   .site-header,
@@ -27,6 +34,25 @@ body:has(.datasheet-page) #main {
   .skip-link,
   .compare-tray {
     display: none !important;
+  }
+
+  body:has(.compare-page) .compare-toolbar,
+  body:has(.compare-page) .compare-silhouettes,
+  body:has(.compare-page) .compare-table-wrap,
+  body:has(.compare-page) h1 {
+    display: none !important;
+  }
+
+  body:has(.compare-page) .floor-planner {
+    border: none;
+    padding: 0;
+  }
+
+  body:has(.compare-page) .floor-planner-stage {
+    max-height: none;
+    overflow: visible;
+    border: none;
+    padding: 0;
   }
 
   html,

@@ -1,47 +1,44 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildCategorySummary,
   formatCategoryMetricLead,
   formatCategoryMetricRange,
-  getCategorySummary,
 } from "./category-summary";
+import { getSnapshotIndex } from "./index";
+import { CATEGORY_SLUGS } from "./schema";
+
+function summary(slug: Parameters<typeof buildCategorySummary>[0]) {
+  return buildCategorySummary(slug, getSnapshotIndex());
+}
 
 describe("category summary", () => {
   it("reports model counts that sum to the full index", () => {
-    const slugs = [
-      "washers",
-      "dryers",
-      "flatwork-ironers",
-      "laundry-carts",
-      "ironing-rollers",
-      "finishing",
-      "water-recovery",
-      "washer-dryers",
-    ] as const;
-    const total = slugs.reduce(
-      (sum, slug) => sum + getCategorySummary(slug).count,
+    const index = getSnapshotIndex();
+    const total = CATEGORY_SLUGS.reduce(
+      (sum, slug) => sum + summary(slug).count,
       0,
     );
-    expect(total).toBe(303);
+    expect(total).toBe(index.length);
   });
 
   it("exposes kg for washers and width for ironing rollers", () => {
-    const washers = getCategorySummary("washers");
+    const washers = summary("washers");
     expect(washers.metricKind).toBe("kg");
     expect(washers.metricMin).not.toBeNull();
     expect(washers.metricMax).toBeGreaterThanOrEqual(washers.metricMin ?? 0);
 
-    const rollers = getCategorySummary("ironing-rollers");
+    const rollers = summary("ironing-rollers");
     expect(rollers.metricKind).toBe("width");
     expect(rollers.metricMin).not.toBeNull();
 
-    const carts = getCategorySummary("laundry-carts");
+    const carts = summary("laundry-carts");
     expect(carts.metricKind).toBe("volume");
     expect(carts.metricMin).not.toBeNull();
   });
 
   it("formats ranges with a no-break space before the unit", () => {
-    const washers = getCategorySummary("washers");
+    const washers = summary("washers");
     const label = formatCategoryMetricRange(washers, "uk", {
       kg: "кг",
       mm: "мм",
@@ -52,7 +49,7 @@ describe("category summary", () => {
   });
 
   it("formats named lead without a model-count prefix", () => {
-    const ironers = getCategorySummary("flatwork-ironers");
+    const ironers = summary("flatwork-ironers");
     const lead = formatCategoryMetricLead(
       ironers,
       "uk",
@@ -70,11 +67,11 @@ describe("category summary", () => {
   });
 
   it("washer-dryers lead keeps one decimal (SLN-18 16,5–20, not 17)", () => {
-    const summary = getCategorySummary("washer-dryers");
-    expect(summary.metricMin).toBe(16.5);
-    expect(summary.metricMax).toBe(20);
+    const s = summary("washer-dryers");
+    expect(s.metricMin).toBe(16.5);
+    expect(s.metricMax).toBe(20);
     const lead = formatCategoryMetricLead(
-      summary,
+      s,
       "uk",
       { kg: "кг", mm: "мм", L: "л", kW: "кВт" },
       {

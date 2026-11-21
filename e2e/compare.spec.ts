@@ -46,6 +46,35 @@ test.describe("compare and datasheet", () => {
     await expect(page).toHaveURL(/m=/);
   });
 
+  test("floor planner drag and rotate", async ({ page }) => {
+    const m = SLUGS.slice(0, 2).join(",");
+    await page.goto(`/uk/compare?m=${encodeURIComponent(m)}`);
+
+    const planner = page.getByRole("application", {
+      name: "План приміщення з машинами",
+    });
+    await expect(planner).toBeVisible();
+
+    const machines = planner.locator(".floor-planner-machine");
+    await expect(machines).toHaveCount(2);
+
+    const first = machines.first();
+    const box = await first.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) return;
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 80, box.y + box.height / 2 + 40);
+    await page.mouse.up();
+
+    await planner.focus();
+    await planner.press("r");
+    await expect(
+      page.getByRole("button", { name: "Повернути 90°" }),
+    ).toBeVisible();
+  });
+
   test("deep link compare and quote", async ({ page }) => {
     const m = SLUGS.join(",");
     await page.goto(`/uk/compare?m=${encodeURIComponent(m)}`);

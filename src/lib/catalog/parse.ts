@@ -20,12 +20,77 @@ function trimCell(value: string | undefined | null): string {
   return (value ?? "").trim();
 }
 
+/** Ukrainian + common Cyrillic → Latin (passport-style), then ASCII slug. */
+const CYR_TO_LAT: Readonly<Record<string, string>> = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "h",
+  ґ: "g",
+  д: "d",
+  е: "e",
+  є: "ie",
+  ж: "zh",
+  з: "z",
+  и: "y",
+  і: "i",
+  ї: "i",
+  й: "i",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "kh",
+  ц: "ts",
+  ч: "ch",
+  ш: "sh",
+  щ: "shch",
+  ь: "",
+  ю: "iu",
+  я: "ia",
+  ы: "y",
+  э: "e",
+  ё: "io",
+  ъ: "",
+};
+
+export function transliterateCyrillic(input: string): string {
+  let out = "";
+  for (const ch of input) {
+    const lower = ch.toLowerCase();
+    const mapped = CYR_TO_LAT[lower];
+    if (mapped === undefined) {
+      out += ch;
+      continue;
+    }
+    if (ch === lower) out += mapped;
+    else out += mapped.length > 0 ? mapped[0]!.toUpperCase() + mapped.slice(1) : "";
+  }
+  return out;
+}
+
+/**
+ * Stable URL slug from a model name.
+ * Cyrillic is transliterated first so Ukrainian names stay non-empty;
+ * Latin names keep the same slug as before.
+ */
 export function slugify(name: string): string {
-  return name
+  const slug = transliterateCyrillic(name)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+  if (!slug) {
+    throw new ParseError("Empty slug after normalization", "slug", name);
+  }
+  return slug;
 }
 
 export function parseLoadKg(
@@ -133,7 +198,8 @@ export function parseDimensionsMm(
 ): { w: number; d: number; h: number; note?: string } {
   const raw = trimCell(rawInput);
   if (!raw) {
-    throw new ParseError("Missing dimensions", "dimensionsMm", raw);
+    // Allowed for incomplete rows; UI hides the dimensions block when all zero.
+    return { w: 0, d: 0, h: 0 };
   }
 
   // `# (з колесами) x # x #`
@@ -312,19 +378,62 @@ export function parseHeating(
   }
 }
 
-export function parseSectors(rawInput: string | undefined | null): SectorKey[] {
+export type ParseSectorsResult = {
+  sectors: SectorKey[];
+  /** Free-text labels not in SECTOR_BY_CSV (never used as filters). */
+  sectorLabels: string[];
+  unknown: string[];
+};
+
+/**
+ * Accept `|` and comma separators. Known industries map to keys;
+ * unknown tokens become free labels (warn upstream) — do not throw.
+ * Known CSV names that contain commas (e.g. hospitality) match as a whole
+ * segment first when separated by `|`.
+ */
+export function parseSectors(rawInput: string | undefined | null): ParseSectorsResult {
   const raw = trimCell(rawInput);
-  if (!raw) return [];
-  const parts = raw.split("|").map((p) => p.trim()).filter(Boolean);
-  const result: SectorKey[] = [];
-  for (const part of parts) {
-    const key = SECTOR_BY_CSV[part];
-    if (!key) {
-      throw new ParseError("Unknown sector", "sectors", part);
-    }
-    result.push(key);
+  if (!raw) return { sectors: [], sectorLabels: [], unknown: [] };
+
+  const sectors: SectorKey[] = [];
+  const sectorLabels: string[] = [];
+  const unknown: string[] = [];
+  const seenKey = new Set<SectorKey>();
+  const seenLabel = new Set<string>();
+
+  function addKey(key: SectorKey) {
+    if (seenKey.has(key)) return;
+    seenKey.add(key);
+    sectors.push(key);
   }
-  return result;
+
+  function addLabel(label: string) {
+    if (seenLabel.has(label)) return;
+    seenLabel.add(label);
+    sectorLabels.push(label);
+    unknown.push(label);
+  }
+
+  const pipeParts = raw.split("|").map((p) => p.trim()).filter(Boolean);
+  for (const part of pipeParts) {
+    const direct = SECTOR_BY_CSV[part];
+    if (direct) {
+      addKey(direct);
+      continue;
+    }
+    const commaParts = part.split(",").map((p) => p.trim()).filter(Boolean);
+    if (commaParts.length <= 1) {
+      addLabel(part);
+      continue;
+    }
+    for (const sub of commaParts) {
+      const key = SECTOR_BY_CSV[sub];
+      if (key) addKey(key);
+      else addLabel(sub);
+    }
+  }
+
+  return { sectors, sectorLabels, unknown };
 }
 
 export function parseOptionalNumber(
@@ -365,23 +474,82 @@ export function parseOptionalRangeNumber(
   return { raw, min: n, max: n };
 }
 
-/** Collapse whitespace; split full description on • into bullets. */
+export type DescriptionBlock = {
+  kind: "heading" | "bullet";
+  text: string;
+};
+
+const HEADING_ALIASES: Readonly<Record<string, string>> = {
+  комплектація: "Комплектація",
+  "до складу входять:": "До складу входять:",
+  "до складу входять": "До складу входять:",
+};
+
+function sentenceCaseHeading(line: string): string | null {
+  const key = line.replace(/\s+/g, " ").trim().toLowerCase();
+  return HEADING_ALIASES[key] ?? null;
+}
+
+/** Collapse whitespace; split full description into headings + • bullets. */
 export function normalizeDescription(rawInput: string | undefined | null): {
   text: string;
   bullets: string[];
+  blocks: DescriptionBlock[];
 } {
   const raw = (rawInput ?? "").replace(/\r\n/g, "\n").trim();
-  if (!raw) return { text: "", bullets: [] };
+  if (!raw) return { text: "", bullets: [], blocks: [] };
 
   const collapsed = raw.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n");
+  const blocks: DescriptionBlock[] = [];
+  const bullets: string[] = [];
 
-  if (collapsed.includes("•")) {
-    const bullets = collapsed
-      .split("•")
-      .map((part) => part.replace(/\s+/g, " ").trim())
-      .filter(Boolean);
-    return { text: collapsed.replace(/\s+/g, " ").trim(), bullets };
+  const lines = collapsed.split("\n");
+  for (const lineRaw of lines) {
+    const line = lineRaw.replace(/\s+/g, " ").trim();
+    if (!line) continue;
+
+    const heading = sentenceCaseHeading(line.replace(/•/g, "").trim());
+    if (heading && !line.includes("•")) {
+      blocks.push({ kind: "heading", text: heading });
+      continue;
+    }
+
+    if (line.includes("•")) {
+      const parts = line.split("•").map((p) => p.replace(/\s+/g, " ").trim());
+      for (let i = 0; i < parts.length; i += 1) {
+        const part = parts[i]!;
+        if (!part) continue;
+        if (i === 0) {
+          const leadHeading = sentenceCaseHeading(part);
+          if (leadHeading) {
+            blocks.push({ kind: "heading", text: leadHeading });
+            continue;
+          }
+          if (parts.length === 1) {
+            blocks.push({ kind: "bullet", text: part });
+            bullets.push(part);
+          }
+          continue;
+        }
+        blocks.push({ kind: "bullet", text: part });
+        bullets.push(part);
+      }
+      continue;
+    }
+
+    blocks.push({ kind: "bullet", text: line });
+    bullets.push(line);
   }
 
-  return { text: collapsed.replace(/\s+/g, " ").trim(), bullets: [] };
+  // No • and no recognized headings → single prose blob as before (no fake bullets).
+  if (!collapsed.includes("•") && blocks.every((b) => b.kind === "bullet")) {
+    const text = collapsed.replace(/\s+/g, " ").trim();
+    return { text, bullets: [], blocks: [] };
+  }
+
+  return {
+    text: collapsed.replace(/\s+/g, " ").trim(),
+    bullets,
+    blocks,
+  };
 }

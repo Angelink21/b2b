@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getAll } from "@/lib/catalog";
+import { getAll } from "@/lib/catalog/queries";
 import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 import { absoluteUrl, languageAlternates } from "@/lib/seo/paths";
 import { routing } from "@/i18n/routing";
@@ -9,8 +9,8 @@ import { routing } from "@/i18n/routing";
  * Public indexable routes only.
  * Excluded: _styleguide, fontcheck, datasheet (noindex / internal).
  */
-export default function sitemap(): MetadataRoute.Sitemap {
-  const products = getAll();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await getAll();
   const staticPaths = [
     "",
     "/catalog",

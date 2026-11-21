@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Section } from "@/components/ui/Section";
 import { FEATURED_SLUGS } from "@/config/featured";
-import { getBySlug } from "@/lib/catalog";
+import { getBySlug } from "@/lib/catalog/queries";
 import { typo } from "@/lib/typo";
 
 import { FlagshipCardActions } from "./FlagshipCardActions";
@@ -14,7 +14,10 @@ export async function FlagshipSection() {
   const tCat = await getTranslations("catalog");
   const tCategories = await getTranslations("categories");
 
-  const items = FEATURED_SLUGS.map((slug) => getBySlug(slug)).filter(
+  const resolved = await Promise.all(
+    FEATURED_SLUGS.map((slug) => getBySlug(slug)),
+  );
+  const items = resolved.filter(
     (p): p is NonNullable<typeof p> => p !== undefined,
   );
 

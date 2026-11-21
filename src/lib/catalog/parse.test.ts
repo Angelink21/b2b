@@ -1,8 +1,11 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { deriveFamily } from "./families";
 import {
   normalizeDescription,
+  ParseError,
   parseAirflowM3h,
   parseDimensionsMm,
   parseHeating,
@@ -17,10 +20,32 @@ import {
   slugify,
 } from "./parse";
 import { normalizeSearchQuery } from "./query";
+import type { CatalogGenerated } from "./schema";
 
 describe("slugify", () => {
   it("maps slash and spaces per DATA_CONTRACT", () => {
     expect(slugify("P-18/100 M E Nomex")).toBe("p-18-100-m-e-nomex");
+  });
+
+  it("transliterates Ukrainian model names", () => {
+    expect(slugify("ПРАЛЬНЯ TO GO")).toBe("pralnia-to-go");
+  });
+
+  it("throws on empty slug after normalization", () => {
+    expect(() => slugify("***")).toThrow(ParseError);
+    expect(() => slugify("***")).toThrow(/Empty slug/);
+  });
+
+  it("keeps existing Latin catalog slugs stable", () => {
+    const root = path.resolve(__dirname, "../../..");
+    const raw = JSON.parse(
+      fs.readFileSync(path.join(root, "src/data/catalog.generated.json"), "utf8"),
+    ) as CatalogGenerated;
+    const latin = raw.products.filter((p) => !/[а-яА-ЯіІїЇєЄґҐ]/.test(p.name));
+    expect(latin.length).toBeGreaterThan(280);
+    for (const product of latin) {
+      expect(slugify(product.name)).toBe(product.slug);
+    }
   });
 });
 
@@ -93,6 +118,11 @@ describe("parseDimensionsMm", () => {
       h: 580,
       note: "з колесами",
     });
+  });
+
+  it("allows empty as 0×0×0", () => {
+    expect(parseDimensionsMm("")).toEqual({ w: 0, d: 0, h: 0 });
+    expect(parseDimensionsMm(null)).toEqual({ w: 0, d: 0, h: 0 });
   });
 });
 
@@ -201,7 +231,27 @@ describe("parseSectors", () => {
       parseSectors(
         "Лікарні та медичні центри|Готелі, хостели та ресторани",
       ),
-    ).toEqual(["hospitals", "hospitality"]);
+    ).toEqual({
+      sectors: ["hospitals", "hospitality"],
+      sectorLabels: [],
+      unknown: [],
+    });
+  });
+
+  it("keeps unknown free labels without throwing", () => {
+    expect(
+      parseSectors("Лікарні та медичні центри|Військові бази, польові табори"),
+    ).toEqual({
+      sectors: ["hospitals"],
+      sectorLabels: ["Військові бази", "польові табори"],
+      unknown: ["Військові бази", "польові табори"],
+    });
+  });
+
+  it("splits comma-only lists when no known whole segment", () => {
+    const result = parseSectors("Готелі, хостели та ресторани");
+    expect(result.sectors).toEqual(["hospitality"]);
+    expect(result.sectorLabels).toEqual([]);
   });
 });
 
@@ -219,6 +269,10 @@ describe("normalizeDescription", () => {
   it("collapses whitespace and splits bullets", () => {
     const result = normalizeDescription("• one\n• two");
     expect(result.bullets).toEqual(["one", "two"]);
+    expect(result.blocks).toEqual([
+      { kind: "bullet", text: "one" },
+      { kind: "bullet", text: "two" },
+    ]);
     expect(result.text.includes("  ")).toBe(false);
   });
 
@@ -226,6 +280,20 @@ describe("normalizeDescription", () => {
     const result = normalizeDescription("Alpha   beta");
     expect(result.text).toBe("Alpha beta");
     expect(result.bullets).toEqual([]);
+    expect(result.blocks).toEqual([]);
+  });
+
+  it("sentence-cases kit headings and keeps • bullets", () => {
+    const result = normalizeDescription(
+      "КОМПЛЕКТАЦІЯ\n• Пральна машина\nДо складу входять:\n• Сушильна машина",
+    );
+    expect(result.blocks).toEqual([
+      { kind: "heading", text: "Комплектація" },
+      { kind: "bullet", text: "Пральна машина" },
+      { kind: "heading", text: "До складу входять:" },
+      { kind: "bullet", text: "Сушильна машина" },
+    ]);
+    expect(result.bullets).toEqual(["Пральна машина", "Сушильна машина"]);
   });
 });
 

@@ -73,10 +73,57 @@ describe("parseCatalogCsvText fixtures", () => {
     expect(quirks.rows[0]?.[CSV_COLUMNS.workingSpeedMpm]).toBe("2.02");
   });
 
-  it("fails on date-like loadKg", () => {
+  it("fails on date-like loadKg with column and model in the error", () => {
     const parsed = parseCatalogCsvText(readFix("csv-dates.csv"));
     expect(() => applyGoogleSheetQuirks(parsed.rows)).toThrow(CatalogCsvError);
-    expect(() => applyGoogleSheetQuirks(parsed.rows)).toThrow(/Простой текст/);
+    try {
+      applyGoogleSheetQuirks(parsed.rows);
+      expect.unreachable("expected date quirk to throw");
+    } catch (err) {
+      expect(err).toBeInstanceOf(CatalogCsvError);
+      const message = err instanceof Error ? err.message : String(err);
+      expect(message).toMatch(/Простой текст/);
+      expect(message).toContain(CSV_COLUMNS.loadKg);
+      expect(message).toContain("LAP-08 TP2 E V");
+      expect(message).toMatch(/8 сент/);
+    }
+  });
+
+  it("fails on Excel serial dates with column and model", () => {
+    const parsed = parseCatalogCsvText(readFix("csv-date-serial.csv"));
+    try {
+      applyGoogleSheetQuirks(parsed.rows);
+      expect.unreachable("expected serial date to throw");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      expect(message).toContain(CSV_COLUMNS.loadKg);
+      expect(message).toContain("SERIAL-MODEL");
+      expect(message).toMatch(/45200/);
+    }
+  });
+
+  it("handles BOM, CRLF, quoted newlines, edge spaces, and list commas", () => {
+    const raw = readFix("csv-bom-crlf.csv");
+    expect(raw.charCodeAt(0)).toBe(0xfeff);
+    expect(raw).toContain("\r\n");
+
+    const parsed = parseCatalogCsvText(raw);
+    expect(parsed.headers[0]).toBe(CSV_COLUMNS.name);
+    expect(parsed.rows).toHaveLength(1);
+
+    const quirks = applyGoogleSheetQuirks(parsed.rows);
+    const row = quirks.rows[0]!;
+    // Name still has edge spaces here; normalizeRow trims via cell().
+    expect(row[CSV_COLUMNS.name]).toBe("  LAP-08 TP2 E V  ");
+    expect(row[CSV_COLUMNS.powerKw]).toBe("6.25");
+    expect(row[CSV_COLUMNS.voltage]).toBe("230V I+N+T, 400V III+N+T");
+    expect(row[CSV_COLUMNS.fullDescription]).toContain("Рядок один");
+    expect(row[CSV_COLUMNS.fullDescription]).toContain("Рядок два");
+    expect(
+      quirks.warnings.some((w) =>
+        w.message.includes(CSV_COLUMNS.powerKw) && w.message.includes("6,25"),
+      ),
+    ).toBe(true);
   });
 
   it("ignores unexpected extra columns (keeps required data)", () => {

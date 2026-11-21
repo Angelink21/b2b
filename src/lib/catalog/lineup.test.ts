@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAll, getIndex } from "./index";
+import { getSnapshotAll as getAll, getSnapshotIndex as getIndex } from "./index";
 import {
   countModelsInKgRange,
   indexKgPairs,
@@ -9,12 +9,16 @@ import {
   isFullRange,
   kgFromUnit,
   lineupFloorSizeMm,
+  LINEUP_PHOTO_MIN,
   LINEUP_SIZE,
   RANGE_UNIT_MAX,
   RANGE_UNIT_MIN,
   selectLineup,
+  selectRangeStripModels,
+  type RangeStripCandidate,
   unitToFraction,
 } from "./lineup";
+import { hasModelImage } from "@/lib/images";
 
 describe("selectLineup", () => {
   it("returns 8 washers including unique kg min and max", () => {
@@ -48,6 +52,81 @@ describe("selectLineup", () => {
     const lineup = selectLineup(getAll());
     expect(lineup.every((m) => /^(LA|LAP|LN)-/i.test(m.name))).toBe(true);
     expect(lineup.some((m) => /^LBS-/i.test(m.name))).toBe(false);
+  });
+
+  it("limits the floor row to photo washers when at least six exist", () => {
+    const hasPhoto = (slug: string) => hasModelImage(slug);
+    const lineup = selectLineup(getAll(), { hasPhoto });
+    const washers = getAll().filter(
+      (p) => p.category === "washers" && p.loadKg && hasPhoto(p.slug),
+    );
+    if (washers.length >= LINEUP_PHOTO_MIN) {
+      expect(lineup.every((m) => hasPhoto(m.slug))).toBe(true);
+    }
+  });
+});
+
+describe("selectRangeStripModels", () => {
+  const pool: RangeStripCandidate[] = [
+    {
+      slug: "a",
+      name: "A",
+      category: "washers",
+      loadMin: 8,
+      loadMax: 9,
+      keyStat: "8–9 kg",
+      thumbnailSrc: null,
+      thumbW: 100,
+      thumbH: 100,
+    },
+    {
+      slug: "b",
+      name: "B",
+      category: "washers",
+      loadMin: 18,
+      loadMax: 20,
+      keyStat: "18–20 kg",
+      thumbnailSrc: null,
+      thumbW: 100,
+      thumbH: 100,
+    },
+    {
+      slug: "c",
+      name: "C",
+      category: "washers",
+      loadMin: 28,
+      loadMax: 30,
+      keyStat: "28–30 kg",
+      thumbnailSrc: null,
+      thumbW: 100,
+      thumbH: 100,
+    },
+    {
+      slug: "d",
+      name: "D",
+      category: "washers",
+      loadMin: 60,
+      loadMax: 65,
+      keyStat: "60–65 kg",
+      thumbnailSrc: null,
+      thumbW: 100,
+      thumbH: 100,
+    },
+  ];
+
+  it("picks smallest, midpoint, and largest in a kg window", () => {
+    const picked = selectRangeStripModels(pool, 15, 35, false);
+    expect(picked.map((m) => m.slug)).toEqual(["b", "c"]);
+  });
+
+  it("returns nothing when no photo models overlap the window", () => {
+    expect(selectRangeStripModels(pool, 40, 50, false)).toEqual([]);
+  });
+
+  it("deduplicates when the window fits a single model", () => {
+    const picked = selectRangeStripModels(pool, 8, 10, false);
+    expect(picked).toHaveLength(1);
+    expect(picked[0]!.slug).toBe("a");
   });
 });
 

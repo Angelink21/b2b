@@ -1,31 +1,29 @@
 import { getCatalogColumns } from "@/config/columns";
-import type { CategorySlug } from "@/lib/catalog/schema";
+import {
+  CATEGORY_DEFS,
+  getCategoryDef,
+  type CategoryFacetId,
+  type CategorySlug,
+} from "@/config/categories";
 import {
   SORT_BY_TO_COLUMN,
   type SortParam,
 } from "@/lib/catalog/search-params";
 
+export {
+  DIMENSION_FILTER_CATEGORIES,
+  dimensionFilterAllowed,
+} from "@/config/dimension-facets";
+
 /** Filters that can appear in the catalog URL. Boiler is intentionally absent. */
 export const RANGE_FACETS = ["kg", "power", "width", "speed", "volume"] as const;
 
 export type RangeFacet = (typeof RANGE_FACETS)[number];
-export type FacetId = RangeFacet | "heating";
+export type FacetId = CategoryFacetId;
 
-const LOAD = ["kg", "heating", "power"] as const satisfies readonly FacetId[];
-const IRON = ["width", "speed", "heating", "power"] as const satisfies readonly FacetId[];
-const VOLUME = ["volume"] as const satisfies readonly FacetId[];
-const FINISH = ["heating", "power"] as const satisfies readonly FacetId[];
-
-export const FACETS_BY_CATEGORY: Record<CategorySlug, readonly FacetId[]> = {
-  washers: LOAD,
-  dryers: LOAD,
-  "washer-dryers": LOAD,
-  "flatwork-ironers": IRON,
-  "ironing-rollers": IRON,
-  "laundry-carts": VOLUME,
-  "water-recovery": VOLUME,
-  finishing: FINISH,
-};
+export const FACETS_BY_CATEGORY = Object.fromEntries(
+  CATEGORY_DEFS.map((d) => [d.slug, d.facets]),
+) as unknown as Record<CategorySlug, readonly FacetId[]>;
 
 /** All categories: chips and search are always on; only heating is an extra facet. */
 export const FACETS_WHEN_ALL: readonly FacetId[] = ["heating"];
@@ -34,7 +32,7 @@ export function facetsForCategory(
   category: CategorySlug | null,
 ): readonly FacetId[] {
   if (!category) return FACETS_WHEN_ALL;
-  return FACETS_BY_CATEGORY[category];
+  return getCategoryDef(category)?.facets ?? FACETS_WHEN_ALL;
 }
 
 export function facetAllowed(

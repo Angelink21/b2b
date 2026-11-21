@@ -1,4 +1,7 @@
-import type { LineupModel } from "@/lib/catalog/lineup";
+import {
+  LINEUP_PHOTO_MIN,
+  type LineupModel,
+} from "@/lib/catalog/lineup";
 
 import { getImagesManifest } from "./manifest";
 
@@ -18,26 +21,23 @@ export function photoAspectDeviationPct(
 }
 
 /**
- * Photos on the hero floor row only when every machine has an asset
- * and trimmed aspect stays within 8% of catalog Ш/В (front-view check).
+ * Hero floor row uses Cloudinary photos when enough lineup slots have 12B assets.
  */
-export function canUseLineupPhotos(lineup: readonly LineupModel[]): boolean {
+export function canUseLineupPhotos(
+  lineup: readonly LineupModel[],
+  hasPhoto?: (slug: string) => boolean,
+): boolean {
   if (lineup.length === 0) return false;
   const manifest = getImagesManifest();
   if (!manifest.cloudName) return false;
 
-  return lineup.every((machine) => {
-    const entry = manifest.images[machine.slug];
-    if (!entry || entry.width <= 1 || entry.height <= 1) return false;
-    const tw = entry.trimWidth ?? entry.width;
-    const th = entry.trimHeight ?? entry.height;
-    return (
-      photoAspectDeviationPct(
-        tw,
-        th,
-        machine.dimensionsMm.w,
-        machine.dimensionsMm.h,
-      ) <= LINEUP_ASPECT_MAX_DEVIATION_PCT
-    );
-  });
+  const check =
+    hasPhoto ??
+    ((slug: string) => {
+      const entry = manifest.images[slug];
+      return Boolean(entry && entry.width > 1 && entry.height > 1);
+    });
+
+  const photoSlots = lineup.filter((m) => check(m.slug)).length;
+  return photoSlots >= LINEUP_PHOTO_MIN && lineup.every((m) => check(m.slug));
 }

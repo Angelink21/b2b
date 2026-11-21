@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import sitemap from "@/app/sitemap";
 import robots from "@/app/robots";
-import { getAll } from "@/lib/catalog";
+import { getSnapshotAll as getAll } from "@/lib/catalog";
 import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 import { routing } from "@/i18n/routing";
 
 describe("sitemap and robots (S2)", () => {
-  it("includes all public pages for both locales and excludes datasheet/styleguide", () => {
-    const entries = sitemap();
+  it("includes all public pages for both locales and excludes datasheet/styleguide", async () => {
+    const entries = await sitemap();
     const urls = entries.map((e) => e.url);
 
     const staticPerLocale = 8; // home, catalog, compare, quote, privacy, about, service, contacts

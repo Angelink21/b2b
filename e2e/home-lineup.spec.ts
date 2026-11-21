@@ -44,6 +44,40 @@ test.describe("home lineup", () => {
     await expect(page).toHaveURL(/\/uk\/catalog\?kg=\d+-\d+/);
   });
 
+  test("range strip updates when the load window changes", async ({ page }) => {
+    await page.goto("/uk");
+    await expect(page.locator('[data-lineup-ready="true"]')).toBeVisible();
+
+    const strip = page.getByTestId("lineup-range-strip");
+    const ranges = page.locator(".lineup-ruler input[type=range]");
+
+    await setRangeValue(ranges.nth(0), 450);
+    await setRangeValue(ranges.nth(1), 550);
+
+    await expect(strip).toBeVisible({ timeout: 5000 });
+    const slugsBefore = await strip
+      .locator(".lineup-range-strip-card")
+      .evaluateAll((cards) =>
+        cards.map((card) => card.getAttribute("data-slug")).filter(Boolean),
+      );
+    expect(slugsBefore.length).toBeGreaterThan(0);
+
+    await setRangeValue(ranges.nth(0), 50);
+    await setRangeValue(ranges.nth(1), 120);
+
+    await expect
+      .poll(
+        async () =>
+          strip
+            .locator(".lineup-range-strip-card")
+            .evaluateAll((cards) =>
+              cards.map((card) => card.getAttribute("data-slug")).join(","),
+            ),
+        { timeout: 5000 },
+      )
+      .not.toBe(slugsBefore.join(","));
+  });
+
   test("home is accessible (axe)", async ({ page }) => {
     await page.goto("/uk");
     const results = await new AxeBuilder({ page }).analyze();

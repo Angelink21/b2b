@@ -1,6 +1,8 @@
 import type { Product } from "./schema";
 
 export const LINEUP_SIZE = 8;
+/** Minimum photo-backed washers before the hero lineup switches from silhouettes. */
+export const LINEUP_PHOTO_MIN = 6;
 export const RANGE_UNIT_MIN = 0;
 export const RANGE_UNIT_MAX = 1000;
 /** Static start matching prototype post-tween (stage 8 adds motion). */
@@ -60,14 +62,29 @@ export function lineupFloorSizeMm(
   return { widthMm: floorW, heightMm: floorH };
 }
 
+export type SelectLineupOptions = {
+  /** 12B manifest photo presence (cached at build/sync time). */
+  hasPhoto?: (slug: string) => boolean;
+};
+
 /**
  * Pick 8 washers evenly across unique kgMax (includes min and max).
  * Prefers LA/LAP/LN front-loaders so the floor row stays one visual language.
+ * When at least LINEUP_PHOTO_MIN floor washers have photos, candidates are limited to that set.
  */
-export function selectLineup(products: readonly Product[]): LineupModel[] {
+export function selectLineup(
+  products: readonly Product[],
+  options?: SelectLineupOptions,
+): LineupModel[] {
+  const hasPhoto = options?.hasPhoto ?? (() => false);
   const allWashers = products.filter(isWasherWithKgAndDims);
   const floorWashers = allWashers.filter(isLineupFloorModel);
-  const washers = floorWashers.length >= LINEUP_SIZE ? floorWashers : allWashers;
+  let washers =
+    floorWashers.length >= LINEUP_SIZE ? floorWashers : allWashers;
+  const photoWashers = washers.filter((w) => hasPhoto(w.slug));
+  if (photoWashers.length >= LINEUP_PHOTO_MIN) {
+    washers = photoWashers;
+  }
   const uniqueKg = [...new Set(washers.map((m) => m.loadKg.max))].sort(
     (a, b) => a - b,
   );
@@ -195,4 +212,65 @@ export function indexKgPairs(
     }
   }
   return pairs;
+}
+
+export type RangeStripCandidate = {
+  slug: string;
+  name: string;
+  category: string;
+  loadMin: number;
+  loadMax: number;
+  keyStat: string;
+  thumbnailSrc: string | null;
+  thumbW: number;
+  thumbH: number;
+};
+
+function overlapsKgRange(
+  loadMin: number,
+  loadMax: number,
+  loKg: number,
+  hiKg: number,
+): boolean {
+  const lo = Math.min(loKg, hiKg);
+  const hi = Math.max(loKg, hiKg);
+  return loadMax >= lo - 0.01 && loadMin <= hi + 0.01;
+}
+
+/**
+ * Up to three photo models in the current kg window: smallest, nearest midpoint, largest.
+ */
+export function selectRangeStripModels(
+  candidates: readonly RangeStripCandidate[],
+  loKg: number,
+  hiKg: number,
+  fullRange: boolean,
+  max = 3,
+): RangeStripCandidate[] {
+  const inRange = candidates.filter((c) =>
+    fullRange ? true : overlapsKgRange(c.loadMin, c.loadMax, loKg, hiKg),
+  );
+  if (inRange.length === 0) return [];
+
+  const byKg = [...inRange].sort((a, b) => a.loadMax - b.loadMax);
+  const smallest = byKg[0]!;
+  const largest = byKg[byKg.length - 1]!;
+  const midKg = fullRange
+    ? (smallest.loadMax + largest.loadMax) / 2
+    : (Math.min(loKg, hiKg) + Math.max(loKg, hiKg)) / 2;
+
+  let middle = smallest;
+  let bestDist = Infinity;
+  for (const item of byKg) {
+    const dist = Math.abs(item.loadMax - midKg);
+    if (dist < bestDist) {
+      bestDist = dist;
+      middle = item;
+    }
+  }
+
+  const unique = [...new Map(
+    [smallest, middle, largest].map((item) => [item.slug, item]),
+  ).values()];
+  return unique.slice(0, max);
 }

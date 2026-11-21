@@ -41,12 +41,17 @@ import {
 } from "@/lib/catalog/lineup";
 
 import { LineupRangeProvider } from "./LineupContext";
+import {
+  LineupRangeStrip,
+  type LineupRangeStripProps,
+} from "./LineupRangeStrip";
 
 export type LineupRulerProps = {
   anchors: readonly number[];
   kgPairs: readonly KgPair[];
   /** Full catalog length (including models without kg). */
   totalCount: number;
+  rangeStripCandidates?: LineupRangeStripProps["candidates"];
   children: ReactNode;
 };
 
@@ -75,10 +80,26 @@ function magnetUnit(unit: number, anchorCount: number): number | null {
   return bestDist <= MAGNET_THRESHOLD_UNITS ? best : null;
 }
 
+/** Inclusive break indices for contiguous preset segments along lineup anchors. */
+function lineupPresetBreaks(anchorCount: number, segments = 4): number[] {
+  if (anchorCount < 2) return [0];
+  const raw: number[] = [];
+  for (let s = 0; s <= segments; s += 1) {
+    raw.push(Math.round((s * (anchorCount - 1)) / segments));
+  }
+  return raw.filter((value, index, list) => index === 0 || value !== list[index - 1]);
+}
+
+function unitAtAnchorIndex(index: number, anchorCount: number): number {
+  if (anchorCount < 2) return RANGE_UNIT_MIN;
+  return Math.round((index / (anchorCount - 1)) * RANGE_UNIT_MAX);
+}
+
 export function LineupRuler({
   anchors,
   kgPairs,
   totalCount,
+  rangeStripCandidates = [],
   children,
 }: LineupRulerProps) {
   const t = useTranslations("home");
@@ -93,6 +114,7 @@ export function LineupRuler({
   const [playMachineIntro, setPlayMachineIntro] = useState(false);
   const [hoveredKg, setHoveredKg] = useState<number | null>(null);
   const [centers, setCenters] = useState<number[]>([]);
+  const [activePreset, setActivePreset] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const machinesRef = useRef<HTMLDivElement>(null);
   const rulerRef = useRef<HTMLDivElement>(null);
@@ -269,11 +291,17 @@ export function LineupRuler({
     (which: "lo" | "hi", clientX: number) => {
       userMovedRef.current = true;
       finishIntro();
+      setActivePreset(null);
       const next = unitFromClientX(clientX);
       if (which === "lo") setLoUnit(Math.min(next, hiRef.current));
       else setHiUnit(Math.max(next, loRef.current));
     },
     [finishIntro, unitFromClientX],
+  );
+
+  const presetBreaks = useMemo(
+    () => lineupPresetBreaks(anchors.length, 4),
+    [anchors.length],
   );
 
   const catalogHref = fullRange ? "/catalog" : `/catalog?kg=${loKgRound}-${hiKgRound}`;
@@ -411,6 +439,7 @@ export function LineupRuler({
                 onChange={(event) => {
                   userMovedRef.current = true;
                   finishIntro();
+                  setActivePreset(null);
                   const next = Number(event.target.value);
                   setLoUnit(Math.min(next, hi));
                 }}
@@ -428,6 +457,7 @@ export function LineupRuler({
                 onChange={(event) => {
                   userMovedRef.current = true;
                   finishIntro();
+                  setActivePreset(null);
                   const next = Number(event.target.value);
                   setHiUnit(Math.max(next, lo));
                 }}
@@ -462,6 +492,50 @@ export function LineupRuler({
             </>
           }
         />
+        {rangeStripCandidates.length > 0 ? (
+          <LineupRangeStrip candidates={rangeStripCandidates} />
+        ) : null}
+        {presetBreaks.length >= 3 ? (
+          <ul className="lineup-presets" aria-label={t("presetsLabel")}>
+            {presetBreaks.slice(0, -1).map((startIndex, segment) => {
+              const endIndex = presetBreaks[segment + 1]!;
+              const isFirst = segment === 0;
+              const isLast = segment === presetBreaks.length - 2;
+              const loTarget = isFirst
+                ? RANGE_UNIT_MIN
+                : unitAtAnchorIndex(startIndex, anchors.length);
+              const hiTarget = isLast
+                ? RANGE_UNIT_MAX
+                : unitAtAnchorIndex(endIndex, anchors.length);
+              const label = isFirst
+                ? t("presetTo", { kg: anchors[endIndex]! })
+                : isLast
+                  ? t("presetFrom", { kg: anchors[startIndex]! })
+                  : t("presetBetween", {
+                      from: anchors[startIndex]!,
+                      to: anchors[endIndex]!,
+                    });
+              return (
+                <li key={`preset-${startIndex}-${endIndex}`}>
+                  <button
+                    type="button"
+                    className="lineup-preset"
+                    aria-pressed={activePreset === segment}
+                    onClick={() => {
+                      userMovedRef.current = true;
+                      finishIntro();
+                      setActivePreset(segment);
+                      setLoUnit(loTarget);
+                      setHiUnit(hiTarget);
+                    }}
+                  >
+                    {label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
         <Button href={catalogHref} variant="secondary">
           {t("showInCatalog")}
         </Button>

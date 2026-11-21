@@ -7,7 +7,13 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { siteConfig, visibleContact } from "@/config/site";
+import {
+  localizedHours,
+  siteConfig,
+  telHref,
+  visibleContact,
+  visiblePhones,
+} from "@/config/site";
 import { getEnv } from "@/env";
 import { breadcrumbListJsonLd, organizationJsonLd } from "@/lib/seo/json-ld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -37,11 +43,11 @@ export default async function ServicePage() {
   const tNav = await getTranslations("nav");
   const env = getEnv();
 
-  const phone = visibleContact(siteConfig.phone);
+  const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
   const address = visibleContact(siteConfig.address);
-  const hours = visibleContact(siteConfig.hours);
-  const hasDirectContacts = Boolean(phone || email || hours);
+  const hours = localizedHours(locale);
+  const hasDirectContacts = Boolean(phones.length > 0 || email || hours);
 
   const crumbs = [
     { label: tNav("brand"), href: "/" },
@@ -130,11 +136,17 @@ export default async function ServicePage() {
             ) : null}
             <div className="service-tech-card premium-frame">
               <dl className="company-contact-dl">
-                {phone ? (
+                {phones.length > 0 ? (
                   <>
                     <dt>{t("phone")}</dt>
                     <dd>
-                      <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
+                      <ul className="contact-phones">
+                        {phones.map((phone) => (
+                          <li key={phone}>
+                            <a href={telHref(phone)}>{phone}</a>
+                          </li>
+                        ))}
+                      </ul>
                     </dd>
                   </>
                 ) : null}
@@ -164,7 +176,7 @@ export default async function ServicePage() {
                 {hours ? (
                   <>
                     <dt>{t("hours")}</dt>
-                    <dd>{hours}</dd>
+                    <dd className="contact-hours">{hours}</dd>
                   </>
                 ) : null}
               </dl>

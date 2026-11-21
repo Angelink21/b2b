@@ -275,6 +275,9 @@ export async function fetchCatalogCsvText(
       const res = await fetchImpl(url, {
         signal: ctrl.signal,
         redirect: "follow",
+        // Catalog freshness is owned by `'use cache'` / cacheLife — do not
+        // let the Fetch Cache serve a stale CSV across revalidations.
+        cache: "no-store",
         headers: {
           Accept: "text/csv,text/plain,*/*",
           "User-Agent": "fagor-site-catalog-build/1.0",

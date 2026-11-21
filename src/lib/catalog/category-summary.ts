@@ -1,10 +1,9 @@
-import { getIndex } from "@/lib/catalog";
 import {
   formatCatalogRange,
   formatLoadRange,
 } from "@/lib/catalog/format";
 import { formatNavLoad } from "@/lib/catalog/nav";
-import type { CategorySlug } from "@/lib/catalog/schema";
+import type { CatalogIndexItem, CategorySlug } from "@/lib/catalog/schema";
 
 export type CategoryMetricKind = "kg" | "width" | "volume" | "power";
 
@@ -27,10 +26,11 @@ const METRIC_BY_CATEGORY: Readonly<
   "laundry-carts": "volume",
   "water-recovery": "volume",
   finishing: "power",
+  "mobile-laundry": "power",
 };
 
 function readMetric(
-  item: ReturnType<typeof getIndex>[number],
+  item: CatalogIndexItem,
   kind: CategoryMetricKind,
 ): { min: number; max: number } | null {
   switch (kind) {
@@ -55,9 +55,12 @@ function readMetric(
   }
 }
 
-export function getCategorySummary(slug: CategorySlug): CategorySummary {
+export function buildCategorySummary(
+  slug: CategorySlug,
+  items: readonly CatalogIndexItem[],
+): CategorySummary {
   const kind = METRIC_BY_CATEGORY[slug];
-  const group = getIndex().filter((item) => item.category === slug);
+  const group = items.filter((item) => item.category === slug);
   let metricMin: number | null = null;
   let metricMax: number | null = null;
 

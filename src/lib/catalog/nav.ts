@@ -1,5 +1,5 @@
-import { getIndex } from "@/lib/catalog";
-import { CATEGORY_SLUGS, type CategorySlug } from "@/lib/catalog/schema";
+import type { CatalogIndexItem, CategorySlug } from "@/lib/catalog/schema";
+import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 
 export type CategoryNavStat = {
   slug: CategorySlug;
@@ -14,8 +14,10 @@ const LOAD_RANGE_SLUGS: ReadonlySet<CategorySlug> = new Set([
   "dryers",
 ]);
 
-export function getCategoryNavStats(): CategoryNavStat[] {
-  const items = getIndex();
+/** Pure helper — pass index items from the server (`getIndex()` / snapshot). */
+export function buildCategoryNavStats(
+  items: readonly CatalogIndexItem[],
+): CategoryNavStat[] {
   return CATEGORY_SLUGS.map((slug) => {
     const group = items.filter((item) => item.category === slug);
     let loadMin: number | null = null;
@@ -33,6 +35,13 @@ export function getCategoryNavStats(): CategoryNavStat[] {
 
     return { slug, count: group.length, loadMin, loadMax };
   });
+}
+
+/** @deprecated Prefer `buildCategoryNavStats` + `getIndex()` from queries. */
+export function getCategoryNavStatsFromItems(
+  items: readonly CatalogIndexItem[],
+): CategoryNavStat[] {
+  return buildCategoryNavStats(items);
 }
 
 /** `8–120 кг` with a no-break space before the unit. */

@@ -34,6 +34,12 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+export const viewport = {
+  width: "device-width" as const,
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export async function generateMetadata({ params }: LocaleLayoutProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "meta" });

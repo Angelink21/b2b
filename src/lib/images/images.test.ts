@@ -130,7 +130,7 @@ describe("lineup photo gate", () => {
     expect(photoAspectDeviationPct(680, 1040, 680, 1040)).toBeLessThanOrEqual(8);
   });
 
-  it("disallows lineup photos when AR drifts", () => {
+  it("disallows lineup photos when fewer than six slots have assets", () => {
     __setImagesManifestForTests(
       emptyImagesManifest({
         cloudName: "demo",
@@ -139,22 +139,38 @@ describe("lineup photo gate", () => {
             publicId: "LAP-08_TP2_E_V",
             width: 1067,
             height: 800,
-            trimWidth: 1067,
-            trimHeight: 800,
           },
         },
       }),
     );
-    expect(
-      canUseLineupPhotos([
-        {
-          slug: "lap-08-tp2-e-v",
-          name: "LAP-08 TP2 E V",
-          kgMax: 9,
-          dimensionsMm: { w: 680, d: 698, h: 1040 },
-        },
-      ]),
-    ).toBe(false);
+    const lineup = Array.from({ length: 8 }, (_, i) => ({
+      slug: i === 0 ? "lap-08-tp2-e-v" : `no-photo-${i}`,
+      name: "X",
+      kgMax: 10 + i,
+      dimensionsMm: { w: 680, d: 698, h: 1040 },
+    }));
+    expect(canUseLineupPhotos(lineup)).toBe(false);
+  });
+
+  it("allows lineup photos when every slot has a manifest entry", () => {
+    __setImagesManifestForTests(
+      emptyImagesManifest({
+        cloudName: "demo",
+        images: Object.fromEntries(
+          Array.from({ length: 8 }, (_, i) => [
+            `washer-${i}`,
+            { publicId: `W${i}`, width: 400, height: 500 },
+          ]),
+        ),
+      }),
+    );
+    const lineup = Array.from({ length: 8 }, (_, i) => ({
+      slug: `washer-${i}`,
+      name: "X",
+      kgMax: 10 + i,
+      dimensionsMm: { w: 680, d: 698, h: 1040 },
+    }));
+    expect(canUseLineupPhotos(lineup)).toBe(true);
   });
 });
 

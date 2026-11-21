@@ -49,8 +49,12 @@ export function organizationJsonLd(): JsonLd {
   if (url) {
     data.url = url;
   }
-  const phone = siteConfig.phone.trim();
-  if (phone) data.telephone = phone;
+  const phones = siteConfig.phones.map((p) => p.trim()).filter((p) => p.length > 0);
+  if (phones.length === 1) {
+    data.telephone = phones[0];
+  } else if (phones.length > 1) {
+    data.telephone = phones;
+  }
   const email = siteConfig.email.trim();
   if (email) data.email = email;
   const address = siteConfig.address.trim();
@@ -58,6 +62,7 @@ export function organizationJsonLd(): JsonLd {
     data.address = {
       "@type": "PostalAddress",
       streetAddress: address,
+      addressCountry: "UA",
     };
   }
   return data;

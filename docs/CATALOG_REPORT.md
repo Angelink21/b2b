@@ -1,17 +1,17 @@
 # Catalog build report
 
-Generated: 2026-11-15T17:03:43.052Z
+Generated: 2026-11-21T18:32:13.313Z
 Source: **remote**
 
 ## Summary
 
-- Models: **303**
-- Categories: **8**
-- Series entities: **64**
-- Families: **139**
+- Models: **304**
+- Categories: **9**
+- Series entities: **65**
+- Families: **140**
 - Multi-variant families: **95**
 - Discarded empty CSV rows: **0**
-- Index JSON: 101050 bytes raw, **6080** bytes gzip
+- Index JSON: 101388 bytes raw, **6169** bytes gzip
 
 ## Что изменилось с прошлой сборки
 
@@ -32,31 +32,32 @@ Source: **remote**
 | `finishing` | 12 |
 | `water-recovery` | 7 |
 | `washer-dryers` | 2 |
+| `mobile-laundry` | 1 |
 
 ## Empty fields (null count)
 
 | Field | Empty |
 |---|---|
-| `loadKg` | 84 |
-| `volumeL` | 281 |
-| `boilerL` | 298 |
+| `loadKg` | 85 |
+| `volumeL` | 282 |
+| `boilerL` | 299 |
 | `powerKw` | 23 |
-| `boilerPowerKw` | 298 |
-| `gFactor` | 213 |
-| `spinRpm` | 213 |
-| `shaftDiameterMm` | 253 |
-| `workingWidthMm` | 253 |
-| `workingSpeedMpm` | 253 |
+| `boilerPowerKw` | 299 |
+| `gFactor` | 214 |
+| `spinRpm` | 214 |
+| `shaftDiameterMm` | 254 |
+| `workingWidthMm` | 254 |
+| `workingSpeedMpm` | 254 |
 | `heating` | 25 |
 | `voltage` | 22 |
-| `exhaustMm` | 140 |
-| `airflowM3h` | 140 |
-| `noiseDb` | 35 |
+| `exhaustMm` | 141 |
+| `airflowM3h` | 141 |
+| `noiseDb` | 36 |
 
 ## Series coverage
 
-- Unique short descriptions: 29
-- Unique full descriptions: 52
+- Unique short descriptions: 30
+- Unique full descriptions: 53
 - Models without short description: 1
 - Models without full description: 13
 

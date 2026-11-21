@@ -30,5 +30,6 @@ describe("catalog client payload", () => {
     );
     expect(source).not.toMatch(/^["']use client["']/m);
     expect(source).toMatch(/getBySlug/);
+    expect(source).toMatch(/buildModelStaticParams/);
   });
 });

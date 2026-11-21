@@ -29,6 +29,7 @@ describe("catalog formatters", () => {
         note: "з колесами",
       }),
     ).toBe("1710×810×580 (з колесами)");
+    expect(formatDimensionsMm({ w: 0, d: 0, h: 0 })).toBe("—");
   });
 
   it("formats noise lessThan and alt", () => {

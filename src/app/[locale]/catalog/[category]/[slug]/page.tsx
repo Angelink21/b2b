@@ -11,25 +11,29 @@ import { DimHighlightProvider } from "@/components/motion/DimHighlight";
 import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Container } from "@/components/ui/Container";
-import { DimensionDrawing } from "@/components/ui/DimensionDrawing";
 import { ModelImage } from "@/components/ui/ModelImage";
 import { Row, RowList } from "@/components/ui/Row";
-import { routing } from "@/i18n/routing";
+import { Silhouette } from "@/components/ui/Silhouette";
 import {
-  getAll,
+  GENERIC_SILHOUETTE_MM,
+  getCategoryDef,
+  hasRealDimensions,
+} from "@/config/categories";
+import { summarizeFamily } from "@/lib/catalog/family-diff";
+import { formatLoadKg } from "@/lib/catalog/format";
+import {
   getBySlug,
   getFamily,
   getRelated,
   getSeriesById,
-} from "@/lib/catalog";
-import { summarizeFamily } from "@/lib/catalog/family-diff";
-import { formatLoadKg } from "@/lib/catalog/format";
+} from "@/lib/catalog/queries";
 import {
   CATEGORY_SLUGS,
   HEATING_KEYS,
   type CategorySlug,
   type HeatingKey,
 } from "@/lib/catalog/schema";
+import { buildModelStaticParams } from "@/lib/catalog/static-params";
 import { buildSpecGroups } from "@/lib/catalog/spec-groups";
 import { getModelImage } from "@/lib/images";
 import {
@@ -47,20 +51,14 @@ function isCategorySlug(value: string): value is CategorySlug {
   return (CATEGORY_SLUGS as readonly string[]).includes(value);
 }
 
+/** Snapshot only — do not call runtime `getCatalog()` here. */
 export function generateStaticParams() {
-  const products = getAll();
-  return routing.locales.flatMap((locale) =>
-    products.map((product) => ({
-      locale,
-      category: product.category,
-      slug: product.slug,
-    })),
-  );
+  return buildModelStaticParams();
 }
 
 export async function generateMetadata({ params }: PageProps) {
   const { locale, category, slug } = await params;
-  const product = getBySlug(slug);
+  const product = await getBySlug(slug);
   if (!product || product.category !== category) {
     return {};
   }
@@ -98,7 +96,7 @@ export default async function ModelPage({ params }: PageProps) {
   const { locale, category, slug } = await params;
   if (!isCategorySlug(category)) notFound();
 
-  const product = getBySlug(slug);
+  const product = await getBySlug(slug);
   if (!product || product.category !== category) notFound();
 
   const t = await getTranslations({ locale, namespace: "model" });
@@ -106,10 +104,10 @@ export default async function ModelPage({ params }: PageProps) {
   const tCatalog = await getTranslations({ locale, namespace: "catalog" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
 
-  const series = getSeriesById(product.seriesId);
-  const family = getFamily(product.familyId);
+  const series = await getSeriesById(product.seriesId);
+  const family = await getFamily(product.familyId);
   const familyMembers = summarizeFamily(product, family);
-  const related = getRelated(product.slug, 4);
+  const related = await getRelated(product.slug, 4);
 
   const heatingLabels: Partial<Record<string, string>> = {};
   for (const key of HEATING_KEYS) {
@@ -119,6 +117,13 @@ export default async function ModelPage({ params }: PageProps) {
 
   const photo = getModelImage(product);
   const dims = product.dimensionsMm;
+  const realDims = hasRealDimensions(dims);
+  const drawDims = realDims ? dims : GENERIC_SILHOUETTE_MM;
+  const silhouetteKind =
+    getCategoryDef(product.category)?.silhouette ?? "porthole";
+  const descriptionBlocks = series?.fullBlocks ?? [];
+  const hasDescription =
+    descriptionBlocks.length > 0 || (series?.fullBullets.length ?? 0) > 0;
 
   let heatingLabel: string | null = null;
   if (product.heating) {
@@ -180,11 +185,12 @@ export default async function ModelPage({ params }: PageProps) {
                 categoryLabel={tCat(product.category)}
               />
             ) : (
-              <DimensionDrawing
-                widthMm={dims.w}
-                heightMm={dims.h}
+              <Silhouette
+                widthMm={drawDims.w}
+                heightMm={drawDims.h}
                 targetMaxPx={300}
                 title={product.name}
+                variant={silhouetteKind}
               />
             )}
           </ModelSharedTransition>
@@ -263,7 +269,7 @@ export default async function ModelPage({ params }: PageProps) {
             />
           </div>
 
-          {series && series.fullBullets.length > 0 ? (
+          {series && hasDescription ? (
             <section
               className="model-description"
               aria-labelledby="model-desc-heading"
@@ -272,14 +278,39 @@ export default async function ModelPage({ params }: PageProps) {
               {locale === "en" ? (
                 <p className="model-uk-note mt-2">{t("ukCopyNote")}</p>
               ) : null}
-              <ul
-                className="model-bullets"
-                {...(locale === "en" ? { lang: "uk" } : {})}
-              >
-                {series.fullBullets.map((bullet, index) => (
-                  <li key={`${index}-${bullet.slice(0, 24)}`}>{bullet}</li>
-                ))}
-              </ul>
+              {descriptionBlocks.length > 0 ? (
+                <div
+                  className="model-desc-blocks"
+                  {...(locale === "en" ? { lang: "uk" } : {})}
+                >
+                  {descriptionBlocks.map((block, index) =>
+                    block.kind === "heading" ? (
+                      <h3
+                        key={`h-${index}-${block.text.slice(0, 24)}`}
+                        className="model-desc-heading"
+                      >
+                        {block.text}
+                      </h3>
+                    ) : (
+                      <p
+                        key={`b-${index}-${block.text.slice(0, 24)}`}
+                        className="model-desc-bullet"
+                      >
+                        {block.text}
+                      </p>
+                    ),
+                  )}
+                </div>
+              ) : (
+                <ul
+                  className="model-bullets"
+                  {...(locale === "en" ? { lang: "uk" } : {})}
+                >
+                  {series.fullBullets.map((bullet, index) => (
+                    <li key={`${index}-${bullet.slice(0, 24)}`}>{bullet}</li>
+                  ))}
+                </ul>
+              )}
             </section>
           ) : null}
 

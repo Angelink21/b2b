@@ -6,7 +6,7 @@ import {
   sharedSilhouetteScale,
   toCompareRecord,
 } from "./compare";
-import { getAll, getBySlug } from "./index";
+import { getSnapshotAll as getAll, getSnapshotBySlug as getBySlug } from "./index";
 import { COMPARE_MAX, parseAsModelSlugs } from "./search-params";
 
 const HEATING = {

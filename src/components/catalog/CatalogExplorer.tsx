@@ -11,11 +11,17 @@ import { Input } from "@/components/ui/Input";
 import { RangeDual } from "@/components/ui/RangeDual";
 import { Select } from "@/components/ui/Select";
 import {
+  dimensionFilterAllowed,
   facetAllowed,
   facetsForCategory,
   sortAllowed,
   type RangeFacet,
 } from "@/config/facets";
+import {
+  countHiddenWithoutDimensions,
+  dimensionFilterActive,
+  type DimensionMaxFilter,
+} from "@/lib/catalog/dimension-filter";
 import { Link, usePathname } from "@/i18n/navigation";
 import { serializeCompareSlugs } from "@/lib/catalog/compare";
 import {
@@ -136,6 +142,11 @@ export function CatalogExplorer({
 
   useEffect(() => {
     const patch: Partial<CatalogQueryState> = {};
+    if (!dimensionFilterAllowed(activeCategory)) {
+      if (query.w) patch.w = null;
+      if (query.d) patch.d = null;
+      if (query.h) patch.h = null;
+    }
     if (activeCategory && query.kg && !bounds.kg) patch.kg = null;
     if (activeCategory && query.power && !bounds.power) patch.power = null;
     if (activeCategory && query.width && !bounds.width) patch.width = null;
@@ -160,6 +171,9 @@ export function CatalogExplorer({
     query.speed,
     query.volume,
     query.width,
+    query.w,
+    query.d,
+    query.h,
     setQuery,
   ]);
 
@@ -227,6 +241,17 @@ export function CatalogExplorer({
     };
   }, [sheetOpen]);
 
+  const dimensionMax = useMemo((): DimensionMaxFilter => {
+    if (!dimensionFilterAllowed(activeCategory)) {
+      return {};
+    }
+    const filter: DimensionMaxFilter = {};
+    if (query.w != null) filter.w = query.w;
+    if (query.d != null) filter.d = query.d;
+    if (query.h != null) filter.h = query.h;
+    return filter;
+  }, [activeCategory, query.d, query.h, query.w]);
+
   const applied = useMemo(() => {
     return {
       kg: bounds.kg ? tighten(query.kg, bounds.kg) : null,
@@ -236,10 +261,33 @@ export function CatalogExplorer({
       volume: bounds.volume ? tighten(query.volume, bounds.volume) : null,
       heat: facetAllowed(activeCategory, "heating") ? query.heat : null,
       sort: sortAllowed(activeCategory, query.sort) ? query.sort : null,
+      dimensionsMax: dimensionFilterActive(dimensionMax) ? dimensionMax : null,
     };
-  }, [activeCategory, bounds, query]);
+  }, [activeCategory, bounds, dimensionMax, query]);
 
   const filtered = useMemo(() => {
+    const filter = {
+      ...(activeCategory ? { category: activeCategory } : {}),
+      ...(applied.heat ? { heating: applied.heat } : {}),
+      ...(applied.kg ? { kg: applied.kg } : {}),
+      ...(applied.power ? { power: applied.power } : {}),
+      ...(applied.width ? { width: applied.width } : {}),
+      ...(applied.speed ? { speed: applied.speed } : {}),
+      ...(applied.volume ? { volume: applied.volume } : {}),
+      ...(applied.dimensionsMax ? { dimensionsMax: applied.dimensionsMax } : {}),
+      ...(query.q ? { q: query.q } : {}),
+      allowed,
+    };
+    let list = filterProducts(items, filter);
+    const sort = applied.sort ?? defaultCatalogSort(activeCategory);
+    list = sortProducts(list, sort, {
+      groupByCategory: !applied.sort && !activeCategory,
+    });
+    return list;
+  }, [activeCategory, allowed, applied, items, query.q]);
+
+  const hiddenWithoutDimensions = useMemo(() => {
+    if (!applied.dimensionsMax) return 0;
     const filter = {
       ...(activeCategory ? { category: activeCategory } : {}),
       ...(applied.heat ? { heating: applied.heat } : {}),
@@ -251,12 +299,8 @@ export function CatalogExplorer({
       ...(query.q ? { q: query.q } : {}),
       allowed,
     };
-    let list = filterProducts(items, filter);
-    const sort = applied.sort ?? defaultCatalogSort(activeCategory);
-    list = sortProducts(list, sort, {
-      groupByCategory: !applied.sort && !activeCategory,
-    });
-    return list;
+    const base = filterProducts(items, filter);
+    return countHiddenWithoutDimensions(base, applied.dimensionsMax);
   }, [activeCategory, allowed, applied, items, query.q]);
 
   const limit = Math.max(CATALOG_PAGE_SIZE, query.limit || CATALOG_PAGE_SIZE);
@@ -273,12 +317,24 @@ export function CatalogExplorer({
     if (applied.speed) params.set("speed", `${applied.speed.min}-${applied.speed.max}`);
     if (applied.volume)
       params.set("volume", `${applied.volume.min}-${applied.volume.max}`);
+    if (query.w) params.set("w", String(query.w));
+    if (query.d) params.set("d", String(query.d));
+    if (query.h) params.set("h", String(query.h));
     if (query.q) params.set("q", query.q);
     if (applied.sort) params.set("sort", `${applied.sort.by}:${applied.sort.dir}`);
     if (limit !== CATALOG_PAGE_SIZE) params.set("limit", String(limit));
     const s = params.toString();
     return s ? `?${s}` : "";
-  }, [activeCategory, applied, limit, lockedCategory, query.q]);
+  }, [
+    activeCategory,
+    applied,
+    limit,
+    lockedCategory,
+    query.d,
+    query.h,
+    query.q,
+    query.w,
+  ]);
 
   const heatKeys = useMemo(
     () => HEATING_KEYS.filter((key) => pool.some((item) => item.heating === key)),
@@ -293,6 +349,9 @@ export function CatalogExplorer({
     applied.width ||
     applied.speed ||
     applied.volume ||
+    query.w ||
+    query.d ||
+    query.h ||
     (!lockedCategory && query.type) ||
     applied.sort,
   );
@@ -325,6 +384,9 @@ export function CatalogExplorer({
       width: null,
       speed: null,
       volume: null,
+      w: null,
+      d: null,
+      h: null,
       type: null,
       heat: null,
       q: "",
@@ -394,6 +456,16 @@ export function CatalogExplorer({
     },
   };
 
+  const orphanDimensions = (["w", "d", "h"] as const).flatMap((axis) => {
+    if (dimensionFilterAllowed(activeCategory)) return [];
+    const value = query[axis];
+    if (!value) return [];
+    const label = t(`activeDimension${axis.toUpperCase()}` as "activeDimensionW", {
+      value: formatCatalogBound(locale, value, 10),
+    });
+    return [{ axis, label }];
+  });
+
   const orphanRanges = (["kg", "power", "width", "speed", "volume"] as const).flatMap(
     (facet) => {
       if (facetAllowed(activeCategory, facet)) return [];
@@ -449,8 +521,22 @@ export function CatalogExplorer({
             </div>
           </div>
 
-          {orphanRanges.length > 0 ? (
+          {orphanDimensions.length > 0 || orphanRanges.length > 0 ? (
             <div className="catalog-active-filters">
+              {orphanDimensions.map((item) => (
+                <button
+                  key={item.axis}
+                  type="button"
+                  className="chip catalog-active-chip"
+                  aria-label={t("clearActiveFilter", { value: item.label })}
+                  onClick={() => {
+                    void setQuery({ [item.axis]: null, limit: CATALOG_PAGE_SIZE });
+                  }}
+                >
+                  <span>{item.label}</span>
+                  <span aria-hidden="true">×</span>
+                </button>
+              ))}
               {orphanRanges.map((item) => (
                 <button
                   key={item.facet}
@@ -465,6 +551,39 @@ export function CatalogExplorer({
                   <span aria-hidden="true">×</span>
                 </button>
               ))}
+            </div>
+          ) : null}
+
+          {hiddenWithoutDimensions > 0 ? (
+            <p className="catalog-dimension-note">
+              {t("hiddenWithoutDimensions", { count: hiddenWithoutDimensions })}
+            </p>
+          ) : null}
+
+          {dimensionFilterAllowed(activeCategory) &&
+          dimensionFilterActive(dimensionMax) ? (
+            <div className="catalog-active-filters">
+              {(["w", "d", "h"] as const).flatMap((axis) => {
+                const value = query[axis];
+                if (!value) return [];
+                const label = t(`activeDimension${axis.toUpperCase()}` as "activeDimensionW", {
+                  value: formatCatalogBound(locale, value, 10),
+                });
+                return (
+                  <button
+                    key={axis}
+                    type="button"
+                    className="chip catalog-active-chip"
+                    aria-label={t("clearActiveFilter", { value: label })}
+                    onClick={() => {
+                      void setQuery({ [axis]: null, limit: CATALOG_PAGE_SIZE });
+                    }}
+                  >
+                    <span>{label}</span>
+                    <span aria-hidden="true">×</span>
+                  </button>
+                );
+              })}
             </div>
           ) : null}
 
@@ -624,6 +743,35 @@ export function CatalogExplorer({
                 ))}
               </Select>
             </Field>
+          ) : null}
+
+          {dimensionFilterAllowed(activeCategory) ? (
+            <div className="catalog-dimension-filters">
+              <p className="catalog-kg-label">{t("dimensionFilters")}</p>
+              {(["w", "d", "h"] as const).map((axis) => (
+                <Field
+                  key={axis}
+                  id={`catalog-dim-${axis}`}
+                  label={t(`dimensionMax${axis.toUpperCase()}` as "dimensionMaxW")}
+                >
+                  <Input
+                    id={`catalog-dim-${axis}`}
+                    type="number"
+                    inputMode="numeric"
+                    step={10}
+                    min={10}
+                    value={query[axis] ?? ""}
+                    onChange={(event) => {
+                      const raw = event.target.value.trim();
+                      void setQuery({
+                        [axis]: raw === "" ? null : Number(raw),
+                        limit: CATALOG_PAGE_SIZE,
+                      });
+                    }}
+                  />
+                </Field>
+              ))}
+            </div>
           ) : null}
 
           {(["kg", "power", "width", "speed", "volume"] as const).map((facet) => {

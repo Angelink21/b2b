@@ -7,49 +7,62 @@ Fill these in `src/config/site.ts` (or dedicated content files) before publishin
 | Item | Status | Notes |
 |------|--------|-------|
 | Privacy / legal policy | **blocker** | Final lawyer-approved text for `/privacy`. Current page only describes form fields and purpose (no retention, legal bases, or rights claims). |
+| `NEXT_PUBLIC_SITE_URL` | **blocker for prod** | Set to `https://fagorlaundry.com.ua` when DNS switches (still another site today). Local `.env` stays `localhost`. |
 
-## Contacts (`siteConfig`)
+## Contacts (`src/config/site.ts`) — filled 2026-11-15
 
-| Field     | Status | Notes                                      |
-|-----------|--------|--------------------------------------------|
-| `phone`   | empty  | Shown in footer + contacts + JSON-LD       |
-| `email`   | empty  | Shown in footer + contacts + JSON-LD       |
-| `address` | empty  | Cleared — not confirmed by owner; publish only after confirmation |
-| `hours`   | empty  | Contacts / service hours — wait for client |
-| `logo.src`| empty  | Text brand until logo assets are provided  |
+| Field | Status | Notes |
+|-------|--------|-------|
+| `phones` | set | `044-501-88-87`, `050-382-48-78` |
+| `email` | set | `pkmprofessional@ukr.net` |
+| `address` | set | вул. Київська, 27-В, Вишневе, Київська область |
+| `hours` | set | uk/en localized strings |
+| `logo` / `logoDark` | set | `/brand/fagor-logo.png` (+ dark wordmark); SVG master still welcome |
 
-## Category intros (client copy)
+## Home
 
-Category pages currently show **data-only** leads: model count and the relevant numeric range from the catalog (kg / width / volume / power). Optional short marketing intros from the client can replace or follow that line later — without inventing claims.
+| Slot | Status | Notes |
+|------|--------|-------|
+| Cases | set | Sector scenarios (hotel / healthcare / self-service / central) — not named clients; revise with real stories when available |
+| Featured slugs | set | Confirm list with owner if lineup/flagship should change |
 
-| Category slug | Status | Notes |
-|---------------|--------|-------|
-| `washers` | empty | Client short intro (optional) |
-| `dryers` | empty | Client short intro (optional) |
-| `flatwork-ironers` | empty | Client short intro (optional) |
-| `laundry-carts` | empty | Client short intro (optional) |
-| `ironing-rollers` | empty | Client short intro (optional) |
-| `finishing` | empty | Client short intro (optional) |
-| `water-recovery` | empty | Client short intro (optional) |
-| `washer-dryers` | empty | Client short intro (optional) |
+## Category intros
+
+| Category slug | Status |
+|---------------|--------|
+| all 8 | set | Draft copy in `messages/{uk,en}.json` → `categoryIntros`; owner may revise |
 
 ## About page
 
-Corporate sections (expertise, warehouse, standards, quote CTA) are live. Optional slots below stay hidden until client content exists.
-
-| Slot           | Status | Notes                                      |
-|----------------|--------|--------------------------------------------|
-| History        | empty  | Company timeline / founding story          |
-| Team           | empty  | People / roles                             |
-| Certificates   | empty  | Only real certificates with source docs    |
+| Slot | Status | Notes |
+|------|--------|-------|
+| Lead + history (since 1994, FAGOR PROFESSIONAL) | set | Owner wording + draft expansion |
+| Expertise / infra / standards | set | Infra mentions Vyshneve warehouse |
+| Team | empty | People / roles |
+| Certificates | empty | Only real certificates with source docs |
 
 ## Service page
 
-| Slot              | Status | Notes                                   |
-|-------------------|--------|-----------------------------------------|
-| Warehouse address | empty  | Wait for owner confirmation |
-| Service phone     | empty  | Client will add later; card hides until set |
-| Service email     | empty  | Hide until set                          |
-| Warranty terms    | empty  | Do not invent coverage or duration      |
-| Spare parts lead times | empty | Channels, lead times               |
-| Service hours / SLA | empty | Response times — no invented SLA      |
+| Slot | Status | Notes |
+|------|--------|-------|
+| Phone / email / hours / address | set | From `siteConfig` |
+| Warranty terms | empty | Do not invent coverage or duration |
+| Spare parts lead times | empty | Channels, lead times |
+| SLA / response times | empty | No invented SLA |
+
+## Catalog data (owner / sheet)
+
+| Item | Status | Notes |
+|------|--------|-------|
+| DATA_CONTRACT Q1–Q5 | open | See `docs/DATA_CONTRACT.md` |
+| Short / full description gaps | open | See `docs/CATALOG_REPORT.md` |
+| EN model/series copy | uk-only in UI | EN shows uk text + note, or hide |
+| Finishing without heating | needs-review | DES-F, DES-F-GC, MINI-DES |
+
+## Photos / brand assets
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Logo PNG (header) | set | Prefer SVG master later; OG still uses text brand |
+| Favicon / app icons | empty | Optional from same mark |
+| Hero lineup photos | constrained | See `docs/IMAGES_REPORT.md` |

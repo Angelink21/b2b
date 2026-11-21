@@ -1,4 +1,4 @@
-import { getAll } from "@/lib/catalog";
+import { getSnapshotAll } from "@/lib/catalog";
 import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -67,7 +67,7 @@ export function collectPublicPageMeta(
     });
   }
 
-  for (const product of getAll()) {
+  for (const product of getSnapshotAll()) {
     const heatingLabel = product.heating
       ? heating[product.heating as keyof typeof heating]
       : null;

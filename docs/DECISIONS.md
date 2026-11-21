@@ -43,5 +43,17 @@
 2026-11-15 · next/image custom loader prop (`cloudName::publicId`) instead of global loaderFile · Limits Cloudinary URLs to ModelImage/lineup; remotePatterns still set when cloud name is present.
 2026-11-15 · Compare client island uses ModelImageView + preloaded photo; never imports images.generated.json · Turbopack JSON.parse crashed in the client graph when CompareView imported ModelImage→manifest.
 2026-11-15 · Hero lineup: only LA/LAP/LN front-loaders; photos only if all 8 pass ≤8% trim AR vs Ш/В · LBS barrier bodies broke the shared scale; current Cloudinary crops are not front-view enough for e_trim photos.
+2026-11-15 · U1 hero photos: floor row when ≥6 lineup slots have 12B manifest assets (no per-slot AR gate) · PROMPTS_FINAL vitrine goal; e_trim + mm scale handles scale on render.
 2026-11-15 · Stage 12A: catalog:build fetches CATALOG_CSV_URL (published Sheet CSV) with local CSV fallback; decimal commas coerced; date-like cells fail; shrink guard via catalog.meta.json; slug-history.json → next.config 301 · Owner edits the sheet; no API keys; Vercel keeps last good deploy on validation failure.
 2026-11-15 · Optional CSV column `image_id` stored on Product · Stronger photo match and rename identity than imageKey alone.
+2026-11-15 · Owner contacts published in `siteConfig` (two phones, email, Vyshneve address, hours); cases + category intros authored with owner OK; production domain will be `https://fagorlaundry.com.ua` via `NEXT_PUBLIC_SITE_URL` · Confirmed by owner 2026-11-15; cases are sector scenarios not named clients.
+2026-11-15 · `siteConfig.phones[]` + `hours.{uk,en}` replace single `phone`/`hours` strings · Two public numbers and bilingual hours without inventing a second phone field in i18n.
+2026-11-15 · Header logo: cropped owner PNG → `/brand/fagor-logo.png` + `fagor-logo-dark.png` (white wordmark); swap via `data-theme` · Source wordmark was black; dark theme needed a second asset so red mark is not inverted.
+2026-11-15 · Runtime catalog via `getCatalog()` + `'use cache'` / `cacheLife` (~300s), not Deploy Hook / cron / Apps Script · Sheet edits appear without rebuild; build snapshot remains fallback; status reads `meta` from the same cached result (no module side-status).
+2026-11-15 · Inside `'use cache'` sheet failures throw (Next keeps previous entry on background revalidation error); snapshot only outside on cold/expired miss · Avoids overwriting a good sheet cache with the build snapshot for ≤5 minutes of downtime.
+2026-11-15 · `/api/catalog-status` returns 404 when `CATALOG_STATUS_SECRET` is unset · Optional ops endpoint; build must not require the secret.
+2026-11-19 · `CompareToggle` wraps nuqs/`useSearchParams` in its own `<Suspense>` · Home LineupRangeStrip used it outside a boundary and blocked `/[locale]` prerender.
+2026-11-19 · Production domain `fagorlaundry.com.ua` not set yet · Owner has not confirmed DNS switch; keep `NEXT_PUBLIC_SITE_URL` local.
+2026-11-19 · Snapshot `meta.fetchedAt` = `catalog.meta.json` `builtAt` (not `Date.now`) · Empty `CATALOG_CSV_URL` (e2e) hit Next blocking-prerender-current-time.
+2026-11-21 · Category registry `src/config/categories.ts` + `docs/ADD_CATEGORY.md`; `mobile-laundry` last · Single place for CSV name/slug/facets/columns/silhouette; soft sectors + uk slug translit for TO GO.
+2026-11-21 · loadKg cell that matches a known sector CSV name → sector, loadKg null · Sheet row for ПРАЛЬНЯ TO GO put «Пральні…» in kg column; avoid hard fail.

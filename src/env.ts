@@ -26,6 +26,12 @@ const envSchema = z.object({
   ENABLE_STYLEGUIDE: z.string().optional(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_FOLDER: z.string().optional(),
+  /** Published Google Sheet CSV URL (runtime + catalog:build). Never log the value. */
+  CATALOG_CSV_URL: z.string().optional(),
+  CATALOG_ALLOW_SHRINK: z.string().optional(),
+  CATALOG_CACHE_REVALIDATE_SECONDS: z.string().optional(),
+  /** Bearer for GET /api/catalog-status. Unset → route returns 404 (build must not fail). */
+  CATALOG_STATUS_SECRET: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema> & {
@@ -35,6 +41,10 @@ export type AppEnv = z.infer<typeof envSchema> & {
   rateLimitWindowMs: number;
   rateSalt: string;
   turnstileEnabled: boolean;
+  catalogCsvUrl: string | null;
+  catalogAllowShrink: boolean;
+  catalogCacheRevalidateSeconds: number;
+  catalogStatusSecret: string | null;
 };
 
 function parseSinks(raw: string | undefined): SinkId[] {
@@ -66,6 +76,13 @@ export function getEnv(): AppEnv {
   const turnstileEnabled = Boolean(
     parsed.NEXT_PUBLIC_TURNSTILE_SITE_KEY && parsed.TURNSTILE_SECRET_KEY,
   );
+  const catalogCsvUrl = parsed.CATALOG_CSV_URL?.trim() || null;
+  const catalogStatusSecret = parsed.CATALOG_STATUS_SECRET?.trim() || null;
+  const catalogCacheRevalidateSeconds = Math.max(
+    1,
+    parsePositiveInt(parsed.CATALOG_CACHE_REVALIDATE_SECONDS, 300) || 300,
+  );
+
   cached = {
     ...parsed,
     sinks: parseSinks(parsed.LEADS_SINKS),
@@ -77,6 +94,10 @@ export function getEnv(): AppEnv {
     ),
     rateSalt: parsed.LEADS_RATE_SALT ?? "fagor-dev-rate-salt",
     turnstileEnabled,
+    catalogCsvUrl,
+    catalogAllowShrink: parsed.CATALOG_ALLOW_SHRINK === "1",
+    catalogCacheRevalidateSeconds,
+    catalogStatusSecret,
   };
   return cached;
 }

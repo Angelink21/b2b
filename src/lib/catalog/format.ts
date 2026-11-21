@@ -114,6 +114,7 @@ export function formatDimensionsMm(
   dims: DimensionsMm | null | undefined,
 ): string {
   if (!dims) return EMPTY;
+  if (!(dims.w > 0 && dims.d > 0 && dims.h > 0)) return EMPTY;
   const base = `${dims.w}×${dims.d}×${dims.h}`;
   return dims.note ? `${base} (${dims.note})` : base;
 }

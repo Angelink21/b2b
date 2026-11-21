@@ -1,5 +1,10 @@
 import type { FacetId, RangeFacet } from "@/config/facets";
 
+import {
+  dimensionFilterActive,
+  itemMatchesDimensionFilter,
+  type DimensionMaxFilter,
+} from "./dimension-filter";
 import { indexKeyMetricSortValue } from "./format";
 import {
   CATEGORY_SLUGS,
@@ -55,6 +60,8 @@ export type CatalogFilter = {
   width?: NumberRange;
   speed?: NumberRange;
   volume?: NumberRange;
+  /** Maximum overall dimensions (Ш×Г×В), mm. */
+  dimensionsMax?: DimensionMaxFilter;
   q?: string;
   /**
    * When set, a range or heating value is applied only if its facet is listed.
@@ -197,6 +204,13 @@ export function filterProducts<T extends CatalogIndexItem>(
       filter.volume &&
       facetOn(filter, "volume") &&
       !coversPoint(item.volumeL, filter.volume)
+    ) {
+      return false;
+    }
+    if (
+      filter.dimensionsMax &&
+      dimensionFilterActive(filter.dimensionsMax) &&
+      !itemMatchesDimensionFilter(item, filter.dimensionsMax)
     ) {
       return false;
     }

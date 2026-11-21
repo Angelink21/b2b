@@ -4,8 +4,7 @@ import { Suspense } from "react";
 import { CatalogExplorer } from "@/components/catalog/CatalogExplorer";
 import { CatalogSkeleton } from "@/components/catalog/CatalogSkeleton";
 import { Container } from "@/components/ui/Container";
-import { getIndex } from "@/lib/catalog";
-import { getCategoryNavStats } from "@/lib/catalog/nav";
+import { getCategoryNavStats, getIndex } from "@/lib/catalog/queries";
 import { CATEGORY_SLUGS, type CategorySlug } from "@/lib/catalog/schema";
 import { typo } from "@/lib/typo";
 import { buildPageMetadata } from "@/lib/seo/metadata";
@@ -27,9 +26,10 @@ export async function generateMetadata({
 
 export default async function CatalogPage() {
   const t = await getTranslations("catalog");
-  const items = getIndex();
+  const items = await getIndex();
+  const stats = await getCategoryNavStats();
   const categoryCounts = Object.fromEntries(
-    getCategoryNavStats().map((stat) => [stat.slug, stat.count]),
+    stats.map((stat) => [stat.slug, stat.count]),
   ) as Record<CategorySlug, number>;
   const categoryCount = CATEGORY_SLUGS.filter(
     (slug) => (categoryCounts[slug] ?? 0) > 0,

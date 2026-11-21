@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 import { siteConfig } from "@/config/site";
-import { getAll } from "@/lib/catalog";
+import { getAll } from "@/lib/catalog/queries";
 import { selectLineup } from "@/lib/catalog/lineup";
 import { seoMessages } from "@/lib/seo/messages";
 import { OgFrame, OgSilhouette, OG_SIZE, ogColors } from "@/lib/seo/og";
@@ -17,7 +17,7 @@ type Props = {
 export default async function Image({ params }: Props) {
   const { locale } = await params;
   const meta = seoMessages(locale).meta;
-  const lineup = selectLineup(getAll()).slice(0, 5);
+  const lineup = selectLineup(await getAll()).slice(0, 5);
 
   return new ImageResponse(
     (

@@ -7,12 +7,12 @@ import {
   __setCatalogForTests,
   __setIndexForTests,
   facets,
-  getAll,
-  getByCategory,
-  getBySlug,
-  getFamily,
-  getIndex,
-  getRelated,
+  getSnapshotAll as getAll,
+  getSnapshotByCategory as getByCategory,
+  getSnapshotBySlug as getBySlug,
+  getSnapshotFamily as getFamily,
+  getSnapshotIndex as getIndex,
+  getSnapshotRelated as getRelated,
 } from "./index";
 import {
   CATEGORY_SLUGS,
@@ -44,15 +44,16 @@ describe("generated catalog", () => {
   const catalog = loadGenerated();
   const index = loadIndexFile();
 
-  it("has 303 models, 0 duplicate slugs, 8 categories", () => {
-    expect(catalog.products).toHaveLength(303);
+  it("has unique slugs and every registry category with products", () => {
+    const count = catalog.products.length;
+    expect(count).toBeGreaterThanOrEqual(303);
     const slugs = catalog.products.map((p) => p.slug);
-    expect(new Set(slugs).size).toBe(303);
+    expect(new Set(slugs).size).toBe(count);
     const categories = new Set(catalog.products.map((p) => p.category));
-    expect(categories.size).toBe(8);
     for (const slug of CATEGORY_SLUGS) {
       expect(categories.has(slug)).toBe(true);
     }
+    expect(categories.size).toBe(CATEGORY_SLUGS.length);
   });
 
   it("keeps image null and imageKey present", () => {
@@ -88,7 +89,7 @@ describe("generated catalog", () => {
   });
 
   it("index has same slug set as generated", () => {
-    expect(index.products).toHaveLength(303);
+    expect(index.products).toHaveLength(catalog.products.length);
     const genSlugs = new Set(catalog.products.map((p) => p.slug));
     for (const item of index.products) {
       expect(genSlugs.has(item.slug)).toBe(true);
@@ -99,18 +100,19 @@ describe("generated catalog", () => {
 describe("catalog API", () => {
   const catalog = loadGenerated();
   const index = loadIndexFile();
+  const productCount = catalog.products.length;
 
   it("getBySlug / getByCategory / getFamily / getRelated / facets", () => {
     __setCatalogForTests(catalog);
     __setIndexForTests(index);
 
-    expect(getAll()).toHaveLength(303);
+    expect(getAll()).toHaveLength(productCount);
 
     const sample = catalog.products.find((p) => p.variantLabel !== null)!;
     expect(getBySlug(sample.slug)?.name).toBe(sample.name);
 
     const washers = getByCategory("washers");
-    expect(washers.length).toBe(88);
+    expect(washers.length).toBeGreaterThan(0);
     expect(washers.every((p) => p.category === "washers")).toBe(true);
 
     const family = getFamily(sample.familyId);
@@ -123,8 +125,8 @@ describe("catalog API", () => {
     expect(related.every((p) => p.category === sample.category)).toBe(true);
 
     const f = facets();
-    expect(f.count).toBe(303);
-    expect(f.categories.washers).toBe(88);
+    expect(f.count).toBe(productCount);
+    expect(f.categories.washers).toBe(washers.length);
     expect(f.kg).not.toBeNull();
 
     __setCatalogForTests(null);

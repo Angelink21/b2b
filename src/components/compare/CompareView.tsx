@@ -6,6 +6,10 @@ import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { ModelImageView } from "@/components/ui/ModelImageView";
+import {
+  GENERIC_SILHOUETTE_MM,
+  hasRealDimensions,
+} from "@/config/categories";
 import { Link } from "@/i18n/navigation";
 import {
   buildCompareMatrix,
@@ -16,6 +20,7 @@ import {
 } from "@/lib/catalog/compare";
 import type { SpecFieldKey } from "@/lib/catalog/spec-groups";
 
+import { FloorPlanner } from "./FloorPlanner";
 import { useCompareSelection } from "./useCompareSelection";
 
 const SILHOUETTE_TARGET = 160;
@@ -111,12 +116,16 @@ export function CompareView({
         role="group"
         aria-label={t("silhouettesLabel")}
       >
-        {products.map((product) => (
+        {products.map((product) => {
+          const hMm = hasRealDimensions(product.dimensionsMm)
+            ? product.dimensionsMm.h
+            : GENERIC_SILHOUETTE_MM.h;
+          return (
           <figure key={product.slug} className="compare-silhouette">
             <ModelImageView
               product={product}
               photo={product.photo}
-              targetMaxPx={Math.round(product.dimensionsMm.h * scale)}
+              targetMaxPx={Math.round(hMm * scale)}
               sizes="160px"
             />
             <figcaption>
@@ -128,8 +137,11 @@ export function CompareView({
               </span>
             </figcaption>
           </figure>
-        ))}
+          );
+        })}
       </div>
+
+      <FloorPlanner products={products} quoteHref={quoteHref} />
 
       <div className="data-table-wrap compare-table-wrap">
         <table className="data-table compare-table">

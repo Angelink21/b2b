@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAll, getByCategory } from "@/lib/catalog";
+import { getSnapshotAll as getAll, getSnapshotByCategory as getByCategory } from "@/lib/catalog";
 import {
   aboutPageJsonLd,
   assertNoInventedFields,
@@ -14,14 +14,18 @@ import {
 } from "./json-ld";
 
 describe("JSON-LD builders (S3)", () => {
-  it("Organization omits empty phone/email/address", () => {
+  it("Organization uses owner-confirmed phone/email/address", () => {
     const data = organizationJsonLd();
     expect(data["@type"]).toBe("Organization");
     expect(assertNoInventedFields(data)).toEqual([]);
     expect(data.name).toBe("Fagor Industrial");
-    expect(data.telephone).toBeUndefined();
-    expect(data.email).toBeUndefined();
-    expect(data.address).toBeUndefined();
+    expect(data.telephone).toEqual(["044-501-88-87", "050-382-48-78"]);
+    expect(data.email).toBe("pkmprofessional@ukr.net");
+    expect(data.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "вулиця Київська, 27-В, Вишневе, Київська область",
+      addressCountry: "UA",
+    });
   });
 
   it("AboutPage and ContactPage omit invented contacts", () => {
