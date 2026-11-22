@@ -7,7 +7,7 @@ Fill these in `src/config/site.ts` (or dedicated content files) before publishin
 | Item | Status | Notes |
 |------|--------|-------|
 | Privacy / legal policy | **interim shipped** | Factual notice on `/privacy` (forms, contacts, processors, rights). Lawyer polish still recommended, not a hard launch stop. |
-| `NEXT_PUBLIC_SITE_URL` | **blocker for prod** | Set to `https://fagorlaundry.com.ua` when DNS switches (still another site today). Local `.env` stays `localhost`. |
+| `NEXT_PUBLIC_SITE_URL` | **blocker for prod** | Set to `https://pralne-obladnannya.com.ua` when DNS points at Vercel. Local `.env` stays `localhost`. |
 
 ## Contacts (`src/config/site.ts`) — filled 2026-11-15
 

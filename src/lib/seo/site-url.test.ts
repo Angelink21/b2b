@@ -54,10 +54,10 @@ describe("getSiteUrl", () => {
   it("prefers NEXT_PUBLIC_SITE_URL", () => {
     stashEnv();
     clearSiteEnv();
-    writeEnv("NEXT_PUBLIC_SITE_URL", "https://fagorlaundry.com.ua/");
+    writeEnv("NEXT_PUBLIC_SITE_URL", "https://pralne-obladnannya.com.ua/");
     writeEnv("VERCEL_ENV", "production");
     writeEnv("VERCEL_PROJECT_PRODUCTION_URL", "other.vercel.app");
-    expect(getSiteUrl()).toBe("https://fagorlaundry.com.ua");
+    expect(getSiteUrl()).toBe("https://pralne-obladnannya.com.ua");
   });
 
   it("uses VERCEL_PROJECT_PRODUCTION_URL in production without localhost", () => {
@@ -65,9 +65,9 @@ describe("getSiteUrl", () => {
     clearSiteEnv();
     writeEnv("VERCEL_ENV", "production");
     writeEnv("NODE_ENV", "production");
-    writeEnv("VERCEL_PROJECT_PRODUCTION_URL", "fagorlaundry.com.ua");
+    writeEnv("VERCEL_PROJECT_PRODUCTION_URL", "pralne-obladnannya.com.ua");
     const url = getSiteUrl();
-    expect(url).toBe("https://fagorlaundry.com.ua");
+    expect(url).toBe("https://pralne-obladnannya.com.ua");
     expect(url).not.toMatch(/localhost/i);
   });
 

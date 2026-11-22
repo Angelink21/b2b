@@ -40,7 +40,7 @@ describe("production metadata URLs", () => {
     }
     writeEnv("VERCEL_ENV", "production");
     writeEnv("NODE_ENV", "production");
-    writeEnv("VERCEL_PROJECT_PRODUCTION_URL", "fagorlaundry.com.ua");
+    writeEnv("VERCEL_PROJECT_PRODUCTION_URL", "pralne-obladnannya.com.ua");
 
     const origin = getSiteUrl();
     const canonical = absoluteUrl("uk", "/catalog");

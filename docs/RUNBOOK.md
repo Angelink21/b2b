@@ -13,10 +13,10 @@
 
 ### Домен (коли DNS готовий)
 
-1. Vercel → Project → **Domains** → `fagorlaundry.com.ua` (+ `www` за бажанням).
+1. Vercel → Project → **Domains** → `pralne-obladnannya.com.ua` (+ `www` за бажанням).
 2. Додайте DNS-записи, які покаже Vercel.
 3. Редирект `www` → apex (або навпаки) налаштуйте в Domains UI.
-4. Виставте `NEXT_PUBLIC_SITE_URL=https://fagorlaundry.com.ua` і зробіть Redeploy.
+4. Виставте `NEXT_PUBLIC_SITE_URL=https://pralne-obladnannya.com.ua` і зробіть Redeploy.
 
 ### Чек-лист релізу
 
@@ -36,7 +36,7 @@ Vercel → **Deployments** → попередній успішний депло�
 
 | Ім’я | Навіщо | Обов’язкова | Приклад |
 |---|---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | Canonical, sitemap, JSON-LD | Так у проді | `https://fagorlaundry.com.ua` |
+| `NEXT_PUBLIC_SITE_URL` | Canonical, sitemap, JSON-LD | Так у проді | `https://pralne-obladnannya.com.ua` |
 | `CATALOG_CSV_URL` | Published Google Sheet CSV | Так для live-оновлень | `https://docs.google.com/.../pub?output=csv` |
 | `CATALOG_CACHE_REVALIDATE_SECONDS` | TTL runtime-каталогу | Ні (300) | `300` |
 | `CATALOG_STATUS_SECRET` | Bearer для `/api/catalog-status` | Ні | довгий random |
