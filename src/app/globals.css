@@ -3279,11 +3279,11 @@ a.chip[aria-pressed="true"] {
 
 .compare-tray-thumb {
   display: grid;
-  place-items: end center;
+  place-items: center;
   box-sizing: border-box;
-  width: 44px;
-  height: 44px;
-  padding: var(--space-1);
+  width: 40px;
+  height: 40px;
+  padding: 3px;
   flex: 0 0 auto;
   /* Brighter well than --bg: white pad in light, brightest surface in dark */
   background: var(--surf);
@@ -3302,7 +3302,7 @@ a.chip[aria-pressed="true"] {
   width: auto;
   height: auto;
   object-fit: contain;
-  object-position: bottom center;
+  object-position: center;
 }
 
 [data-theme="light"] .compare-tray-thumb-img {

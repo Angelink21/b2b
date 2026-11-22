@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, type ReactNode } from "react";
 
-import { CompareToggle } from "@/components/compare/CompareToggle";
+import { CompareCheckbox } from "@/components/compare/CompareCheckbox";
 import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
 import {
   DataTable,
@@ -207,7 +207,7 @@ export function CatalogTable({
           if (id === "name") {
             return (
               <div className="catalog-name-cell">
-                <CompareToggle slug={row.slug} size="sm" className="compare-toggle-table" />
+                <CompareCheckbox slug={row.slug} name={row.name} />
                 <ModelSharedTransition slug={row.slug}>
                   <Link
                     href={`/catalog/${row.category}/${row.slug}`}
