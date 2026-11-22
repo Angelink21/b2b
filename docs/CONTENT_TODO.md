@@ -6,7 +6,7 @@ Fill these in `src/config/site.ts` (or dedicated content files) before publishin
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Privacy / legal policy | **blocker** | Final lawyer-approved text for `/privacy`. Current page only describes form fields and purpose (no retention, legal bases, or rights claims). |
+| Privacy / legal policy | **interim shipped** | Factual notice on `/privacy` (forms, contacts, processors, rights). Lawyer polish still recommended, not a hard launch stop. |
 | `NEXT_PUBLIC_SITE_URL` | **blocker for prod** | Set to `https://fagorlaundry.com.ua` when DNS switches (still another site today). Local `.env` stays `localhost`. |
 
 ## Contacts (`src/config/site.ts`) — filled 2026-11-15

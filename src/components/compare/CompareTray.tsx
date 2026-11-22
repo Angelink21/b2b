@@ -90,9 +90,9 @@ export function CompareTray() {
                   <Image
                     src={item.thumbSrc}
                     alt=""
-                    width={item.thumbW}
-                    height={item.thumbH}
-                    sizes="88px"
+                    width={40}
+                    height={40}
+                    sizes="40px"
                     unoptimized
                     className="compare-tray-thumb-img"
                   />

@@ -11,14 +11,27 @@ export type CloudinaryLoaderOptions = {
 /**
  * Build a Cloudinary delivery URL.
  * Default transforms: f_auto,q_auto,c_limit,w_<width>
+ *
+ * `padSquare`: e_trim then transparent square pad so mixed aspect ratios
+ * fill the same box without cropping the machine (compare-tray thumbs).
  */
 export function buildCloudinaryUrl(
   cloudName: string,
   publicId: string,
   width: number,
-  opts?: { quality?: number | "auto"; extraTransforms?: string },
+  opts?: { quality?: number | "auto"; extraTransforms?: string; padSquare?: boolean },
 ): string {
-  const parts = ["f_auto", "q_auto", "c_limit", `w_${Math.max(1, Math.round(width))}`];
+  const w = Math.max(1, Math.round(width));
+  const q = opts?.quality === undefined ? "auto" : opts.quality;
+  const qSeg = `q_${q}`;
+
+  if (opts?.padSquare) {
+    // Chain: trim → pad to square (transparent) → auto format
+    const transform = `e_trim/c_pad,b_transparent,w_${w},h_${w},f_auto,${qSeg}`;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${transform}/${encodeCloudinaryPath(publicId)}`;
+  }
+
+  const parts = ["f_auto", qSeg, "c_limit", `w_${w}`];
   if (opts?.extraTransforms) {
     parts.unshift(opts.extraTransforms);
   }

@@ -36,7 +36,7 @@ export async function SiteShell({ children }: SiteShellProps) {
     const thumbSrc =
       photo?.publicId && cloudName
         ? buildCloudinaryUrl(cloudName, photo.publicId, COMPARE_TRAY_THUMB_WIDTH, {
-            extraTransforms: "e_trim",
+            padSquare: true,
           })
         : null;
     itemsBySlug[product.slug] = {

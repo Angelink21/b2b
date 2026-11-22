@@ -3256,6 +3256,7 @@ a.chip[aria-pressed="true"] {
   padding: 0;
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
   gap: var(--space-2);
   flex: 1;
   min-width: 0;
@@ -3265,11 +3266,14 @@ a.chip[aria-pressed="true"] {
 .compare-tray-item {
   display: inline-flex;
   align-items: center;
+  align-self: center;
+  box-sizing: border-box;
   gap: var(--space-2);
+  height: 44px;
   min-height: 44px;
   max-width: 100%;
   /* space-3 left clears the chip radius so the thumb is not clipped */
-  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  padding: 0 var(--space-1) 0 var(--space-3);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-chip);
   background: var(--floor);
@@ -3285,7 +3289,6 @@ a.chip[aria-pressed="true"] {
   height: 40px;
   padding: 3px;
   flex: 0 0 auto;
-  /* Brighter well than --bg: white pad in light, brightest surface in dark */
   background: var(--surf);
   border-radius: var(--radius-control);
   overflow: hidden;
@@ -3295,12 +3298,11 @@ a.chip[aria-pressed="true"] {
   background: var(--floor);
 }
 
+/* Full machine visible; Cloudinary square-pad equalizes aspect before delivery */
 .compare-tray-thumb-img {
   display: block;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
 }

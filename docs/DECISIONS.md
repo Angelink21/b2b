@@ -63,3 +63,4 @@
 2026-11-22 · `getSiteUrl()`: NEXT_PUBLIC_SITE_URL → Vercel production/preview hosts → localhost only off production · Stops preview OG/canonical leaking localhost or sibling deployment URLs.
 2026-11-22 · Prerender-manifest test accepts `compute: "resuming"` · Cache Components marks compare/quote/catalog (searchParams) as resuming while still PARTIALLY_STATIC.
 2026-11-22 · Brand copy `Fagor Professional`; linen volume phrased per hour (uk «у годину», en «per hour») · Owner request; replaces Industrial / per-shift wording in UI.
+2026-11-22 · Interim factual `/privacy` notice (not lawyer-certified) · Owner asked for launchable text; sticks to real forms/contacts/processors, no invented statutes.
