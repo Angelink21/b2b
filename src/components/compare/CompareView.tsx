@@ -103,6 +103,25 @@ export function CompareView({
           <Button type="button" variant="secondary" onClick={() => void copyLink()}>
             {t("copyLink")}
           </Button>
+          <a
+            href="#floor-planner-title"
+            className="compare-planner-jump"
+            onClick={(event) => {
+              const title = document.getElementById("floor-planner-title");
+              if (!title) return;
+              event.preventDefault();
+              const reduceMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+              ).matches;
+              title.focus({ preventScroll: true });
+              title.scrollIntoView({
+                behavior: reduceMotion ? "instant" : "smooth",
+                block: "start",
+              });
+            }}
+          >
+            {t("toPlanner")}
+          </a>
         </div>
         {copyStatus ? (
           <p className="compare-copy-status" role="status">
@@ -140,8 +159,6 @@ export function CompareView({
           );
         })}
       </div>
-
-      <FloorPlanner products={products} quoteHref={quoteHref} />
 
       <div className="data-table-wrap compare-table-wrap">
         <table className="data-table compare-table">
@@ -191,6 +208,8 @@ export function CompareView({
           </tbody>
         </table>
       </div>
+
+      <FloorPlanner products={products} quoteHref={quoteHref} />
     </div>
   );
 }

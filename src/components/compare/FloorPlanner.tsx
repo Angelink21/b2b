@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -35,10 +36,18 @@ import {
   type FloorRect,
   type RotationQuarter,
 } from "@/lib/floor-planner/geometry";
-
-const ZOOM_STEP = 1.25;
-const ZOOM_MIN = 0.5;
-const ZOOM_MAX = 3;
+import {
+  clampPan,
+  fitScalePxPerMm,
+  fitView,
+  formatZoomPercent,
+  labelFontSizeMm,
+  PAN_STEP_PX,
+  stepZoom,
+  viewportHeightPx,
+  zoomAtCenter,
+  type ViewTransform,
+} from "@/lib/floor-planner/view-transform";
 
 type PlacementState = {
   xMm: number;
@@ -51,6 +60,12 @@ type FloorPlannerProps = {
   quoteHref: string;
 };
 
+function topViewLabel(wMm: number, dMm: number, rotation: RotationQuarter): string {
+  const { w, d } = footprintMm(wMm, dMm, rotation);
+  return `${w}×${d}`;
+}
+
+/** Screen → SVG user units; includes CSS zoom/pan via getScreenCTM. */
 function clientToSvgMm(
   svg: SVGSVGElement,
   clientX: number,
@@ -65,17 +80,13 @@ function clientToSvgMm(
   return { x: mapped.x, y: mapped.y };
 }
 
-function topViewLabel(wMm: number, dMm: number, rotation: RotationQuarter): string {
-  const { w, d } = footprintMm(wMm, dMm, rotation);
-  return `${w}×${d}`;
-}
-
 export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
   const t = useTranslations("compare.floorPlanner");
   const locale = useLocale();
   const sectionId = useId();
+  const stageRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const pinchRef = useRef<{ distance: number; scale: number } | null>(null);
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const stagePointersRef = useRef(
     new Map<number, { x: number; y: number }>(),
   );
@@ -85,11 +96,20 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     offsetY: number;
     pointerId: number;
   } | null>(null);
+  const panDragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originPanX: number;
+    originPanY: number;
+  } | null>(null);
+  const viewRef = useRef<ViewTransform>(fitView());
 
   const [roomWidthM, setRoomWidthM] = useState(DEFAULT_ROOM_WIDTH_M);
   const [roomLengthM, setRoomLengthM] = useState(DEFAULT_ROOM_LENGTH_M);
   const [gapMm, setGapMm] = useState(DEFAULT_MACHINE_GAP_MM);
-  const [zoom, setZoom] = useState(1);
+  const [view, setView] = useState<ViewTransform>(fitView);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
   const [hiddenSlugs, setHiddenSlugs] = useState<Set<string>>(() => new Set());
   const [placementOverrides, setPlacementOverrides] = useState<
@@ -98,6 +118,39 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
 
   const roomWidthMm = metersToMm(roomWidthM);
   const roomLengthMm = metersToMm(roomLengthM);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const measure = () => {
+      const width = stage.clientWidth;
+      const height = viewportHeightPx(
+        width,
+        roomWidthM,
+        roomLengthM,
+        window.innerHeight,
+      );
+      setViewportSize((prev) => {
+        if (prev.width === width && prev.height === height) return prev;
+        setView((current) => {
+          const next = zoomAtCenter(current, current.zoom, width, height);
+          viewRef.current = next;
+          return next;
+        });
+        return { width, height };
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [roomLengthM, roomWidthM]);
 
   const productSlugs = useMemo(
     () => new Set(products.map((product) => product.slug)),
@@ -187,11 +240,88 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     return Array.from({ length: max + 1 }, (_, index) => index);
   }, [roomLengthM, roomWidthM]);
 
+  const pxPerMmAtFit = useMemo(
+    () =>
+      fitScalePxPerMm(
+        viewportSize.width,
+        viewportSize.height,
+        roomWidthMm,
+        roomLengthMm,
+      ),
+    [roomLengthMm, roomWidthMm, viewportSize.height, viewportSize.width],
+  );
+
+  const commitView = useCallback(
+    (next: ViewTransform) => {
+      const width = viewportSize.width || stageRef.current?.clientWidth || 0;
+      const height =
+        viewportSize.height ||
+        viewportHeightPx(
+          width,
+          roomWidthM,
+          roomLengthM,
+          typeof window !== "undefined" ? window.innerHeight : 0,
+        );
+      const clamped = zoomAtCenter(next, next.zoom, width, height);
+      viewRef.current = clamped;
+      setView(clamped);
+    },
+    [roomLengthM, roomWidthM, viewportSize.height, viewportSize.width],
+  );
+
+  const bumpZoom = useCallback(
+    (direction: 1 | -1) => {
+      setView((current) => {
+        const width = viewportSize.width || stageRef.current?.clientWidth || 0;
+        const height =
+          viewportSize.height ||
+          viewportHeightPx(
+            width,
+            roomWidthM,
+            roomLengthM,
+            typeof window !== "undefined" ? window.innerHeight : 0,
+          );
+        const next = zoomAtCenter(
+          current,
+          stepZoom(current.zoom, direction),
+          width,
+          height,
+        );
+        viewRef.current = next;
+        return next;
+      });
+    },
+    [roomLengthM, roomWidthM, viewportSize.height, viewportSize.width],
+  );
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      const direction: 1 | -1 = event.deltaY < 0 ? 1 : -1;
+      bumpZoom(direction);
+    };
+    stage.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      stage.removeEventListener("wheel", onWheel);
+    };
+  }, [bumpZoom]);
+
+  const fitToView = useCallback(() => {
+    const next = fitView();
+    viewRef.current = next;
+    setView(next);
+  }, []);
+
   const resetLayout = useCallback(() => {
     setRoomWidthM(DEFAULT_ROOM_WIDTH_M);
     setRoomLengthM(DEFAULT_ROOM_LENGTH_M);
     setGapMm(DEFAULT_MACHINE_GAP_MM);
-    setZoom(1);
+    const next = fitView();
+    viewRef.current = next;
+    setView(next);
     setHiddenSlugs(new Set());
     setSelectedSlug(null);
     setPlacementOverrides({});
@@ -239,8 +369,58 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     setSelectedSlug((current) => (current === slug ? null : current));
   }, []);
 
+  const panBy = useCallback(
+    (dx: number, dy: number) => {
+      const current = viewRef.current;
+      if (current.zoom <= 1) return;
+      const pan = clampPan(
+        current.panX + dx,
+        current.panY + dy,
+        current.zoom,
+        viewportSize.width,
+        viewportSize.height,
+      );
+      const next = { zoom: current.zoom, ...pan };
+      viewRef.current = next;
+      setView(next);
+    },
+    [viewportSize.height, viewportSize.width],
+  );
+
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    if (!effectiveSelectedSlug) return;
+    if (event.key === "+" || event.key === "=") {
+      event.preventDefault();
+      bumpZoom(1);
+      return;
+    }
+    if (event.key === "-" || event.key === "_") {
+      event.preventDefault();
+      bumpZoom(-1);
+      return;
+    }
+    if (event.key === "0") {
+      event.preventDefault();
+      fitToView();
+      return;
+    }
+
+    if (!effectiveSelectedSlug) {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        panBy(PAN_STEP_PX, 0);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        panBy(-PAN_STEP_PX, 0);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        panBy(0, PAN_STEP_PX);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        panBy(0, -PAN_STEP_PX);
+      }
+      return;
+    }
+
     const product = products.find((p) => p.slug === effectiveSelectedSlug);
     const state = placements[effectiveSelectedSlug];
     if (!product || !state) return;
@@ -293,9 +473,8 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     event.preventDefault();
     event.stopPropagation();
     setSelectedSlug(slug);
-    const product = products.find((p) => p.slug === slug);
     const state = placements[slug];
-    if (!product || !state) return;
+    if (!state) return;
 
     const point = clientToSvgMm(svg, event.clientX, event.clientY);
     dragRef.current = {
@@ -314,10 +493,6 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     const drag = dragRef.current;
     const svg = svgRef.current;
     if (!drag || drag.slug !== slug || !svg) return;
-    const product = products.find((p) => p.slug === slug);
-    const state = placements[slug];
-    if (!product || !state) return;
-
     const point = clientToSvgMm(svg, event.clientX, event.clientY);
     const xMm = snapMm(point.x - drag.offsetX);
     const yMm = snapMm(point.y - drag.offsetY);
@@ -350,13 +525,27 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     });
     const distance = pinchDistance(stagePointersRef.current);
     if (distance !== null) {
-      pinchRef.current = { distance, scale: zoom };
+      pinchRef.current = { distance, zoom: viewRef.current.zoom };
+      panDragRef.current = null;
     }
   }
 
   function onStagePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (event.target !== event.currentTarget) return;
+    const target = event.target as Element | null;
+    if (target?.closest(".floor-planner-machine")) return;
+
     setSelectedSlug(null);
+
+    if (viewRef.current.zoom > 1 && stagePointersRef.current.size < 2) {
+      panDragRef.current = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        originPanX: viewRef.current.panX,
+        originPanY: viewRef.current.panY,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
   }
 
   function onStagePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -366,17 +555,41 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
         y: event.clientY,
       });
     }
+
     const distance = pinchDistance(stagePointersRef.current);
     const pinch = pinchRef.current;
-    if (distance === null || !pinch || pinch.distance <= 0) return;
-    const nextScale = pinch.scale * (distance / pinch.distance);
-    setZoom(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, nextScale)));
+    if (distance !== null && pinch && pinch.distance > 0) {
+      const nextZoom = pinch.zoom * (distance / pinch.distance);
+      commitView({ ...viewRef.current, zoom: nextZoom });
+      return;
+    }
+
+    const panDrag = panDragRef.current;
+    if (!panDrag || panDrag.pointerId !== event.pointerId) return;
+    const dx = event.clientX - panDrag.startX;
+    const dy = event.clientY - panDrag.startY;
+    const pan = clampPan(
+      panDrag.originPanX + dx,
+      panDrag.originPanY + dy,
+      viewRef.current.zoom,
+      viewportSize.width,
+      viewportSize.height,
+    );
+    const next = { zoom: viewRef.current.zoom, ...pan };
+    viewRef.current = next;
+    setView(next);
   }
 
   function onStagePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
     stagePointersRef.current.delete(event.pointerId);
     if (stagePointersRef.current.size < 2) {
       pinchRef.current = null;
+    }
+    if (panDragRef.current?.pointerId === event.pointerId) {
+      panDragRef.current = null;
+    }
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
     }
   }
 
@@ -389,13 +602,19 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
   const roomWidthFieldId = `${sectionId}-room-width`;
   const roomLengthFieldId = `${sectionId}-room-length`;
   const gapFieldId = `${sectionId}-gap`;
+  const zoomLabel = formatZoomPercent(view.zoom);
 
   return (
     <section
+      id="floor-planner"
       className="floor-planner"
-      aria-labelledby={`${sectionId}-title`}
+      aria-labelledby="floor-planner-title"
     >
-      <h2 id={`${sectionId}-title`} className="floor-planner-title">
+      <h2
+        id="floor-planner-title"
+        className="floor-planner-title"
+        tabIndex={-1}
+      >
         {t("title")}
       </h2>
       <p className="floor-planner-lead text-steel">{t("lead")}</p>
@@ -465,29 +684,33 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
             size="sm"
             variant="secondary"
             aria-label={t("zoomOut")}
-            onClick={() =>
-              setZoom((current) =>
-                Math.max(ZOOM_MIN, current / ZOOM_STEP),
-              )
-            }
+            onClick={() => bumpZoom(-1)}
           >
             −
           </Button>
+          <span className="floor-planner-zoom-value" aria-live="polite">
+            {zoomLabel}
+          </span>
           <Button
             type="button"
             size="sm"
             variant="secondary"
             aria-label={t("zoomIn")}
-            onClick={() =>
-              setZoom((current) =>
-                Math.min(ZOOM_MAX, current * ZOOM_STEP),
-              )
-            }
+            onClick={() => bumpZoom(1)}
           >
             +
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={fitToView}
+          >
+            {t("fit")}
+          </Button>
         </div>
         <div
+          ref={stageRef}
           className="floor-planner-stage"
           tabIndex={0}
           role="application"
@@ -498,12 +721,16 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
           onPointerMove={onStagePointerMove}
           onPointerUp={onStagePointerUp}
           onPointerCancel={onStagePointerUp}
+          style={{
+            height:
+              viewportSize.height > 0 ? `${viewportSize.height}px` : undefined,
+          }}
         >
           <div
             className="floor-planner-stage-inner"
             style={{
-              transform: `scale(${zoom})`,
-              transformOrigin: "top left",
+              transform: `translate(${view.panX}px, ${view.panY}px) scale(${view.zoom})`,
+              transformOrigin: "center center",
             }}
           >
             <svg
@@ -511,6 +738,7 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
               className="floor-planner-svg"
               viewBox={`0 0 ${roomWidthMm} ${roomLengthMm}`}
               width="100%"
+              height="100%"
               preserveAspectRatio="xMidYMid meet"
               aria-hidden={false}
             >
@@ -552,9 +780,14 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
                   : overlap
                     ? t("overlap")
                     : null;
-                const labelSize = Math.max(
+                const preferred = Math.max(
                   60,
                   Math.min(140, Math.min(w, d) * 0.14),
+                );
+                const labelSize = labelFontSizeMm(
+                  preferred,
+                  pxPerMmAtFit,
+                  view.zoom,
                 );
 
                 return (
@@ -606,37 +839,43 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
                         strokeWidth={40}
                       />
                     ) : null}
-                    {issue ? (
+                    <g aria-hidden="true">
+                      {issue ? (
+                        <text
+                          x={placement.xMm + w / 2}
+                          y={placement.yMm + d / 2}
+                          className="floor-planner-machine-issue"
+                          fontSize={labelSize}
+                        >
+                          {issue}
+                        </text>
+                      ) : null}
                       <text
                         x={placement.xMm + w / 2}
-                        y={placement.yMm + d / 2}
-                        className="floor-planner-machine-issue"
+                        y={placement.yMm + d / 2 + (issue ? labelSize : 0)}
+                        className="floor-planner-machine-name"
                         fontSize={labelSize}
                       >
-                        {issue}
+                        {placement.name}
                       </text>
-                    ) : null}
-                    <text
-                      x={placement.xMm + w / 2}
-                      y={placement.yMm + d / 2 + (issue ? labelSize : 0)}
-                      className="floor-planner-machine-name"
-                      fontSize={labelSize}
-                    >
-                      {placement.name}
-                    </text>
-                    <text
-                      x={placement.xMm + w / 2}
-                      y={placement.yMm + d / 2 + (issue ? labelSize * 2 : labelSize)}
-                      className="floor-planner-machine-size"
-                      fontSize={labelSize * 0.85}
-                    >
-                      {topViewLabel(
-                        placement.wMm,
-                        placement.dMm,
-                        placement.rotation,
-                      )}{" "}
-                      {t("unitMm")}
-                    </text>
+                      <text
+                        x={placement.xMm + w / 2}
+                        y={
+                          placement.yMm +
+                          d / 2 +
+                          (issue ? labelSize * 2 : labelSize)
+                        }
+                        className="floor-planner-machine-size"
+                        fontSize={labelSize * 0.85}
+                      >
+                        {topViewLabel(
+                          placement.wMm,
+                          placement.dMm,
+                          placement.rotation,
+                        )}{" "}
+                        {t("unitMm")}
+                      </text>
+                    </g>
                   </g>
                 );
               })}

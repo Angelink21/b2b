@@ -227,6 +227,7 @@
     "diffOnly": "Differences only",
     "quoteSelected": "Get a quote for these models",
     "copyLink": "Copy link",
+    "toPlanner": "To floor layout planner ↓",
     "copied": "Link copied",
     "empty": "Pick 2–4 models in the catalog to compare.",
     "toCatalog": "To catalog",
@@ -252,10 +253,11 @@
       "canvasLabel": "Room plan with machines",
       "machineLabel": "{name}, {size} mm",
       "unitMm": "mm",
-      "hint": "Arrow keys move the selected machine by 50 mm, R rotates, Delete removes it from the plan. Pinch or +/- zoom the view.",
+      "hint": "Arrow keys move the selected machine by 50 mm (or pan the plan when none is selected), R rotates, Delete removes it from the plan. +, −, 0 zoom; Ctrl+wheel or pinch also zoom.",
       "zoomLabel": "Plan zoom",
       "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out"
+      "zoomOut": "Zoom out",
+      "fit": "Fit"
     }
   },
   "categories": {

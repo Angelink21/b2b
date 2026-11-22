@@ -81,7 +81,9 @@ test.describe("compare and datasheet", () => {
     await expect(page.locator(".compare-table")).toBeVisible();
     await expect(page.getByRole("button", { name: "Лише відмінності" })).toBeVisible();
 
-    const quote = page.getByRole("link", { name: /Отримати КП на ці моделі/i });
+    const quote = page
+      .getByRole("link", { name: /Отримати КП на ці моделі/i })
+      .first();
     await expect(quote).toHaveAttribute("href", /m=/);
   });
 

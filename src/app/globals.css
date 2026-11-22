@@ -3284,6 +3284,18 @@ body.has-compare-tray #main {
   flex-wrap: wrap;
   gap: var(--space-3);
   margin-inline-start: auto;
+  align-items: center;
+}
+
+.compare-planner-jump {
+  font-size: var(--text-caption);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: var(--ink);
+}
+
+.compare-planner-jump:hover {
+  color: var(--steel);
 }
 
 .compare-copy-status {
@@ -3338,7 +3350,7 @@ body.has-compare-tray #main {
 }
 
 .compare-table-wrap {
-  margin-bottom: var(--space-4);
+  margin-bottom: 0;
 }
 
 /* Compare — floor planner (U4) */
@@ -3359,12 +3371,21 @@ body.has-compare-tray #main {
   text-wrap: balance;
 }
 
+.floor-planner-title:focus {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
 .floor-planner-lead,
 .floor-planner-hint {
   margin: 0;
   font-size: var(--text-caption);
   text-wrap: pretty;
   max-width: var(--measure-narrow);
+}
+
+.floor-planner-lead {
+  hyphens: manual;
 }
 
 .floor-planner-summary {
@@ -3394,17 +3415,27 @@ body.has-compare-tray #main {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  align-items: center;
+}
+
+.floor-planner-zoom-value {
+  min-width: 4ch;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-caption);
+  text-align: center;
 }
 
 .floor-planner-stage {
   position: relative;
-  overflow: auto;
-  min-height: 280px;
-  max-height: min(72vh, 640px);
-  padding: var(--space-2);
+  overflow: hidden;
+  isolation: isolate;
+  z-index: 0;
+  width: 100%;
+  min-height: 160px;
   background: var(--floor);
   border: 1.5px solid var(--line);
   touch-action: none;
+  cursor: grab;
 }
 
 .floor-planner-stage:focus-visible {
@@ -3413,46 +3444,54 @@ body.has-compare-tray #main {
 }
 
 .floor-planner-stage-inner {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   width: 100%;
-  min-width: 280px;
+  height: 100%;
+  transform-origin: center center;
 }
 
 .floor-planner-svg {
   display: block;
-  height: auto;
+  width: 100%;
+  height: 100%;
   font-family: var(--font-sans);
 }
 
 .floor-planner-room {
   fill: var(--bg);
   stroke: var(--ink);
-  stroke-width: 20;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
 }
 
 .floor-planner-grid line {
   stroke: var(--line);
-  stroke-width: 4;
+  stroke-width: 1px;
   vector-effect: non-scaling-stroke;
 }
 
 .floor-planner-machine-body {
   fill: var(--surf);
   stroke: var(--ink);
-  stroke-width: 12;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
   cursor: grab;
 }
 
 .floor-planner-machine.is-selected .floor-planner-machine-body {
-  stroke-width: 20;
+  stroke-width: 3px;
 }
 
 .floor-planner-machine.is-overlap .floor-planner-machine-body,
 .floor-planner-machine.is-outside .floor-planner-machine-body {
-  stroke-width: 30;
+  stroke-width: 3px;
 }
 
 .floor-planner-machine-stripe {
   stroke: var(--ink);
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
