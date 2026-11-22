@@ -7,6 +7,7 @@ import { ModelActions } from "@/components/catalog/ModelActions";
 import { ModelBreadcrumbs } from "@/components/catalog/ModelBreadcrumbs";
 import { ModelFamilySwitcher } from "@/components/catalog/ModelFamilySwitcher";
 import { ModelSpecs } from "@/components/catalog/ModelSpecs";
+import { CompareToggle } from "@/components/compare/CompareToggle";
 import { DimHighlightProvider } from "@/components/motion/DimHighlight";
 import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -252,20 +253,45 @@ export default async function ModelPage({ params }: PageProps) {
 
           <div className="model-family">
             <ModelFamilySwitcher
-              currentSlug={product.slug}
-              members={familyMembers}
               heading={t("otherVariants")}
-              differsIn={(fields) => t("differsIn", { fields })}
-              fieldLabels={{
-                variantLabel: t("diffFields.variantLabel"),
-                heating: t("diffFields.heating"),
-                heatingVariant: t("diffFields.heatingVariant"),
-                powerKw: t("diffFields.powerKw"),
-                loadKg: t("diffFields.loadKg"),
-                voltage: t("diffFields.voltage"),
-                dimensionsMm: t("diffFields.dimensionsMm"),
-                name: t("diffFields.name"),
-              }}
+              members={familyMembers.map((member) => {
+                const current = member.slug === product.slug;
+                const label = member.variantLabel?.trim() || member.name;
+                const fields = member.differingFields
+                  .map((field) => {
+                    switch (field) {
+                      case "variantLabel":
+                        return t("diffFields.variantLabel");
+                      case "heating":
+                        return t("diffFields.heating");
+                      case "heatingVariant":
+                        return t("diffFields.heatingVariant");
+                      case "powerKw":
+                        return t("diffFields.powerKw");
+                      case "loadKg":
+                        return t("diffFields.loadKg");
+                      case "voltage":
+                        return t("diffFields.voltage");
+                      case "dimensionsMm":
+                        return t("diffFields.dimensionsMm");
+                      case "name":
+                        return t("diffFields.name");
+                      default:
+                        return field;
+                    }
+                  })
+                  .join(", ");
+                return {
+                  slug: member.slug,
+                  category: member.category,
+                  label,
+                  current,
+                  diffNote:
+                    !current && fields.length > 0
+                      ? t("differsIn", { fields })
+                      : null,
+                };
+              })}
             />
           </div>
 
@@ -320,19 +346,21 @@ export default async function ModelPage({ params }: PageProps) {
               aria-labelledby="model-related-heading"
             >
               <h2 id="model-related-heading">{t("related")}</h2>
-              <RowList className="mt-6">
+              <RowList className="mt-6 model-related-list">
                 {related.map((item) => {
                   const meta = item.loadKg
                     ? `${formatLoadKg(item.loadKg)} ${tCatalog("kg")}`
                     : undefined;
                   return (
-                    <Row
-                      key={item.slug}
-                      href={`/catalog/${item.category}/${item.slug}`}
-                      title={item.name}
-                      body={tCat(item.category)}
-                      {...(meta ? { meta } : {})}
-                    />
+                    <div key={item.slug} className="model-related-row">
+                      <Row
+                        href={`/catalog/${item.category}/${item.slug}`}
+                        title={item.name}
+                        body={tCat(item.category)}
+                        {...(meta ? { meta } : {})}
+                      />
+                      <CompareToggle slug={item.slug} size="sm" />
+                    </div>
                   );
                 })}
               </RowList>

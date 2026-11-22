@@ -1,9 +1,7 @@
 "use client";
 
-import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/Button";
 import { trackEvent } from "@/lib/analytics/track";
 
 import { useCompareSelection } from "./useCompareSelection";
@@ -14,64 +12,41 @@ type CompareToggleProps = {
   size?: "md" | "sm";
 };
 
-function CompareToggleFallback({
-  className = "",
-  size = "sm",
-}: Pick<CompareToggleProps, "className" | "size">) {
-  const t = useTranslations("compare");
-  return (
-    <Button
-      type="button"
-      variant="secondary"
-      size={size}
-      className={className}
-      disabled
-      aria-hidden="true"
-      tabIndex={-1}
-    >
-      {t("add")}
-    </Button>
-  );
-}
-
-function CompareToggleInner({
+export function CompareToggle({
   slug,
   className = "",
   size = "sm",
 }: CompareToggleProps) {
   const t = useTranslations("compare");
-  const { isSelected, toggle, isFull } = useCompareSelection();
+  const { isSelected, toggle, isFull, showLimitHint } = useCompareSelection();
   const pressed = isSelected(slug);
-  const disabled = !pressed && isFull;
+  const atLimit = !pressed && isFull;
 
   return (
-    <Button
+    <button
       type="button"
-      variant="secondary"
-      size={size}
-      className={className}
+      className={[
+        "compare-toggle",
+        size === "sm" ? "compare-toggle-sm" : "compare-toggle-md",
+        pressed ? "is-pressed" : "",
+        atLimit ? "is-limit" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       aria-pressed={pressed}
-      disabled={disabled}
-      title={disabled ? t("full") : undefined}
+      aria-disabled={atLimit ? true : undefined}
+      title={atLimit ? t("limitHint") : undefined}
       onClick={() => {
+        if (atLimit) {
+          showLimitHint();
+          return;
+        }
         if (!pressed) trackEvent("compare_add");
-        void toggle(slug);
+        toggle(slug);
       }}
     >
-      {pressed ? t("inCompare") : t("add")}
-    </Button>
-  );
-}
-
-/** Suspense boundary required: `useCompareSelection` → nuqs → `useSearchParams`. */
-export function CompareToggle(props: CompareToggleProps) {
-  const fallbackProps: Pick<CompareToggleProps, "className" | "size"> = {};
-  if (props.className !== undefined) fallbackProps.className = props.className;
-  if (props.size !== undefined) fallbackProps.size = props.size;
-
-  return (
-    <Suspense fallback={<CompareToggleFallback {...fallbackProps} />}>
-      <CompareToggleInner {...props} />
-    </Suspense>
+      <span className="compare-toggle-label">{t("add")}</span>
+    </button>
   );
 }

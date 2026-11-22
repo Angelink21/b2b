@@ -10,6 +10,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import { CompareHeaderLink } from "@/components/compare/CompareHeaderLink";
 import { useSiteChrome } from "@/components/layout/SiteChromeContext";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -524,6 +525,7 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
                 {tSearch("shortcut")}
               </span>
             </button>
+            <CompareHeaderLink />
             <LocaleSwitcher />
             <ThemeToggle />
             <Link

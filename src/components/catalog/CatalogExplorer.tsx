@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useQueryState, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -23,7 +23,6 @@ import {
   type DimensionMaxFilter,
 } from "@/lib/catalog/dimension-filter";
 import { Link, usePathname } from "@/i18n/navigation";
-import { serializeCompareSlugs } from "@/lib/catalog/compare";
 import {
   formatCatalogBound,
   formatLoadNumber,
@@ -44,7 +43,6 @@ import {
 import {
   CATALOG_PAGE_SIZE,
   catalogParsers,
-  parseAsModelSlugs,
   type CatalogQueryState,
   type KgRangeParam,
 } from "@/lib/catalog/search-params";
@@ -101,13 +99,6 @@ export function CatalogExplorer({
     history: "replace",
     shallow: false,
   });
-  const [compareSlugs] = useQueryState("m", parseAsModelSlugs);
-
-  const compareQuery =
-    compareSlugs && compareSlugs.length > 0
-      ? `?m=${encodeURIComponent(serializeCompareSlugs(compareSlugs))}`
-      : "";
-
   const activeCategory = lockedCategory ?? query.type;
   // All-categories view hides range controls, but a lineup link may still pass ?kg=.
   const allowed = useMemo(() => {
@@ -638,10 +629,7 @@ export function CatalogExplorer({
           <nav className="catalog-cat-list" aria-label={t("type")}>
             {lockedCategory ? (
               <>
-                <Link
-                  href={`/catalog${compareQuery}`}
-                  className="catalog-cat-row"
-                >
+                <Link href="/catalog" className="catalog-cat-row">
                   <span className="catalog-cat-name">{t("all")}</span>
                   <span className="catalog-cat-count">{totalCount}</span>
                 </Link>
@@ -650,7 +638,7 @@ export function CatalogExplorer({
                   return (
                     <Link
                       key={slug}
-                      href={`/catalog/${slug}${compareQuery}`}
+                      href={`/catalog/${slug}`}
                       className={
                         active
                           ? "catalog-cat-row is-active"

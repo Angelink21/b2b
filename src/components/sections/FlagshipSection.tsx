@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Section } from "@/components/ui/Section";
@@ -58,13 +57,7 @@ export async function FlagshipSection() {
                 ) : null}
               </dl>
               <p className="flagship-card-badge">{t("flagshipBadge")}</p>
-              <Suspense
-                fallback={
-                  <div className="flagship-card-actions" aria-hidden="true" />
-                }
-              >
-                <FlagshipCardActions slug={product.slug} />
-              </Suspense>
+              <FlagshipCardActions slug={product.slug} />
             </li>
           );
         })}

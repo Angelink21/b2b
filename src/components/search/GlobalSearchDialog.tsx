@@ -11,6 +11,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 
+import { CompareToggle } from "@/components/compare/CompareToggle";
 import { useSiteChrome } from "@/components/layout/SiteChromeContext";
 import { Silhouette } from "@/components/ui/Silhouette";
 import {
@@ -321,25 +322,38 @@ export function GlobalSearchDialog() {
                       );
                       const active = idx === safeActiveIndex;
                       return (
-                        <button
+                        <div
                           key={item.slug}
-                          type="button"
                           className={
-                            active ? "search-hit is-active" : "search-hit"
+                            active
+                              ? "search-hit-row is-active"
+                              : "search-hit-row"
                           }
                           role="option"
                           aria-selected={active}
                           onMouseEnter={() => setActiveIndex(idx)}
-                          onClick={() => navigate(item)}
                         >
-                          <SearchHitVisual item={item} />
-                          <span className="search-hit-copy">
-                            <span className="search-hit-name">{item.name}</span>
-                            <span className="search-hit-metric">
-                              {formatIndexKeyMetric(item, units, locale)}
+                          <button
+                            type="button"
+                            className="search-hit"
+                            onClick={() => navigate(item)}
+                          >
+                            <SearchHitVisual item={item} />
+                            <span className="search-hit-copy">
+                              <span className="search-hit-name">
+                                {item.name}
+                              </span>
+                              <span className="search-hit-metric">
+                                {formatIndexKeyMetric(item, units, locale)}
+                              </span>
                             </span>
-                          </span>
-                        </button>
+                          </button>
+                          <CompareToggle
+                            slug={item.slug}
+                            size="sm"
+                            className="search-hit-compare"
+                          />
+                        </div>
                       );
                     })}
                   </div>

@@ -9,20 +9,19 @@ test.describe("compare and datasheet", () => {
     await page.goto("/uk/catalog?type=washers");
 
     await expect(
-      page.getByRole("checkbox", { name: /Порівняти/ }).first(),
+      page.getByRole("button", { name: "Порівняти" }).first(),
     ).toBeVisible({ timeout: 10_000 });
 
-    const compareBoxes = page.getByRole("checkbox", { name: /Порівняти/ });
+    const compareButtons = page.getByRole("button", { name: "Порівняти" });
     for (let i = 0; i < 3; i += 1) {
-      await compareBoxes.nth(i).check();
+      await compareButtons.nth(i).click();
     }
 
     const tray = page.getByRole("region", { name: "Панель порівняння" });
     await expect(tray).toBeVisible();
-    await expect(tray.getByText(/3 модел/)).toBeVisible();
+    await expect(tray.getByRole("link", { name: /Порівняти \(3\)/ })).toBeVisible();
 
-    await expect(page).toHaveURL(/[?&]m=/);
-    const compareLink = tray.getByRole("link", { name: "Порівняти" });
+    const compareLink = tray.getByRole("link", { name: /Порівняти \(3\)/ });
     const href = await compareLink.getAttribute("href");
     expect(href).toMatch(/\/compare\?m=/);
     // Soft nav via fixed tray is flaky on WebKit; follow the tray href explicitly.
@@ -68,6 +67,7 @@ test.describe("compare and datasheet", () => {
     await page.mouse.move(box.x + box.width / 2 + 80, box.y + box.height / 2 + 40);
     await page.mouse.up();
 
+    await first.click();
     await planner.focus();
     await planner.press("r");
     await expect(

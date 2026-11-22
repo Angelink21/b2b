@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -19,6 +19,7 @@ import {
   type CompareRecord,
 } from "@/lib/catalog/compare";
 import type { SpecFieldKey } from "@/lib/catalog/spec-groups";
+import { initCompareStore } from "@/lib/compare/store";
 
 import { FloorPlanner } from "./FloorPlanner";
 import { useCompareSelection } from "./useCompareSelection";
@@ -39,9 +40,13 @@ export function CompareView({
   categoryLabels,
 }: CompareViewProps) {
   const t = useTranslations("compare");
-  const { selected, remove } = useCompareSelection();
+  const { selected, remove, ready } = useCompareSelection();
   const [diffOnly, setDiffOnly] = useState(false);
   const [copyStatus, setCopyStatus] = useState(false);
+
+  useEffect(() => {
+    initCompareStore();
+  }, []);
 
   const products = useMemo(
     () =>
@@ -63,6 +68,14 @@ export function CompareView({
     if (products.length === 0) return 1;
     return sharedSilhouetteScale(products, SILHOUETTE_TARGET);
   }, [products]);
+
+  if (!ready) {
+    return (
+      <div className="compare-empty">
+        <p>{t("loading")}</p>
+      </div>
+    );
+  }
 
   if (products.length === 0) {
     return (

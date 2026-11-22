@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useSiteChrome } from "@/components/layout/SiteChromeContext";
 import { telHref, visibleMessengers, visiblePhones } from "@/config/site";
@@ -35,7 +35,6 @@ export function MobileActionBar() {
 
   const [enabled, setEnabled] = useState(false);
   const [visible, setVisible] = useState(true);
-  const [compareOffset, setCompareOffset] = useState(0);
   const lastScrollRef = useRef(0);
 
   const hiddenRoute = useMemo(() => {
@@ -50,32 +49,6 @@ export function MobileActionBar() {
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
-
-  const measureCompareTray = useCallback(() => {
-    const tray = document.querySelector<HTMLElement>(".compare-tray");
-    if (!tray || tray.offsetParent === null) {
-      setCompareOffset(0);
-      return;
-    }
-    setCompareOffset(tray.getBoundingClientRect().height);
-  }, []);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => measureCompareTray());
-    const observer = new MutationObserver(measureCompareTray);
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
-      childList: true,
-      subtree: true,
-    });
-    window.addEventListener("resize", measureCompareTray);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("resize", measureCompareTray);
-    };
-  }, [measureCompareTray, pathname]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -134,7 +107,6 @@ export function MobileActionBar() {
       }
       role="region"
       aria-label={t("label")}
-      style={{ bottom: compareOffset }}
     >
       <div className="mobile-action-bar-inner">
         <Link
