@@ -64,3 +64,4 @@
 2026-11-22 · Prerender-manifest test accepts `compute: "resuming"` · Cache Components marks compare/quote/catalog (searchParams) as resuming while still PARTIALLY_STATIC.
 2026-11-22 · Brand copy `Fagor Professional`; linen volume phrased per hour (uk «у годину», en «per hour») · Owner request; replaces Industrial / per-shift wording in UI.
 2026-11-22 · Interim factual `/privacy` notice (not lawyer-certified) · Owner asked for launchable text; sticks to real forms/contacts/processors, no invented statutes.
+2026-11-22 · Email LeadSink TO defaults to `siteConfig.email` when `LEADS_EMAIL_TO` unset · Owner wants leads on the published mailbox; avoids duplicating the address in env.

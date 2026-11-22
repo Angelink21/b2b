@@ -1,7 +1,17 @@
+import { siteConfig, visibleContact } from "@/config/site";
 import { getEnv } from "@/env";
 
 import { escapeHtml } from "../escape";
 import type { LeadPayload, LeadSendMeta, LeadSink } from "../types";
+
+/** Recipient: LEADS_EMAIL_TO, else the public email from siteConfig. */
+export function resolveLeadEmailTo(
+  envTo: string | undefined = getEnv().LEADS_EMAIL_TO,
+): string | null {
+  const fromEnv = envTo?.trim();
+  if (fromEnv) return fromEnv;
+  return visibleContact(siteConfig.email);
+}
 
 function buildHtml(payload: LeadPayload): string {
   const rows: Array<[string, string]> = [
@@ -32,7 +42,8 @@ export const emailSink: LeadSink = {
   id: "email",
   async send(payload: LeadPayload, meta: LeadSendMeta) {
     const env = getEnv();
-    if (!env.RESEND_API_KEY || !env.LEADS_EMAIL_FROM || !env.LEADS_EMAIL_TO) {
+    const to = resolveLeadEmailTo(env.LEADS_EMAIL_TO);
+    if (!env.RESEND_API_KEY || !env.LEADS_EMAIL_FROM || !to) {
       return { ok: false, error: "email-not-configured" };
     }
 
@@ -45,7 +56,7 @@ export const emailSink: LeadSink = {
       },
       body: JSON.stringify({
         from: env.LEADS_EMAIL_FROM,
-        to: [env.LEADS_EMAIL_TO],
+        to: [to],
         subject: `Lead (${payload.intent}) ${payload.leadId}`,
         html: buildHtml(payload),
       }),

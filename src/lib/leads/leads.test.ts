@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { resetEnvCache } from "@/env";
 
+import { resolveLeadEmailTo } from "./adapters/email";
 import { signWebhookBody } from "./adapters/webhook";
 import { consoleSink } from "./adapters/console";
 import { dispatchLead } from "./dispatch";
@@ -133,6 +134,14 @@ describe("escape", () => {
   it("escapes html and markdown", () => {
     expect(escapeHtml('<a href="x">\'&')).toContain("&lt;");
     expect(escapeMarkdownV2("a_b*c")).toContain("\\_");
+  });
+});
+
+describe("resolveLeadEmailTo", () => {
+  it("prefers env and falls back to siteConfig.email", () => {
+    expect(resolveLeadEmailTo("sales@example.com")).toBe("sales@example.com");
+    expect(resolveLeadEmailTo("  ")).toBe("pkmprofessional@ukr.net");
+    expect(resolveLeadEmailTo(undefined)).toBe("pkmprofessional@ukr.net");
   });
 });
 

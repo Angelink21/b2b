@@ -45,7 +45,8 @@ Vercel → **Deployments** → попередній успішний депло�
 | `LEADS_RATE_SALT` | Сіль rate-limit | Так у проді | random |
 | `LEADS_MIN_FILL_MS` | Мін. час заповнення форми | Ні | `3000` |
 | `LEADS_RATE_LIMIT_MAX` / `WINDOW_MS` | Ліміт заявок | Ні | `8` / `3600000` |
-| `RESEND_API_KEY` / `LEADS_EMAIL_FROM` / `LEADS_EMAIL_TO` | Email sink | Якщо sinks містить `email` | — |
+| `RESEND_API_KEY` / `LEADS_EMAIL_FROM` | Email sink | Якщо sinks містить `email` | FROM з верифікованого домену Resend |
+| `LEADS_EMAIL_TO` | Куди слати заявки | Ні (дефолт `siteConfig.email`) | `pkmprofessional@ukr.net` |
 | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Telegram sink | Якщо `telegram` | — |
 | `LEADS_WEBHOOK_URL` / `LEADS_WEBHOOK_SECRET` | Webhook sink | Якщо `webhook` | — |
 | `UPSTASH_REDIS_REST_URL` / `TOKEN` | Розподілений rate-limit | Ні | — |
@@ -84,7 +85,8 @@ Vercel → **Deployments** → попередній успішний депло�
 ## Заявки КП (отримувачі)
 
 1. `LEADS_SINKS=console` — лише логи (dev / перший preview).
-2. Email: додайте `email` у sinks + Resend keys/`FROM`/`TO`.
+2. Email: `LEADS_SINKS=email` + `RESEND_API_KEY` + `LEADS_EMAIL_FROM`.
+   `LEADS_EMAIL_TO` можна не задавати — тоді листа йде на публічний email з `siteConfig` (`pkmprofessional@ukr.net`).
 3. Telegram: `telegram` + bot token + chat id.
 4. Webhook: `webhook` + URL + HMAC secret.
 5. Після зміни env — Redeploy. Не комітьте секрети.
