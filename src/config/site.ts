@@ -41,7 +41,7 @@ export const siteConfig: {
   messengers: readonly MessengerLink[];
   readonly url: string | undefined;
 } = {
-  name: "Fagor Industrial",
+  name: "Fagor Professional",
   logo: {
     src: "/brand/fagor-logo.png",
     width: 182,
@@ -60,7 +60,7 @@ export const siteConfig: {
     en: "Mon–Fri: 9:00–18:00\nSat–Sun: by appointment",
   },
   messengers: [],
-  /** Set via NEXT_PUBLIC_SITE_URL; omitted from JSON-LD when empty. */
+  /** Explicit NEXT_PUBLIC_SITE_URL only; SEO absolute URLs use `getSiteUrl()`. */
   get url(): string | undefined {
     const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
     return raw && raw.length > 0 ? raw.replace(/\/$/, "") : undefined;

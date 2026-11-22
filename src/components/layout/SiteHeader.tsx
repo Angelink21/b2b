@@ -13,6 +13,10 @@ import {
 import { CompareHeaderLink } from "@/components/compare/CompareHeaderLink";
 import { useSiteChrome } from "@/components/layout/SiteChromeContext";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import {
+  SearchShortcutHint,
+  useSearchShortcutLabel,
+} from "@/components/search/SearchShortcutHint";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Container } from "@/components/ui/Container";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -181,6 +185,7 @@ function CategoryList({
 export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
   const tNav = useTranslations("nav");
   const tSearch = useTranslations("search");
+  const shortcutLabel = useSearchShortcutLabel();
   const pathname = usePathname();
   const { menuOpen, setMenuOpen, openSearch, searchOpen } = useSiteChrome();
   const headerRef = useRef<HTMLElement>(null);
@@ -357,6 +362,19 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
     openMega(false);
   }
 
+  /**
+   * Closing on every leave breaks the path button → header gap → fixed mega.
+   * Only close when the pointer is clearly leaving toward the brand (logo).
+   */
+  function onCatalogLeave(event: ReactMouseEvent<HTMLDivElement>) {
+    if (!canHover) return;
+    if (isNodeInside(catalogRef.current, event.relatedTarget)) return;
+    const brand =
+      headerRef.current?.querySelector<HTMLElement>(".site-brand") ?? null;
+    if (!isNodeInside(brand, event.relatedTarget)) return;
+    closeMega();
+  }
+
   function onCatalogClick() {
     if (hoverOpenedRef.current) {
       hoverOpenedRef.current = false;
@@ -429,7 +447,12 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
         {/* Blur lives on this layer, not the header, so the mobile dialog stays viewport-fixed. */}
         <div className="site-header-bg" aria-hidden="true" />
         <Container className="site-header-bar">
-          <Link href="/" className="site-brand" translate="no">
+          <Link
+            href="/"
+            className="site-brand"
+            translate="no"
+            onMouseEnter={closeMega}
+          >
             {logo ? (
               <span className="site-brand-logos">
                 <span className="site-brand-logo site-brand-logo--light">
@@ -465,6 +488,7 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
               className="catalog-anchor"
               ref={catalogRef}
               onMouseEnter={onCatalogEnter}
+              onMouseLeave={onCatalogLeave}
               onFocus={onCatalogFocus}
               onBlur={onCatalogBlur}
               onKeyDown={onCatalogKeyDown}
@@ -517,13 +541,11 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
               className="header-search header-tool"
               aria-haspopup="dialog"
               aria-expanded={searchOpen}
-              aria-label={`${tSearch("open")} ${tSearch("shortcut")}`}
+              aria-label={`${tSearch("open")} ${shortcutLabel}`}
               onClick={openSearch}
             >
               <SearchGlyph />
-              <span className="header-search-hint" aria-hidden="true">
-                {tSearch("shortcut")}
-              </span>
+              <SearchShortcutHint className="header-search-hint" />
             </button>
             <CompareHeaderLink />
             <LocaleSwitcher />

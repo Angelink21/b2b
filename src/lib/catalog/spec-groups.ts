@@ -86,10 +86,11 @@ export function getSpecFieldValue(
   product: Product,
   key: SpecFieldKey,
   heatingLabels: Partial<Record<string, string>>,
+  locale = "uk",
 ): string | null {
   switch (key) {
     case "loadKg":
-      return product.loadKg ? formatLoadKg(product.loadKg) : null;
+      return product.loadKg ? formatLoadKg(product.loadKg, locale) : null;
     case "volumeL":
       return product.volumeL ? formatVolumeL(product.volumeL) : null;
     case "boilerL":
@@ -139,10 +140,11 @@ function collect(
   product: Product,
   keys: SpecFieldKey[],
   heatingLabels: Partial<Record<string, string>>,
+  locale: string,
 ): SpecEntry[] {
   const items: SpecEntry[] = [];
   for (const key of keys) {
-    const value = getSpecFieldValue(product, key, heatingLabels);
+    const value = getSpecFieldValue(product, key, heatingLabels, locale);
     if (value == null || value === "" || value === "—") continue;
     items.push({ key, value });
   }
@@ -153,16 +155,17 @@ function collect(
 export function buildSpecGroups(
   product: Product,
   heatingLabels: Partial<Record<string, string>>,
+  locale = "uk",
 ): SpecGroup[] {
   const groups: SpecGroup[] = [
-    { id: "main", items: collect(product, MAIN_KEYS, heatingLabels) },
+    { id: "main", items: collect(product, MAIN_KEYS, heatingLabels, locale) },
     {
       id: "electrical",
-      items: collect(product, ELECTRICAL_KEYS, heatingLabels),
+      items: collect(product, ELECTRICAL_KEYS, heatingLabels, locale),
     },
     {
       id: "dimensions",
-      items: collect(product, DIMENSION_KEYS, heatingLabels),
+      items: collect(product, DIMENSION_KEYS, heatingLabels, locale),
     },
   ];
   return groups.filter((g) => g.items.length > 0);

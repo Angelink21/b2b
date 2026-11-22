@@ -3,15 +3,18 @@ import { describe, expect, it } from "vitest";
 import {
   collectOverlapSlugs,
   footprintMm,
+  findNearestFreePlacementMm,
   initialPlacementMm,
   isOutOfBounds,
   moveRect,
+  placeMachinesDefault,
   rectsOverlap,
   rotateQuarter,
   rotateRectAroundCenter,
   shareOfRoomPercent,
   snapMm,
   totalFootprintAreaM2,
+  WALL_CLEARANCE_MM,
   type FloorRect,
 } from "./geometry";
 
@@ -172,10 +175,93 @@ describe("areas", () => {
 });
 
 describe("initialPlacementMm", () => {
-  it("staggers machines on the grid", () => {
+  it("puts the first machine at wall clearance", () => {
     const p0 = initialPlacementMm(0, 800, 900);
-    const p1 = initialPlacementMm(1, 800, 900);
-    expect(p0.xMm % 50).toBe(0);
-    expect(p1.xMm).toBeGreaterThan(p0.xMm);
+    expect(p0).toEqual({
+      xMm: WALL_CLEARANCE_MM,
+      yMm: WALL_CLEARANCE_MM,
+    });
+  });
+});
+
+describe("placeMachinesDefault", () => {
+  const roomW = 6000;
+  const roomL = 4000;
+
+  it("places the first machine 100 mm from top and left walls", () => {
+    const [first] = placeMachinesDefault(
+      [{ wMm: 800, dMm: 900 }],
+      roomW,
+      roomL,
+      0,
+    );
+    expect(first).toEqual({
+      xMm: WALL_CLEARANCE_MM,
+      yMm: WALL_CLEARANCE_MM,
+      rotation: 0,
+    });
+    expect(
+      isOutOfBounds(
+        { ...first!, wMm: 800, dMm: 900 },
+        roomW,
+        roomL,
+      ),
+    ).toBe(false);
+  });
+
+  it("places following machines on the 50 mm grid without overlap", () => {
+    const placed = placeMachinesDefault(
+      [
+        { wMm: 800, dMm: 900 },
+        { wMm: 800, dMm: 900 },
+        { wMm: 1000, dMm: 1000 },
+      ],
+      roomW,
+      roomL,
+      0,
+    );
+    expect(placed).toHaveLength(3);
+    const rects: FloorRect[] = placed.map((p, i) => ({
+      ...p,
+      wMm: i === 2 ? 1000 : 800,
+      dMm: i === 2 ? 1000 : 900,
+    }));
+    for (const rect of rects) {
+      expect(rect.xMm % 50).toBe(0);
+      expect(rect.yMm % 50).toBe(0);
+      expect(isOutOfBounds(rect, roomW, roomL)).toBe(false);
+    }
+    expect(rectsOverlap(rects[0]!, rects[1]!, 0)).toBe(false);
+    expect(rectsOverlap(rects[0]!, rects[2]!, 0)).toBe(false);
+    expect(rectsOverlap(rects[1]!, rects[2]!, 0)).toBe(false);
+  });
+
+  it("findNearestFreePlacementMm skips occupied cells", () => {
+    const occupied: FloorRect[] = [
+      {
+        xMm: WALL_CLEARANCE_MM,
+        yMm: WALL_CLEARANCE_MM,
+        wMm: 800,
+        dMm: 900,
+        rotation: 0,
+      },
+    ];
+    const next = findNearestFreePlacementMm(
+      800,
+      900,
+      0,
+      roomW,
+      roomL,
+      occupied,
+      0,
+    );
+    expect(next.xMm % 50).toBe(0);
+    expect(
+      rectsOverlap(
+        { ...next, wMm: 800, dMm: 900, rotation: 0 },
+        occupied[0]!,
+        0,
+      ),
+    ).toBe(false);
   });
 });

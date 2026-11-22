@@ -24,10 +24,15 @@ import {
   itemListJsonLd,
 } from "@/lib/seo/json-ld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  hasIndexBlockingParams,
+  NOINDEX_FOLLOW,
+} from "@/lib/seo/robots-policy";
 import { typo } from "@/lib/typo";
 
 type PageProps = {
   params: Promise<{ locale: string; category: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 function isCategorySlug(value: string): value is CategorySlug {
@@ -40,9 +45,10 @@ export function generateStaticParams() {
   );
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params, searchParams }: PageProps) {
   const { locale, category } = await params;
   if (!isCategorySlug(category)) return {};
+  const query = (await searchParams) ?? {};
   const tMeta = await getTranslations({ locale, namespace: "meta" });
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const categoryLabel = tCat(category);
@@ -51,6 +57,7 @@ export async function generateMetadata({ params }: PageProps) {
     path: `/catalog/${category}`,
     title: categoryLabel,
     description: tMeta("categoryDescription", { category: categoryLabel }),
+    robots: hasIndexBlockingParams(query) ? NOINDEX_FOLLOW : undefined,
   });
 }
 

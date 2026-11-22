@@ -1,4 +1,4 @@
-# Fagor Industrial — архитектурный план (этап 0)
+# Fagor Professional — архитектурный план (этап 0)
 
 Дата разведки: 2026-11-14. Код на этом этапе не писался. Источники: `AGENTS.md`, `.cursor/rules`, `docs/DESIGN.md`, `docs/DATA_CONTRACT.md`, `docs/ACCEPTANCE.md`, выборочно `docs/prototype.html`, статистика `data/products_clean.csv`, документация Next.js / next-intl / Tailwind v4 / Motion.
 

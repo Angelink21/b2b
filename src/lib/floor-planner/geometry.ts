@@ -1,4 +1,5 @@
 export const GRID_SNAP_MM = 50;
+export const WALL_CLEARANCE_MM = 100;
 export const DEFAULT_ROOM_WIDTH_M = 6;
 export const DEFAULT_ROOM_LENGTH_M = 4;
 export const DEFAULT_MACHINE_GAP_MM = 0;
@@ -157,15 +158,108 @@ export function moveRect(
   };
 }
 
+/**
+ * Nearest free cell on the snap grid that keeps the footprint inside the room
+ * and clear of occupied rects (with gap). Prefers the wall-clearance origin.
+ */
+export function findNearestFreePlacementMm(
+  wMm: number,
+  dMm: number,
+  rotation: RotationQuarter,
+  roomWidthMm: number,
+  roomLengthMm: number,
+  occupied: readonly FloorRect[],
+  gapMm: number,
+  preferXMm: number = WALL_CLEARANCE_MM,
+  preferYMm: number = WALL_CLEARANCE_MM,
+): { xMm: number; yMm: number } {
+  const originX = snapMm(preferXMm);
+  const originY = snapMm(preferYMm);
+  const { w, d } = footprintMm(wMm, dMm, rotation);
+  const maxX = snapMm(Math.max(0, roomWidthMm - w));
+  const maxY = snapMm(Math.max(0, roomLengthMm - d));
+
+  let best: { xMm: number; yMm: number; dist: number } | null = null;
+
+  for (let yMm = 0; yMm <= maxY; yMm += GRID_SNAP_MM) {
+    for (let xMm = 0; xMm <= maxX; xMm += GRID_SNAP_MM) {
+      const candidate: FloorRect = {
+        xMm,
+        yMm,
+        wMm,
+        dMm,
+        rotation,
+      };
+      if (isOutOfBounds(candidate, roomWidthMm, roomLengthMm)) continue;
+      if (occupied.some((other) => rectsOverlap(candidate, other, gapMm))) {
+        continue;
+      }
+      const dist =
+        (xMm - originX) * (xMm - originX) + (yMm - originY) * (yMm - originY);
+      if (!best || dist < best.dist) {
+        best = { xMm, yMm, dist };
+      }
+    }
+  }
+
+  return best
+    ? { xMm: best.xMm, yMm: best.yMm }
+    : { xMm: originX, yMm: originY };
+}
+
+/** Place machines sequentially: first at 100×100 mm, then nearest free 50 mm cells. */
+export function placeMachinesDefault(
+  machines: readonly { wMm: number; dMm: number }[],
+  roomWidthMm: number,
+  roomLengthMm: number,
+  gapMm: number = DEFAULT_MACHINE_GAP_MM,
+): { xMm: number; yMm: number; rotation: RotationQuarter }[] {
+  const placed: FloorRect[] = [];
+  const result: { xMm: number; yMm: number; rotation: RotationQuarter }[] = [];
+
+  for (const machine of machines) {
+    const rotation: RotationQuarter = 0;
+    const { xMm, yMm } = findNearestFreePlacementMm(
+      machine.wMm,
+      machine.dMm,
+      rotation,
+      roomWidthMm,
+      roomLengthMm,
+      placed,
+      gapMm,
+      WALL_CLEARANCE_MM,
+      WALL_CLEARANCE_MM,
+    );
+    const rect: FloorRect = {
+      xMm,
+      yMm,
+      wMm: machine.wMm,
+      dMm: machine.dMm,
+      rotation,
+    };
+    placed.push(rect);
+    result.push({ xMm, yMm, rotation });
+  }
+
+  return result;
+}
+
+/** @deprecated Prefer placeMachinesDefault — kept for call-site migration. */
 export function initialPlacementMm(
   index: number,
   wMm: number,
   dMm: number,
 ): { xMm: number; yMm: number } {
+  if (index === 0) {
+    return {
+      xMm: snapMm(WALL_CLEARANCE_MM),
+      yMm: snapMm(WALL_CLEARANCE_MM),
+    };
+  }
   const { w, d } = footprintMm(wMm, dMm, 0);
   const col = index % 2;
   const row = Math.floor(index / 2);
-  const xMm = snapMm(col * (w + 300));
-  const yMm = snapMm(row * (d + 300));
+  const xMm = snapMm(WALL_CLEARANCE_MM + col * (w + 300));
+  const yMm = snapMm(WALL_CLEARANCE_MM + row * (d + 300));
   return { xMm, yMm };
 }

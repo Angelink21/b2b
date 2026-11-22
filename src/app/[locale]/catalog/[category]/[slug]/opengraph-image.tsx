@@ -12,7 +12,7 @@ import { seoMessages } from "@/lib/seo/messages";
 import { OgFrame, OgSilhouette, OG_SIZE, ogColors } from "@/lib/seo/og";
 import { buildProductOgSpecs } from "@/lib/seo/product-copy";
 
-export const alt = "Fagor Industrial";
+export const alt = "Fagor Professional";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 

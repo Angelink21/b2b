@@ -18,7 +18,7 @@ describe("JSON-LD builders (S3)", () => {
     const data = organizationJsonLd();
     expect(data["@type"]).toBe("Organization");
     expect(assertNoInventedFields(data)).toEqual([]);
-    expect(data.name).toBe("Fagor Industrial");
+    expect(data.name).toBe("Fagor Professional");
     expect(data.telephone).toEqual(["044-501-88-87", "050-382-48-78"]);
     expect(data.email).toBe("pkmprofessional@ukr.net");
     expect(data.address).toEqual({

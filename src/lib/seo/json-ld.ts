@@ -45,10 +45,7 @@ export function organizationJsonLd(): JsonLd {
     "@id": `${getSiteUrl()}/#organization`,
     name: siteConfig.name,
   };
-  const url = siteConfig.url;
-  if (url) {
-    data.url = url;
-  }
+  data.url = getSiteUrl();
   const phones = siteConfig.phones.map((p) => p.trim()).filter((p) => p.length > 0);
   if (phones.length === 1) {
     data.telephone = phones[0];

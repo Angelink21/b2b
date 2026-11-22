@@ -32,8 +32,8 @@ export function CompareTray() {
       name: slug,
       category: "washers" as const,
       thumbSrc: null,
-      thumbW: 40,
-      thumbH: 40,
+      thumbW: 44,
+      thumbH: 44,
     };
   });
 
@@ -92,7 +92,7 @@ export function CompareTray() {
                     alt=""
                     width={item.thumbW}
                     height={item.thumbH}
-                    sizes="40px"
+                    sizes="88px"
                     unoptimized
                     className="compare-tray-thumb-img"
                   />

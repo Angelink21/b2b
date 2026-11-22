@@ -11,7 +11,7 @@ function buildHtml(payload: LeadPayload): string {
     ["Company", payload.company || "—"],
     ["Contact", payload.contact],
     ["Sector", payload.sector ?? "—"],
-    ["Kg / shift", payload.kgPerShift?.toString() ?? "—"],
+    ["Kg / hour", payload.kgPerShift?.toString() ?? "—"],
     ["Models", payload.modelSlugs.join(", ") || "—"],
     ["Model label", payload.modelLabel || "—"],
     ["Serial", payload.serialNumber || "—"],

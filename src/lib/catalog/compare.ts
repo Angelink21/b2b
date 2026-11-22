@@ -4,14 +4,110 @@ import {
 } from "@/config/categories";
 import { silhouetteScale } from "@/lib/silhouette";
 
-import type { CategorySlug, Product } from "./schema";
 import {
-  getSpecFieldValue,
-  SPEC_FIELD_ORDER,
-  type SpecFieldKey,
-} from "./spec-groups";
+  formatCatalogNumber,
+  formatCatalogRange,
+  formatDimensionsMm,
+  formatLoadRange,
+  formatNoiseDb,
+  formatVoltage,
+} from "./format";
+import type { CategorySlug, Product } from "./schema";
+import { SPEC_FIELD_ORDER, type SpecFieldKey } from "./spec-groups";
 
 const EMPTY = "—";
+
+function heatingLabelForCompare(
+  product: CompareRecord,
+  heatingLabels: Partial<Record<string, string>>,
+): string | null {
+  if (!product.heating) return null;
+  const base = heatingLabels[product.heating] ?? product.heating;
+  return product.heatingVariant
+    ? `${base} (${product.heatingVariant})`
+    : base;
+}
+
+/** Locale-aware cell text for the compare table (en-dash ranges, uk decimal comma). */
+export function formatCompareFieldValue(
+  product: CompareRecord,
+  key: SpecFieldKey,
+  heatingLabels: Partial<Record<string, string>>,
+  locale: string,
+): string | null {
+  switch (key) {
+    case "loadKg":
+      return product.loadKg
+        ? formatLoadRange(locale, product.loadKg.min, product.loadKg.max)
+        : null;
+    case "volumeL":
+      return product.volumeL
+        ? formatCatalogNumber(locale, product.volumeL.value)
+        : null;
+    case "boilerL":
+      return product.boilerL != null
+        ? formatCatalogNumber(locale, product.boilerL)
+        : null;
+    case "powerKw":
+      return product.powerKw
+        ? product.powerKw.alt !== undefined
+          ? `${formatCatalogNumber(locale, product.powerKw.max)}/${formatCatalogNumber(locale, product.powerKw.alt)}`
+          : formatCatalogNumber(locale, product.powerKw.max)
+        : null;
+    case "boilerPowerKw":
+      return product.boilerPowerKw
+        ? formatCatalogRange(
+            locale,
+            product.boilerPowerKw.min,
+            product.boilerPowerKw.max,
+          )
+        : null;
+    case "gFactor":
+      return product.gFactor != null
+        ? formatCatalogNumber(locale, product.gFactor)
+        : null;
+    case "spinRpm":
+      return product.spinRpm != null
+        ? formatCatalogNumber(locale, product.spinRpm)
+        : null;
+    case "shaftDiameterMm":
+      return product.shaftDiameterMm != null
+        ? formatCatalogNumber(locale, product.shaftDiameterMm)
+        : null;
+    case "workingWidthMm":
+      return product.workingWidthMm != null
+        ? formatCatalogNumber(locale, product.workingWidthMm)
+        : null;
+    case "workingSpeedMpm":
+      return product.workingSpeedMpm
+        ? formatCatalogRange(
+            locale,
+            product.workingSpeedMpm.min,
+            product.workingSpeedMpm.max,
+          )
+        : null;
+    case "heating":
+      return heatingLabelForCompare(product, heatingLabels);
+    case "voltage":
+      return product.voltage || product.voltageRaw
+        ? formatVoltage(product.voltage, product.voltageRaw)
+        : null;
+    case "exhaustMm":
+      return product.exhaustMm != null
+        ? formatCatalogNumber(locale, product.exhaustMm)
+        : null;
+    case "airflowM3h":
+      return product.airflowM3h
+        ? formatCatalogNumber(locale, product.airflowM3h.value)
+        : null;
+    case "noiseDb":
+      return product.noiseDb ? formatNoiseDb(product.noiseDb) : null;
+    case "dimensionsMm":
+      return formatDimensionsMm(product.dimensionsMm);
+    default:
+      return null;
+  }
+}
 
 /** Compact product projection for the /compare client island. */
 export type CompareRecord = {
@@ -108,26 +204,23 @@ export function buildCompareRecords(
   return out;
 }
 
-function asProduct(record: CompareRecord): Product {
-  // CompareRecord is a structural subset; cast is safe for getSpecFieldValue.
-  return record as unknown as Product;
-}
-
 /**
  * Rows = union of non-empty spec fields across products (stable SPEC_FIELD_ORDER).
- * Missing values render as "—".
+ * Missing values render as "—". Display uses locale (en-dash, uk comma).
  */
 export function buildCompareMatrix(
   products: readonly CompareRecord[],
   heatingLabels: Partial<Record<string, string>>,
+  locale = "uk",
 ): CompareMatrix {
   const present = new Set<SpecFieldKey>();
   for (const product of products) {
     for (const key of SPEC_FIELD_ORDER) {
-      const value = getSpecFieldValue(
-        asProduct(product),
+      const value = formatCompareFieldValue(
+        product,
         key,
         heatingLabels,
+        locale,
       );
       if (value != null && value !== "" && value !== EMPTY) {
         present.add(key);
@@ -141,10 +234,11 @@ export function buildCompareMatrix(
     rows.push({
       key,
       values: products.map((product) => {
-        const value = getSpecFieldValue(
-          asProduct(product),
+        const value = formatCompareFieldValue(
+          product,
           key,
           heatingLabels,
+          locale,
         );
         return value == null || value === "" ? EMPTY : value;
       }),

@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -24,10 +25,10 @@ import {
   DEFAULT_ROOM_WIDTH_M,
   footprintMm,
   GRID_SNAP_MM,
-  initialPlacementMm,
   isOutOfBounds,
   metersToMm,
   moveRect,
+  placeMachinesDefault,
   roomAreaM2,
   rotateRectAroundCenter,
   shareOfRoomPercent,
@@ -37,11 +38,35 @@ import {
   type RotationQuarter,
 } from "@/lib/floor-planner/geometry";
 import {
+  canRedo,
+  canUndo,
+  createHistory,
+  pushHistory,
+  redoHistory,
+  undoHistory,
+  type HistoryState,
+} from "@/lib/floor-planner/history";
+import {
+  buildPlanHash,
+  parsePlanHash,
+  planPayloadFromState,
+} from "@/lib/floor-planner/plan-hash";
+import {
+  clampRectInViewport,
+  LABEL_BADGE_FONT_PX,
+  LABEL_MAX_LINES,
+  LABEL_NAME_FONT_PX,
+  LABEL_SIZE_FONT_PX,
+  nameFitsInMachineBox,
+  pickCalloutSide,
+  selectMachineLabelMode,
+  wrapLabelLines,
+  type RectPx,
+} from "@/lib/floor-planner/machine-label";
+import {
   clampPan,
-  fitScalePxPerMm,
   fitView,
   formatZoomPercent,
-  labelFontSizeMm,
   PAN_STEP_PX,
   stepZoom,
   viewportHeightPx,
@@ -53,6 +78,14 @@ type PlacementState = {
   xMm: number;
   yMm: number;
   rotation: RotationQuarter;
+};
+
+type PlanSnapshot = {
+  roomWidthM: number;
+  roomLengthM: number;
+  gapMm: number;
+  placementOverrides: Record<string, PlacementState>;
+  hiddenSlugs: string[];
 };
 
 type FloorPlannerProps = {
@@ -80,6 +113,34 @@ function clientToSvgMm(
   return { x: mapped.x, y: mapped.y };
 }
 
+function snapshotEqual(a: PlanSnapshot, b: PlanSnapshot): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function buildDefaults(
+  products: readonly CompareRecord[],
+  roomWidthMm: number,
+  roomLengthMm: number,
+  gapMm: number,
+): Record<string, PlacementState> {
+  const placed = placeMachinesDefault(
+    products.map((product) => ({
+      wMm: product.dimensionsMm.w,
+      dMm: product.dimensionsMm.d,
+    })),
+    roomWidthMm,
+    roomLengthMm,
+    gapMm,
+  );
+  const defaults: Record<string, PlacementState> = {};
+  products.forEach((product, index) => {
+    const point = placed[index];
+    if (!point) return;
+    defaults[product.slug] = point;
+  });
+  return defaults;
+}
+
 export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
   const t = useTranslations("compare.floorPlanner");
   const locale = useLocale();
@@ -95,6 +156,7 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     offsetX: number;
     offsetY: number;
     pointerId: number;
+    origin: PlacementState;
   } | null>(null);
   const panDragRef = useRef<{
     pointerId: number;
@@ -104,6 +166,7 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     originPanY: number;
   } | null>(null);
   const viewRef = useRef<ViewTransform>(fitView());
+  const hydratedRef = useRef(false);
 
   const [roomWidthM, setRoomWidthM] = useState(DEFAULT_ROOM_WIDTH_M);
   const [roomLengthM, setRoomLengthM] = useState(DEFAULT_ROOM_LENGTH_M);
@@ -115,9 +178,80 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
   const [placementOverrides, setPlacementOverrides] = useState<
     Record<string, PlacementState>
   >(() => ({}));
+  const [history, setHistory] = useState<HistoryState<PlanSnapshot>>(() =>
+    createHistory({
+      roomWidthM: DEFAULT_ROOM_WIDTH_M,
+      roomLengthM: DEFAULT_ROOM_LENGTH_M,
+      gapMm: DEFAULT_MACHINE_GAP_MM,
+      placementOverrides: {},
+      hiddenSlugs: [],
+    }),
+  );
+  const [planCopyStatus, setPlanCopyStatus] = useState(false);
+  const [screenBoxes, setScreenBoxes] = useState<Record<string, RectPx>>(
+    () => ({}),
+  );
 
   const roomWidthMm = metersToMm(roomWidthM);
   const roomLengthMm = metersToMm(roomLengthM);
+
+  const currentSnapshot = useMemo<PlanSnapshot>(
+    () => ({
+      roomWidthM,
+      roomLengthM,
+      gapMm,
+      placementOverrides,
+      hiddenSlugs: [...hiddenSlugs].sort(),
+    }),
+    [gapMm, hiddenSlugs, placementOverrides, roomLengthM, roomWidthM],
+  );
+
+  const commitSnapshot = useCallback((next: PlanSnapshot) => {
+    setRoomWidthM(next.roomWidthM);
+    setRoomLengthM(next.roomLengthM);
+    setGapMm(next.gapMm);
+    setPlacementOverrides(next.placementOverrides);
+    setHiddenSlugs(new Set(next.hiddenSlugs));
+  }, []);
+
+  const pushSnapshot = useCallback((next: PlanSnapshot) => {
+    setHistory((prev) => {
+      if (snapshotEqual(prev.present, next)) return prev;
+      return pushHistory(prev, next);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (hydratedRef.current) return;
+    hydratedRef.current = true;
+    if (typeof window === "undefined") return;
+    const parsed = parsePlanHash(window.location.hash);
+    if (!parsed) return;
+    const overrides: Record<string, PlacementState> = {};
+    for (const machine of parsed.m) {
+      if (!products.some((product) => product.slug === machine.s)) continue;
+      overrides[machine.s] = {
+        xMm: snapMm(machine.x),
+        yMm: snapMm(machine.y),
+        rotation: machine.r,
+      };
+    }
+    const next: PlanSnapshot = {
+      roomWidthM: parsed.w,
+      roomLengthM: parsed.l,
+      gapMm: parsed.g,
+      placementOverrides: overrides,
+      hiddenSlugs: (parsed.h ?? []).filter((slug) =>
+        products.some((product) => product.slug === slug),
+      ),
+    };
+    // Defer setState out of the effect body (lint: set-state-in-effect).
+    const frame = window.requestAnimationFrame(() => {
+      commitSnapshot(next);
+      setHistory(createHistory(next));
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [commitSnapshot, products]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -157,18 +291,10 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     [products],
   );
 
-  const defaultPlacements = useMemo(() => {
-    const defaults: Record<string, PlacementState> = {};
-    products.forEach((product, index) => {
-      const { xMm, yMm } = initialPlacementMm(
-        index,
-        product.dimensionsMm.w,
-        product.dimensionsMm.d,
-      );
-      defaults[product.slug] = { xMm, yMm, rotation: 0 };
-    });
-    return defaults;
-  }, [products]);
+  const defaultPlacements = useMemo(
+    () => buildDefaults(products, roomWidthMm, roomLengthMm, gapMm),
+    [gapMm, products, roomLengthMm, roomWidthMm],
+  );
 
   const placements = useMemo(() => {
     const merged = { ...defaultPlacements };
@@ -227,6 +353,43 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     [activePlacements, gapMm],
   );
 
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    const stage = stageRef.current;
+    if (!svg || !stage) return;
+    const measure = () => {
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return;
+      const stageBox = stage.getBoundingClientRect();
+      const next: Record<string, RectPx> = {};
+      for (const placement of activePlacements) {
+        const { w, d } = footprintMm(
+          placement.wMm,
+          placement.dMm,
+          placement.rotation,
+        );
+        const p1 = svg.createSVGPoint();
+        p1.x = placement.xMm;
+        p1.y = placement.yMm;
+        const p2 = svg.createSVGPoint();
+        p2.x = placement.xMm + w;
+        p2.y = placement.yMm + d;
+        const a = p1.matrixTransform(ctm);
+        const b = p2.matrixTransform(ctm);
+        next[placement.slug] = {
+          left: Math.min(a.x, b.x) - stageBox.left,
+          top: Math.min(a.y, b.y) - stageBox.top,
+          width: Math.abs(b.x - a.x),
+          height: Math.abs(b.y - a.y),
+        };
+      }
+      setScreenBoxes(next);
+    };
+    measure();
+    const frame = window.requestAnimationFrame(measure);
+    return () => window.cancelAnimationFrame(frame);
+  }, [activePlacements, view, viewportSize, roomWidthMm, roomLengthMm]);
+
   const machineAreaM2 = useMemo(
     () => totalFootprintAreaM2(activePlacements),
     [activePlacements],
@@ -239,17 +402,6 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     const max = Math.max(roomWidthM, roomLengthM);
     return Array.from({ length: max + 1 }, (_, index) => index);
   }, [roomLengthM, roomWidthM]);
-
-  const pxPerMmAtFit = useMemo(
-    () =>
-      fitScalePxPerMm(
-        viewportSize.width,
-        viewportSize.height,
-        roomWidthMm,
-        roomLengthMm,
-      ),
-    [roomLengthMm, roomWidthMm, viewportSize.height, viewportSize.width],
-  );
 
   const commitView = useCallback(
     (next: ViewTransform) => {
@@ -315,28 +467,65 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     setView(next);
   }, []);
 
+  const applySnapshot = useCallback(
+    (next: PlanSnapshot) => {
+      commitSnapshot(next);
+      setHistory((prev) => ({ ...prev, present: next }));
+    },
+    [commitSnapshot],
+  );
+
+  const undo = useCallback(() => {
+    setHistory((prev) => {
+      if (!canUndo(prev)) return prev;
+      const next = undoHistory(prev);
+      commitSnapshot(next.present);
+      return next;
+    });
+  }, [commitSnapshot]);
+
+  const redo = useCallback(() => {
+    setHistory((prev) => {
+      if (!canRedo(prev)) return prev;
+      const next = redoHistory(prev);
+      commitSnapshot(next.present);
+      return next;
+    });
+  }, [commitSnapshot]);
+
   const resetLayout = useCallback(() => {
-    setRoomWidthM(DEFAULT_ROOM_WIDTH_M);
-    setRoomLengthM(DEFAULT_ROOM_LENGTH_M);
-    setGapMm(DEFAULT_MACHINE_GAP_MM);
-    const next = fitView();
-    viewRef.current = next;
-    setView(next);
-    setHiddenSlugs(new Set());
+    const next: PlanSnapshot = {
+      roomWidthM: DEFAULT_ROOM_WIDTH_M,
+      roomLengthM: DEFAULT_ROOM_LENGTH_M,
+      gapMm: DEFAULT_MACHINE_GAP_MM,
+      placementOverrides: {},
+      hiddenSlugs: [],
+    };
+    pushSnapshot(currentSnapshot);
+    applySnapshot(next);
+    const fitted = fitView();
+    viewRef.current = fitted;
+    setView(fitted);
     setSelectedSlug(null);
-    setPlacementOverrides({});
-  }, []);
+  }, [applySnapshot, currentSnapshot, pushSnapshot]);
 
   const updatePlacement = useCallback(
-    (slug: string, patch: Partial<PlacementState>) => {
+    (slug: string, patch: Partial<PlacementState>, record = false) => {
       setPlacementOverrides((prev) => {
         const base = placements[slug];
         if (!base) return prev;
         const current = prev[slug] ?? base;
-        return { ...prev, [slug]: { ...current, ...patch } };
+        const nextOverrides = { ...prev, [slug]: { ...current, ...patch } };
+        if (record) {
+          pushSnapshot({
+            ...currentSnapshot,
+            placementOverrides: nextOverrides,
+          });
+        }
+        return nextOverrides;
       });
     },
-    [placements],
+    [currentSnapshot, placements, pushSnapshot],
   );
 
   const rotateSelected = useCallback(
@@ -352,22 +541,45 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
         rotation: current.rotation,
       };
       const next = rotateRectAroundCenter(rect);
-      setPlacementOverrides((prev) => ({
-        ...prev,
+      const nextOverrides = {
+        ...placementOverrides,
         [slug]: {
           xMm: snapMm(next.xMm),
           yMm: snapMm(next.yMm),
           rotation: next.rotation,
         },
-      }));
+      };
+      const snapshot: PlanSnapshot = {
+        ...currentSnapshot,
+        placementOverrides: nextOverrides,
+      };
+      pushSnapshot(currentSnapshot);
+      setPlacementOverrides(nextOverrides);
+      setHistory((prev) => ({ ...prev, present: snapshot }));
     },
-    [placements, products],
+    [
+      currentSnapshot,
+      placementOverrides,
+      placements,
+      products,
+      pushSnapshot,
+    ],
   );
 
-  const removeFromPlan = useCallback((slug: string) => {
-    setHiddenSlugs((prev) => new Set(prev).add(slug));
-    setSelectedSlug((current) => (current === slug ? null : current));
-  }, []);
+  const removeFromPlan = useCallback(
+    (slug: string) => {
+      const nextHidden = new Set(hiddenSlugs).add(slug);
+      const snapshot: PlanSnapshot = {
+        ...currentSnapshot,
+        hiddenSlugs: [...nextHidden].sort(),
+      };
+      pushSnapshot(currentSnapshot);
+      setHiddenSlugs(nextHidden);
+      setSelectedSlug((current) => (current === slug ? null : current));
+      setHistory((prev) => ({ ...prev, present: snapshot }));
+    },
+    [currentSnapshot, hiddenSlugs, pushSnapshot],
+  );
 
   const panBy = useCallback(
     (dx: number, dy: number) => {
@@ -387,7 +599,49 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     [viewportSize.height, viewportSize.width],
   );
 
+  const copyPlanLink = useCallback(async () => {
+    try {
+      const payload = planPayloadFromState({
+        roomWidthM,
+        roomLengthM,
+        gapMm,
+        placements,
+        hiddenSlugs: [...effectiveHiddenSlugs],
+      });
+      const url = new URL(window.location.href);
+      url.hash = buildPlanHash(payload).slice(1);
+      await navigator.clipboard.writeText(url.toString());
+      setPlanCopyStatus(true);
+      window.setTimeout(() => setPlanCopyStatus(false), 2000);
+    } catch {
+      setPlanCopyStatus(false);
+    }
+  }, [
+    effectiveHiddenSlugs,
+    gapMm,
+    placements,
+    roomLengthM,
+    roomWidthM,
+  ]);
+
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement | null;
+    if (
+      target &&
+      (target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable)
+    ) {
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      if (event.shiftKey) redo();
+      else undo();
+      return;
+    }
+
     if (event.key === "+" || event.key === "=") {
       event.preventDefault();
       bumpZoom(1);
@@ -448,21 +702,42 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
     if (event.key === "ArrowLeft") {
       event.preventDefault();
       const moved = moveRect(rect, -GRID_SNAP_MM, 0);
-      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm });
+      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm }, true);
     } else if (event.key === "ArrowRight") {
       event.preventDefault();
       const moved = moveRect(rect, GRID_SNAP_MM, 0);
-      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm });
+      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm }, true);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       const moved = moveRect(rect, 0, -GRID_SNAP_MM);
-      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm });
+      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm }, true);
     } else if (event.key === "ArrowDown") {
       event.preventDefault();
       const moved = moveRect(rect, 0, GRID_SNAP_MM);
-      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm });
+      updatePlacement(effectiveSelectedSlug, { xMm: moved.xMm, yMm: moved.yMm }, true);
     }
   }
+
+  useEffect(() => {
+    function onWindowKey(event: globalThis.KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) redo();
+        else undo();
+      }
+    }
+    window.addEventListener("keydown", onWindowKey);
+    return () => window.removeEventListener("keydown", onWindowKey);
+  }, [redo, undo]);
 
   function beginDrag(
     slug: string,
@@ -482,6 +757,7 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
       pointerId: event.pointerId,
       offsetX: point.x - state.xMm,
       offsetY: point.y - state.yMm,
+      origin: state,
     };
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -500,7 +776,21 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
   }
 
   function endDrag(event: ReactPointerEvent<SVGGElement>) {
-    if (dragRef.current?.pointerId === event.pointerId) {
+    const drag = dragRef.current;
+    if (drag?.pointerId === event.pointerId) {
+      const current = placements[drag.slug];
+      if (
+        current &&
+        (current.xMm !== drag.origin.xMm || current.yMm !== drag.origin.yMm)
+      ) {
+        pushSnapshot({
+          ...currentSnapshot,
+          placementOverrides: {
+            ...placementOverrides,
+            [drag.slug]: current,
+          },
+        });
+      }
       dragRef.current = null;
     }
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
@@ -603,6 +893,8 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
   const roomLengthFieldId = `${sectionId}-room-length`;
   const gapFieldId = `${sectionId}-gap`;
   const zoomLabel = formatZoomPercent(view.zoom);
+  const undoEnabled = canUndo(history);
+  const redoEnabled = canRedo(history);
 
   return (
     <section
@@ -639,6 +931,11 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
               const value = Number.parseFloat(event.target.value);
               if (Number.isFinite(value) && value > 0) setRoomWidthM(value);
             }}
+            onBlur={() => {
+              if (roomWidthM !== history.present.roomWidthM) {
+                pushSnapshot(currentSnapshot);
+              }
+            }}
           />
         </Field>
         <Field id={roomLengthFieldId} label={t("roomLength")}>
@@ -654,6 +951,11 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
               const value = Number.parseFloat(event.target.value);
               if (Number.isFinite(value) && value > 0) setRoomLengthM(value);
             }}
+            onBlur={() => {
+              if (roomLengthM !== history.present.roomLengthM) {
+                pushSnapshot(currentSnapshot);
+              }
+            }}
           />
         </Field>
         <Field id={gapFieldId} label={t("machineGap")}>
@@ -668,6 +970,11 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
             onChange={(event) => {
               const value = Number.parseInt(event.target.value, 10);
               if (Number.isFinite(value) && value >= 0) setGapMm(value);
+            }}
+            onBlur={() => {
+              if (gapMm !== history.present.gapMm) {
+                pushSnapshot(currentSnapshot);
+              }
             }}
           />
         </Field>
@@ -708,6 +1015,24 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
           >
             {t("fit")}
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            disabled={!undoEnabled}
+            onClick={undo}
+          >
+            {t("undo")}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            disabled={!redoEnabled}
+            onClick={redo}
+          >
+            {t("redo")}
+          </Button>
         </div>
         <div
           ref={stageRef}
@@ -740,6 +1065,7 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
               width="100%"
               height="100%"
               preserveAspectRatio="xMidYMid meet"
+              overflow="visible"
               aria-hidden={false}
             >
               <title>{t("canvasLabel")}</title>
@@ -775,20 +1101,12 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
                 const outside = isOutOfBounds(rect, roomWidthMm, roomLengthMm);
                 const overlap = overlapSlugs.has(placement.slug);
                 const selected = effectiveSelectedSlug === placement.slug;
-                const issue = outside
-                  ? t("outside")
-                  : overlap
-                    ? t("overlap")
-                    : null;
-                const preferred = Math.max(
-                  60,
-                  Math.min(140, Math.min(w, d) * 0.14),
+                const sizeText = topViewLabel(
+                  placement.wMm,
+                  placement.dMm,
+                  placement.rotation,
                 );
-                const labelSize = labelFontSizeMm(
-                  preferred,
-                  pxPerMmAtFit,
-                  view.zoom,
-                );
+                const machineTitle = `${placement.name}, ${sizeText} ${t("unitMm")}`;
 
                 return (
                   <g
@@ -801,15 +1119,15 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
                     ]
                       .filter(Boolean)
                       .join(" ")}
+                    data-slug={placement.slug}
+                    data-x-mm={placement.xMm}
+                    data-y-mm={placement.yMm}
+                    data-rotation={placement.rotation}
                     role="button"
                     tabIndex={-1}
                     aria-label={t("machineLabel", {
                       name: placement.name,
-                      size: topViewLabel(
-                        placement.wMm,
-                        placement.dMm,
-                        placement.rotation,
-                      ),
+                      size: sizeText,
                     })}
                     onPointerDown={(event) => beginDrag(placement.slug, event)}
                     onPointerMove={(event) =>
@@ -822,6 +1140,7 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
                       setSelectedSlug(placement.slug);
                     }}
                   >
+                    <title>{machineTitle}</title>
                     <rect
                       x={placement.xMm}
                       y={placement.yMm}
@@ -829,57 +1148,206 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
                       height={d}
                       className="floor-planner-machine-body"
                     />
-                    {issue ? (
-                      <line
-                        x1={placement.xMm + 20}
-                        y1={placement.yMm}
-                        x2={placement.xMm + 20}
-                        y2={placement.yMm + d}
-                        className="floor-planner-machine-stripe"
-                        strokeWidth={40}
-                      />
-                    ) : null}
-                    <g aria-hidden="true">
-                      {issue ? (
-                        <text
-                          x={placement.xMm + w / 2}
-                          y={placement.yMm + d / 2}
-                          className="floor-planner-machine-issue"
-                          fontSize={labelSize}
-                        >
-                          {issue}
-                        </text>
-                      ) : null}
-                      <text
-                        x={placement.xMm + w / 2}
-                        y={placement.yMm + d / 2 + (issue ? labelSize : 0)}
-                        className="floor-planner-machine-name"
-                        fontSize={labelSize}
-                      >
-                        {placement.name}
-                      </text>
-                      <text
-                        x={placement.xMm + w / 2}
-                        y={
-                          placement.yMm +
-                          d / 2 +
-                          (issue ? labelSize * 2 : labelSize)
-                        }
-                        className="floor-planner-machine-size"
-                        fontSize={labelSize * 0.85}
-                      >
-                        {topViewLabel(
-                          placement.wMm,
-                          placement.dMm,
-                          placement.rotation,
-                        )}{" "}
-                        {t("unitMm")}
-                      </text>
-                    </g>
                   </g>
                 );
               })}
             </svg>
+          </div>
+          <div className="floor-planner-labels" aria-hidden="true">
+            {activePlacements.map((placement) => {
+              const box = screenBoxes[placement.slug];
+              if (!box || box.width <= 0 || box.height <= 0) return null;
+              const rect: FloorRect = {
+                xMm: placement.xMm,
+                yMm: placement.yMm,
+                wMm: placement.wMm,
+                dMm: placement.dMm,
+                rotation: placement.rotation,
+              };
+              const outside = isOutOfBounds(rect, roomWidthMm, roomLengthMm);
+              const overlap = overlapSlugs.has(placement.slug);
+              const issue = outside
+                ? t("outside")
+                : overlap
+                  ? t("overlap")
+                  : null;
+              const sizeText = `${topViewLabel(
+                placement.wMm,
+                placement.dMm,
+                placement.rotation,
+              )} ${t("unitMm")}`;
+              const fits = nameFitsInMachineBox(
+                placement.name,
+                box.width,
+                box.height,
+              );
+              const mode = selectMachineLabelMode({
+                widthPx: box.width,
+                heightPx: box.height,
+                nameFitsInside: fits,
+              });
+              const avgChar = LABEL_NAME_FONT_PX * 0.55;
+              const maxChars = Math.max(
+                4,
+                Math.floor(
+                  (mode === "callout" ? 160 : Math.max(24, box.width - 8)) /
+                    avgChar,
+                ),
+              );
+              const nameLines = wrapLabelLines(
+                placement.name,
+                maxChars,
+                LABEL_MAX_LINES,
+              );
+              const showSize = mode === "full";
+              const labelWidth =
+                mode === "callout"
+                  ? Math.min(
+                      180,
+                      Math.max(
+                        72,
+                        nameLines.reduce(
+                          (m, line) => Math.max(m, line.length * avgChar + 16),
+                          0,
+                        ),
+                      ),
+                    )
+                  : box.width;
+              const labelHeight =
+                nameLines.length * LABEL_NAME_FONT_PX * 1.2 +
+                (showSize ? LABEL_SIZE_FONT_PX * 1.3 + 2 : 0) +
+                8;
+              const side =
+                mode === "callout"
+                  ? pickCalloutSide(
+                      box,
+                      viewportSize,
+                      labelWidth,
+                      labelHeight,
+                    )
+                  : null;
+              let labelLeft = box.left;
+              let labelTop = box.top;
+              let leader: {
+                x1: number;
+                y1: number;
+                x2: number;
+                y2: number;
+              } | null = null;
+              if (mode === "callout" && side === "right") {
+                labelLeft = box.left + box.width + 8;
+                labelTop = box.top + Math.max(0, (box.height - labelHeight) / 2);
+                leader = {
+                  x1: box.left + box.width,
+                  y1: box.top + box.height / 2,
+                  x2: labelLeft,
+                  y2: labelTop + labelHeight / 2,
+                };
+              } else if (mode === "callout" && side === "bottom") {
+                labelLeft = box.left + Math.max(0, (box.width - labelWidth) / 2);
+                labelTop = box.top + box.height + 8;
+                leader = {
+                  x1: box.left + box.width / 2,
+                  y1: box.top + box.height,
+                  x2: labelLeft + labelWidth / 2,
+                  y2: labelTop,
+                };
+              }
+              const clampedLabel = clampRectInViewport(
+                {
+                  left: labelLeft,
+                  top: labelTop,
+                  width: mode === "callout" ? labelWidth : box.width,
+                  height: mode === "callout" ? labelHeight : box.height,
+                },
+                viewportSize.width > 0
+                  ? viewportSize
+                  : { width: 1, height: 1 },
+              );
+
+              const badgeWidth = Math.max(
+                48,
+                (issue?.length ?? 0) * LABEL_BADGE_FONT_PX * 0.62 + 16,
+              );
+              const badgeHeight = LABEL_BADGE_FONT_PX + 10;
+              const badgePreferred = {
+                left: box.left + Math.max(0, (box.width - badgeWidth) / 2),
+                top: box.top - badgeHeight - 4,
+                width: badgeWidth,
+                height: badgeHeight,
+              };
+              const badgeBox = issue
+                ? clampRectInViewport(
+                    badgePreferred,
+                    viewportSize.width > 0
+                      ? viewportSize
+                      : { width: 1, height: 1 },
+                  )
+                : null;
+
+              return (
+                <div key={`label-${placement.slug}`}>
+                  {leader ? (
+                    <svg
+                      className="floor-planner-callout-leader"
+                      width={viewportSize.width || 1}
+                      height={viewportSize.height || 1}
+                    >
+                      <line
+                        x1={leader.x1}
+                        y1={leader.y1}
+                        x2={leader.x2}
+                        y2={leader.y2}
+                      />
+                    </svg>
+                  ) : null}
+                  <div
+                    className={[
+                      "floor-planner-label",
+                      mode === "callout" ? "is-callout" : "is-inside",
+                    ].join(" ")}
+                    data-label-slug={placement.slug}
+                    data-label-mode={mode}
+                    style={
+                      mode === "callout"
+                        ? {
+                            left: clampedLabel.left,
+                            top: clampedLabel.top,
+                            width: clampedLabel.width,
+                          }
+                        : {
+                            left: box.left,
+                            top: box.top,
+                            width: box.width,
+                            height: box.height,
+                          }
+                    }
+                  >
+                    <div className="floor-planner-label-name">
+                      {nameLines.map((line) => (
+                        <span key={`${placement.slug}-${line}`}>{line}</span>
+                      ))}
+                    </div>
+                    {showSize ? (
+                      <div className="floor-planner-label-size">{sizeText}</div>
+                    ) : null}
+                  </div>
+                  {issue && badgeBox ? (
+                    <div
+                      className="floor-planner-badge"
+                      data-badge-slug={placement.slug}
+                      style={{
+                        left: badgeBox.left,
+                        top: badgeBox.top,
+                        minHeight: badgeBox.height,
+                      }}
+                    >
+                      {issue}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
         <p className="floor-planner-hint text-steel no-print">{t("hint")}</p>
@@ -888,6 +1356,14 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
       <div className="floor-planner-actions">
         <Button type="button" variant="secondary" onClick={resetLayout}>
           {t("reset")}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="no-print"
+          onClick={() => void copyPlanLink()}
+        >
+          {t("copyPlanLink")}
         </Button>
         <Button
           type="button"
@@ -910,6 +1386,11 @@ export function FloorPlanner({ products, quoteHref }: FloorPlannerProps) {
         <Button href={quoteHref} variant="primary">
           {t("quote")}
         </Button>
+        {planCopyStatus ? (
+          <p className="compare-copy-status" role="status">
+            {t("planLinkCopied")}
+          </p>
+        ) : null}
       </div>
     </section>
   );

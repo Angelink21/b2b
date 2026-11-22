@@ -68,7 +68,7 @@
 5. Тема: light, dark, system без мигания при загрузке; выбор хранится с try/catch; переключатель доступен с клавиатуры; `color-scheme`.
 6. i18n: next-intl по схеме из PLAN.md: uk по умолчанию, en; маршруты /uk и /en; proxy.ts; messages/uk.json и en.json
    (перенеси словарь L из прототипа в неймспейсы); переключатель языка сохраняет текущий путь; тест на паритет ключей.
-7. Оболочка: Header (текстовый бренд «Fagor Industrial», навигация, язык, тема, красная кнопка КП), Footer, SkipLink, контейнер 1200.
+7. Оболочка: Header (текстовый бренд «Fagor Professional», навигация, язык, тема, красная кнопка КП), Footer, SkipLink, контейнер 1200.
    Страницы-заглушки: /, /catalog, /quote, /privacy, а также красивые not-found и error.
 8. Качество: Vitest (jsdom), Playwright (chromium, webkit, мобильный viewport) + @axe-core/playwright;
    smoke e2e: /uk и /en открываются, язык и тема переключаются, axe без нарушений. GitHub Actions: verify и e2e. .env.example. README с запуском.

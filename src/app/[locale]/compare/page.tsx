@@ -1,7 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
+import { CompareCatalogBackLink } from "@/components/compare/CompareCatalogBackLink";
 import { CompareView } from "@/components/compare/CompareView";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { getAll } from "@/lib/catalog/queries";
 import { buildCompareRecords } from "@/lib/catalog/compare";
@@ -12,19 +14,26 @@ import {
 import type { SpecFieldKey } from "@/lib/catalog/spec-groups";
 import { getModelImage } from "@/lib/images";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  hasIndexBlockingParams,
+  NOINDEX_FOLLOW,
+} from "@/lib/seo/robots-policy";
 
 type PageProps = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params, searchParams }: PageProps) {
   const { locale } = await params;
+  const query = await searchParams;
   const t = await getTranslations({ locale, namespace: "meta" });
   return buildPageMetadata({
     locale,
     path: "/compare",
     title: t("compareTitle"),
     description: t("compareDescription"),
+    robots: hasIndexBlockingParams(query) ? NOINDEX_FOLLOW : undefined,
   });
 }
 
@@ -34,6 +43,7 @@ export default async function ComparePage({ params }: PageProps) {
   const tModel = await getTranslations({ locale, namespace: "model" });
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
+  const tCatalog = await getTranslations({ locale, namespace: "catalog" });
 
   const heatingLabels: Partial<Record<string, string>> = {};
   for (const key of HEATING_KEYS) {
@@ -86,8 +96,15 @@ export default async function ComparePage({ params }: PageProps) {
   );
   const records = buildCompareRecords(products, photos);
 
+  const crumbs = [
+    { label: tCatalog("title"), href: "/catalog" },
+    { label: t("title") },
+  ];
+
   return (
     <Container className="compare-page py-12">
+      <CompareCatalogBackLink label={t("toCatalog")} />
+      <Breadcrumbs items={crumbs} label={t("breadcrumbs")} />
       <h1>{t("title")}</h1>
       <Suspense fallback={<p className="mt-6 text-steel">{t("loading")}</p>}>
         <div className="mt-6">

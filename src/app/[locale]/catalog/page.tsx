@@ -8,19 +8,27 @@ import { getCategoryNavStats, getIndex } from "@/lib/catalog/queries";
 import { CATEGORY_SLUGS, type CategorySlug } from "@/lib/catalog/schema";
 import { typo } from "@/lib/typo";
 import { buildPageMetadata } from "@/lib/seo/metadata";
+import {
+  hasIndexBlockingParams,
+  NOINDEX_FOLLOW,
+} from "@/lib/seo/robots-policy";
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
   const t = await getTranslations({ locale, namespace: "meta" });
   return buildPageMetadata({
     locale,
     path: "/catalog",
     title: t("catalogTitle"),
     description: t("catalogDescription"),
+    robots: hasIndexBlockingParams(query) ? NOINDEX_FOLLOW : undefined,
   });
 }
 

@@ -63,7 +63,7 @@ export default async function DatasheetPage({ params }: PageProps) {
   for (const key of HEATING_KEYS) {
     heatingLabels[key] = tHeat(key);
   }
-  const groups = buildSpecGroups(product, heatingLabels);
+  const groups = buildSpecGroups(product, heatingLabels, locale);
   const dims = product.dimensionsMm;
   const realDims = hasRealDimensions(dims);
   const drawDims = realDims ? dims : GENERIC_SILHOUETTE_MM;

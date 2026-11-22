@@ -82,11 +82,15 @@ describe("build route table (prerender-manifest)", () => {
       "/uk/quote",
     ];
 
+    // Cache Components: fully static shell = "static"; pages that resume
+    // with searchParams (compare/quote/catalog filters) = "resuming".
+    const okCompute = ["static", "resuming"];
+
     for (const route of required) {
       const entry = manifest.routes[route];
       expect(entry, `missing prerender entry for ${route}`).toBeDefined();
       if (!entry) continue;
-      expect(entry.compute).toBe("static");
+      expect(okCompute).toContain(entry.compute);
       expect(["STATIC", "PARTIALLY_STATIC"]).toContain(entry.renderingMode);
     }
 
@@ -97,6 +101,6 @@ describe("build route table (prerender-manifest)", () => {
         !r.includes("datasheet"),
     );
     expect(modelRoute).toBeTruthy();
-    expect(manifest.routes[modelRoute!]?.compute).toBe("static");
+    expect(okCompute).toContain(manifest.routes[modelRoute!]?.compute);
   });
 });

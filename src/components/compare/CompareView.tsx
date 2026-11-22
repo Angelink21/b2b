@@ -1,8 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
+import { readCatalogReturn } from "@/components/catalog/catalog-session";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { ModelImageView } from "@/components/ui/ModelImageView";
@@ -26,6 +27,22 @@ import { useCompareSelection } from "./useCompareSelection";
 
 const SILHOUETTE_TARGET = 160;
 
+function subscribeNoop(): () => void {
+  return () => undefined;
+}
+
+function catalogReturnHref(): string {
+  const saved = readCatalogReturn();
+  if (
+    saved &&
+    (saved.pathname === "/catalog" ||
+      /^\/catalog\/[^/]+$/.test(saved.pathname))
+  ) {
+    return `${saved.pathname}${saved.search}`;
+  }
+  return "/catalog";
+}
+
 type CompareViewProps = {
   records: Record<string, CompareRecord>;
   heatingLabels: Partial<Record<string, string>>;
@@ -40,9 +57,15 @@ export function CompareView({
   categoryLabels,
 }: CompareViewProps) {
   const t = useTranslations("compare");
+  const locale = useLocale();
   const { selected, remove, ready } = useCompareSelection();
   const [diffOnly, setDiffOnly] = useState(false);
   const [copyStatus, setCopyStatus] = useState(false);
+  const catalogHref = useSyncExternalStore(
+    subscribeNoop,
+    catalogReturnHref,
+    () => "/catalog",
+  );
 
   useEffect(() => {
     initCompareStore();
@@ -60,9 +83,9 @@ export function CompareView({
     if (products.length === 0) {
       return { slugs: [], names: [], rows: [] };
     }
-    const full = buildCompareMatrix(products, heatingLabels);
+    const full = buildCompareMatrix(products, heatingLabels, locale);
     return diffOnly ? filterDiffRows(full) : full;
-  }, [diffOnly, heatingLabels, products]);
+  }, [diffOnly, heatingLabels, locale, products]);
 
   const scale = useMemo(() => {
     if (products.length === 0) return 1;
@@ -172,6 +195,12 @@ export function CompareView({
           );
         })}
       </div>
+
+      {products.length === 1 ? (
+        <p className="compare-need-one-more">
+          <a href={`/${locale}${catalogHref}`}>{t("needOneMoreHint")}</a>
+        </p>
+      ) : null}
 
       <div className="data-table-wrap compare-table-wrap">
         <table className="data-table compare-table">

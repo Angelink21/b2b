@@ -1618,7 +1618,7 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
 
 .lineup-range-strip-media {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   min-height: 112px;
   background: var(--floor);
@@ -1632,7 +1632,7 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
   width: auto;
   height: auto;
   object-fit: contain;
-  object-position: bottom center;
+  object-position: center;
 }
 
 .lineup-range-strip-body {
@@ -3268,34 +3268,52 @@ a.chip[aria-pressed="true"] {
   gap: var(--space-2);
   min-height: 44px;
   max-width: 100%;
-  padding: 0 var(--space-2) 0 var(--space-1);
+  /* space-3 left clears the chip radius so the thumb is not clipped */
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
   border: 1.5px solid var(--line);
   border-radius: var(--radius-chip);
   background: var(--floor);
   flex: 0 0 auto;
+  overflow: hidden;
 }
 
 .compare-tray-thumb {
   display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
+  place-items: end center;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  padding: var(--space-1);
   flex: 0 0 auto;
-  background: var(--bg);
+  /* Brighter well than --bg: white pad in light, brightest surface in dark */
+  background: var(--surf);
   border-radius: var(--radius-control);
   overflow: hidden;
 }
 
+[data-theme="dark"] .compare-tray-thumb {
+  background: var(--floor);
+}
+
 .compare-tray-thumb-img {
-  width: 100%;
-  height: 100%;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  object-position: bottom center;
+}
+
+[data-theme="light"] .compare-tray-thumb-img {
+  mix-blend-mode: multiply;
 }
 
 .compare-tray-thumb-fallback {
   display: block;
   width: 16px;
   height: 24px;
+  align-self: center;
   background: var(--line);
 }
 
@@ -3567,6 +3585,29 @@ body.has-compare-tray #main {
   margin-bottom: 0;
 }
 
+.compare-need-one-more {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-body);
+  text-wrap: pretty;
+}
+
+.compare-need-one-more a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.compare-table thead th:not(.compare-sticky),
+.compare-table tbody td {
+  max-width: 360px;
+  width: 360px;
+}
+
+.compare-table .is-num {
+  text-align: start;
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+}
+
 /* Compare — floor planner (U4) */
 .floor-planner {
   display: flex;
@@ -3647,6 +3688,7 @@ body.has-compare-tray #main {
   width: 100%;
   min-height: 160px;
   background: var(--floor);
+  /* Stage chrome uses --line only; room wall is the single --ink stroke */
   border: 1.5px solid var(--line);
   touch-action: none;
   cursor: grab;
@@ -3659,10 +3701,11 @@ body.has-compare-tray #main {
 
 .floor-planner-stage-inner {
   position: absolute;
-  inset: 0;
+  /* 24px inset so room walls are not flush / double-stroked against the stage */
+  inset: var(--space-4);
   z-index: 0;
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
   transform-origin: center center;
 }
 
@@ -3678,6 +3721,8 @@ body.has-compare-tray #main {
   stroke: var(--ink);
   stroke-width: 2px;
   vector-effect: non-scaling-stroke;
+  /* Avoid a second edge stroke from meeting the stage frame */
+  shape-rendering: geometricPrecision;
 }
 
 .floor-planner-grid line {
@@ -3703,29 +3748,85 @@ body.has-compare-tray #main {
   stroke-width: 3px;
 }
 
-.floor-planner-machine-stripe {
+.floor-planner-labels {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floor-planner-label {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 4px;
+  text-align: center;
+  color: var(--ink);
+  background: var(--surf);
+  pointer-events: none;
+}
+
+.floor-planner-label.is-inside {
+  background: transparent;
+}
+
+.floor-planner-label.is-callout {
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+}
+
+.floor-planner-label-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.floor-planner-label-size {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.floor-planner-badge {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  padding: 2px 8px;
+  border: 1.5px solid var(--ink);
+  border-radius: 20px;
+  background: var(--surf);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.floor-planner-callout-leader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.floor-planner-callout-leader line {
   stroke: var(--ink);
-  vector-effect: non-scaling-stroke;
-  pointer-events: none;
-}
-
-.floor-planner-machine text {
-  pointer-events: none;
-  text-anchor: middle;
-  dominant-baseline: middle;
-  fill: var(--ink);
-}
-
-.floor-planner-machine-issue {
-  font-weight: 600;
-}
-
-.floor-planner-machine-name {
-  font-weight: 600;
-}
-
-.floor-planner-machine-size {
-  fill: var(--steel);
+  stroke-width: 1px;
 }
 
 .floor-planner-actions {

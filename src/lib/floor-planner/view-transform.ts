@@ -44,22 +44,28 @@ export function formatZoomPercent(zoom: number): string {
   return `${Math.round(clampZoomRange(zoom) * 100)}%`;
 }
 
-/** CSS px per mm when zoom = 1 (room fitted into the viewport with "meet"). */
+/**
+ * CSS px per mm when zoom = 1 (room fitted into the viewport with "meet").
+ * Reserves `padPx` on each side so the room is not flush against the stage edge.
+ */
 export function fitScalePxPerMm(
   viewportW: number,
   viewportH: number,
   roomWidthMm: number,
   roomLengthMm: number,
+  padPx: number = VIEW_PAD_PX,
 ): number {
+  const innerW = viewportW - 2 * padPx;
+  const innerH = viewportH - 2 * padPx;
   if (
-    viewportW <= 0 ||
-    viewportH <= 0 ||
+    innerW <= 0 ||
+    innerH <= 0 ||
     roomWidthMm <= 0 ||
     roomLengthMm <= 0
   ) {
     return 1;
   }
-  return Math.min(viewportW / roomWidthMm, viewportH / roomLengthMm);
+  return Math.min(innerW / roomWidthMm, innerH / roomLengthMm);
 }
 
 /**
@@ -101,6 +107,7 @@ export function clientPointToMm(
     viewport.height,
     roomWidthMm,
     roomLengthMm,
+    VIEW_PAD_PX,
   );
   const contentW = roomWidthMm * pxPerMm;
   const contentH = roomLengthMm * pxPerMm;

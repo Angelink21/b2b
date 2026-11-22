@@ -1,7 +1,8 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Section } from "@/components/ui/Section";
 import { FEATURED_SLUGS } from "@/config/featured";
+import { formatLoadRange } from "@/lib/catalog/format";
 import { getBySlug } from "@/lib/catalog/queries";
 import { typo } from "@/lib/typo";
 
@@ -9,6 +10,7 @@ import { FlagshipCardActions } from "./FlagshipCardActions";
 import { FlagshipMedia } from "./FlagshipMedia";
 
 export async function FlagshipSection() {
+  const locale = await getLocale();
   const t = await getTranslations("home");
   const tCat = await getTranslations("catalog");
   const tCategories = await getTranslations("categories");
@@ -30,7 +32,7 @@ export async function FlagshipSection() {
         {items.map((product) => {
           const load =
             product.loadKg != null
-              ? `${product.loadKg.raw}\u00A0${tCat("kg")}`
+              ? `${formatLoadRange(locale, product.loadKg.min, product.loadKg.max)}\u00A0${tCat("kg")}`
               : "—";
           const gFactor =
             product.gFactor != null ? String(product.gFactor) : null;

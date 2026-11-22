@@ -88,9 +88,12 @@ export function formatOrDashNumber(
   return formatCatalogNumber(locale, value, fractionDigits);
 }
 
-export function formatLoadKg(load: LoadKg | null | undefined): string {
+export function formatLoadKg(
+  load: LoadKg | null | undefined,
+  locale = "uk",
+): string {
   if (!load) return EMPTY;
-  return load.raw;
+  return formatLoadRange(locale, load.min, load.max);
 }
 
 export function formatPowerKw(power: PowerKw | null | undefined): string {

@@ -12,6 +12,7 @@ import { DimHighlightProvider } from "@/components/motion/DimHighlight";
 import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Container } from "@/components/ui/Container";
+import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import { ModelImage } from "@/components/ui/ModelImage";
 import { Row, RowList } from "@/components/ui/Row";
 import { Silhouette } from "@/components/ui/Silhouette";
@@ -101,6 +102,7 @@ export default async function ModelPage({ params }: PageProps) {
   if (!product || product.category !== category) notFound();
 
   const t = await getTranslations({ locale, namespace: "model" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const tCatalog = await getTranslations({ locale, namespace: "catalog" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
@@ -114,7 +116,7 @@ export default async function ModelPage({ params }: PageProps) {
   for (const key of HEATING_KEYS) {
     heatingLabels[key] = tHeat(key);
   }
-  const groups = buildSpecGroups(product, heatingLabels);
+  const groups = buildSpecGroups(product, heatingLabels, locale);
 
   const photo = getModelImage(product);
   const dims = product.dimensionsMm;
@@ -163,6 +165,7 @@ export default async function ModelPage({ params }: PageProps) {
           }),
         ]}
       />
+      <HistoryBackLink label={tNav("back")} />
       <ModelBreadcrumbs
         label={t("breadcrumbs")}
         catalogLabel={tCatalog("title")}
@@ -349,7 +352,7 @@ export default async function ModelPage({ params }: PageProps) {
               <RowList className="mt-6 model-related-list">
                 {related.map((item) => {
                   const meta = item.loadKg
-                    ? `${formatLoadKg(item.loadKg)} ${tCatalog("kg")}`
+                    ? `${formatLoadKg(item.loadKg, locale)} ${tCatalog("kg")}`
                     : undefined;
                   return (
                     <div key={item.slug} className="model-related-row">

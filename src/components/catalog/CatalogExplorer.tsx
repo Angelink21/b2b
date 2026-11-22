@@ -47,6 +47,7 @@ import {
   type KgRangeParam,
 } from "@/lib/catalog/search-params";
 
+import { CatalogReturnTracker } from "./CatalogReturnTracker";
 import { CatalogScrollRestore } from "./CatalogScrollRestore";
 import { CatalogTable } from "./CatalogTable";
 
@@ -484,6 +485,7 @@ export function CatalogExplorer({
 
   return (
     <div ref={rootRef} className="catalog-explorer" data-filters-ready="false">
+      <CatalogReturnTracker pathname={pathname} search={returnSearch} />
       <CatalogScrollRestore />
       <Grid className="catalog-layout">
         <div className="catalog-results">

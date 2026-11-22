@@ -6,6 +6,7 @@ import { QuoteFormFallback } from "@/components/quote/QuoteForm";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
+import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import {
   localizedHours,
   siteConfig,
@@ -70,6 +71,7 @@ export default async function ContactsPage() {
         ]}
       />
       <Container className="company-page py-12">
+        <HistoryBackLink label={tNav("back")} />
         <Breadcrumbs items={crumbs} label={t("breadcrumbs")} />
         {locale === "en" && process.env.NODE_ENV !== "production" ? (
           <p className="company-review-note" role="note">

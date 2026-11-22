@@ -53,6 +53,7 @@ describe("buildCompareMatrix", () => {
     const matrix = buildCompareMatrix(
       [toCompareRecord(a), toCompareRecord(b)],
       HEATING,
+      "uk",
     );
     expect(matrix.slugs).toEqual([a.slug, b.slug]);
     expect(matrix.rows.length).toBeGreaterThan(0);
@@ -63,6 +64,40 @@ describe("buildCompareMatrix", () => {
 
     const dimRow = matrix.rows.find((r) => r.key === "dimensionsMm");
     expect(dimRow).toBeTruthy();
+  });
+
+  it("formats ranges with en-dash and uk decimal comma", () => {
+    const all = getAll();
+    const ranged = all.find(
+      (p) => p.loadKg && p.loadKg.min !== p.loadKg.max,
+    );
+    const decimal = all.find(
+      (p) =>
+        p.boilerPowerKw &&
+        (String(p.boilerPowerKw.min).includes(".") ||
+          String(p.boilerPowerKw.max).includes(".")),
+    );
+    expect(ranged).toBeTruthy();
+    if (!ranged?.loadKg) return;
+
+    const matrix = buildCompareMatrix(
+      [toCompareRecord(ranged)],
+      HEATING,
+      "uk",
+    );
+    const loadRow = matrix.rows.find((r) => r.key === "loadKg");
+    expect(loadRow?.values[0]).toContain("–");
+    expect(loadRow?.values[0]).not.toMatch(/\d-\d/);
+
+    if (decimal?.boilerPowerKw) {
+      const withBoiler = buildCompareMatrix(
+        [toCompareRecord(decimal)],
+        HEATING,
+        "uk",
+      );
+      const boilerRow = withBoiler.rows.find((r) => r.key === "boilerPowerKw");
+      expect(boilerRow?.values[0]).toMatch(/,/);
+    }
   });
 });
 

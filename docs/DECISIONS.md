@@ -59,3 +59,7 @@
 2026-11-21 · loadKg cell that matches a known sector CSV name → sector, loadKg null · Sheet row for ПРАЛЬНЯ TO GO put «Пральні…» in kg column; avoid hard fail.
 2026-11-21 · `@vercel/analytics` for cookie-less page + custom events · Stage 11; no Sentry/Plausible second provider.
 2026-11-21 · Reject unknown `[locale]` before `messages/${locale}.json` · Local `next start` receives `/_vercel/insights` from Analytics; must not treat `_vercel` as a locale.
+2026-11-22 · Floor-plan share via `#fp=` base64url(JSON) without new deps · Room/gap/placements/hidden restore from URL hash; keeps bundle small and avoids LZ libs.
+2026-11-22 · `getSiteUrl()`: NEXT_PUBLIC_SITE_URL → Vercel production/preview hosts → localhost only off production · Stops preview OG/canonical leaking localhost or sibling deployment URLs.
+2026-11-22 · Prerender-manifest test accepts `compute: "resuming"` · Cache Components marks compare/quote/catalog (searchParams) as resuming while still PARTIALLY_STATIC.
+2026-11-22 · Brand copy `Fagor Professional`; linen volume phrased per hour (uk «у годину», en «per hour») · Owner request; replaces Industrial / per-shift wording in UI.

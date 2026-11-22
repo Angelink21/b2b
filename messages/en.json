@@ -1,29 +1,29 @@
 {
   "meta": {
-    "siteName": "Fagor Industrial",
-    "homeTitle": "Fagor Industrial — equipment lineup",
+    "siteName": "Fagor Professional",
+    "homeTitle": "Fagor Professional — equipment lineup",
     "homeDescription": "Industrial laundry equipment. Pick a model by load and request a commercial quote.",
     "catalogTitle": "Catalog",
-    "catalogDescription": "Fagor Industrial industrial laundry equipment catalog.",
+    "catalogDescription": "Fagor Professional industrial laundry equipment catalog.",
     "quoteTitle": "Get a quote",
     "quoteDescription": "Request a commercial quote.",
     "privacyTitle": "Privacy",
     "privacyDescription": "Privacy policy.",
     "compareTitle": "Compare models",
-    "compareDescription": "Compare specifications of selected Fagor Industrial models.",
+    "compareDescription": "Compare specifications of selected Fagor Professional models.",
     "datasheetTitle": "Datasheet",
     "notFoundTitle": "Page not found",
     "styleguideTitle": "Styleguide",
-    "categoryDescription": "{category}. Fagor Industrial industrial laundry equipment catalog.",
-    "categoryOgAlt": "{category} — Fagor Industrial",
-    "modelOgAlt": "{name} — Fagor Industrial",
-    "homeOgAlt": "Fagor Industrial — equipment lineup",
+    "categoryDescription": "{category}. Fagor Professional industrial laundry equipment catalog.",
+    "categoryOgAlt": "{category} — Fagor Professional",
+    "modelOgAlt": "{name} — Fagor Professional",
+    "homeOgAlt": "Fagor Professional — equipment lineup",
     "aboutTitle": "About the company",
     "aboutDescription": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
     "serviceTitle": "Service and support",
-    "serviceDescription": "Request service for Fagor Industrial equipment: describe the model and issue.",
+    "serviceDescription": "Request service for Fagor Professional equipment: describe the model and issue.",
     "contactsTitle": "Contacts",
-    "contactsDescription": "Contact us about a quote, service, or another question about Fagor Industrial equipment."
+    "contactsDescription": "Contact us about a quote, service, or another question about Fagor Professional equipment."
   },
   "units": {
     "kg": "kg",
@@ -37,7 +37,7 @@
   },
   "nav": {
     "skip": "Skip to content",
-    "brand": "Fagor Industrial",
+    "brand": "Fagor Professional",
     "catalog": "Catalog",
     "industries": "Industries",
     "service": "Service and support",
@@ -49,7 +49,8 @@
     "theme": "Theme",
     "menu": "Menu",
     "closeMenu": "Close menu",
-    "allModels": "All models"
+    "allModels": "All models",
+    "back": "← Back"
   },
   "search": {
     "open": "Search models",
@@ -74,7 +75,7 @@
     "system": "System"
   },
   "home": {
-    "title": "How many kilograms per shift?",
+    "title": "How many kilograms per hour?",
     "subtitle": "Drag the load range: matching models step forward and the catalog filters itself.",
     "catalogCta": "Open the catalog",
     "scaleNote": "All machines drawn at one scale",
@@ -83,7 +84,7 @@
     "presetBetween": "{from}–{to} kg",
     "presetFrom": "from {kg} kg",
     "stepsHeading": "How we work",
-    "step1Title": "Sized to your shift",
+    "step1Title": "Sized to your hourly volume",
     "step1Body": "Engineering selection against your linen volumes — lineup and catalog by kilograms.",
     "step2Title": "Specification and quote",
     "step2Body": "Send a request with selected models; we prepare a specification and commercial proposal from the form.",
@@ -100,16 +101,16 @@
     "flagshipBadge": "Availability and lead times are confirmed in the quote",
     "flagshipQuote": "Get a quote",
     "advantagesHeading": "Engineering advantages",
-    "advantagesLead": "Why laundries choose Fagor Industrial.",
+    "advantagesLead": "Why laundries choose Fagor Professional.",
     "advantage1Title": "Energy efficiency up to 30%",
     "advantage1Body": "Intelligent load weighing (Auto Weight): automatic adjustment of water, chemicals, and energy.",
     "advantage2Title": "G-factor up to 450–500",
     "advantage2Body": "High spin reduces residual moisture and shortens drying time.",
-    "advantage3Title": "Built for intensive shifts",
+    "advantage3Title": "Built for intensive hourly load",
     "advantage3Body": "Industrial components designed for daily continuous duty in commercial and industrial laundries.",
     "advantage4Title": "Local stock and service",
     "advantage4Body": "Genuine spare parts in Ukraine and on-site engineer visits.",
-    "casesHeading": "Case studies",
+    "casesHeading": "Selection scenarios",
     "casesLead": "Typical lineup-selection scenarios — without naming specific venues.",
     "cases": {
       "hotel": {
@@ -126,7 +127,7 @@
       },
       "central": {
         "title": "Central laundry",
-        "body": "A wash, dry, and finishing cascade for large shift volumes — from ironers and rollers to carts and water recovery."
+        "body": "A wash, dry, and finishing cascade for large hourly volumes — from ironers and rollers to carts and water recovery."
       }
     },
     "lineupLabel": "Washer lineup by load capacity",
@@ -236,7 +237,9 @@
     "toPlanner": "To floor layout planner ↓",
     "copied": "Link copied",
     "empty": "Pick 2–4 models in the catalog to compare.",
-    "toCatalog": "To catalog",
+    "toCatalog": "← To catalog",
+    "breadcrumbs": "Breadcrumb",
+    "needOneMoreHint": "Add one more model to compare",
     "tableCaption": "Specification comparison",
     "field": "Specification",
     "silhouettesLabel": "Silhouettes at one scale",
@@ -263,7 +266,11 @@
       "zoomLabel": "Plan zoom",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
-      "fit": "Fit"
+      "fit": "Fit",
+      "undo": "Undo",
+      "redo": "Redo",
+      "copyPlanLink": "Copy plan link",
+      "planLinkCopied": "Plan link copied"
     }
   },
   "categories": {
@@ -279,7 +286,7 @@
   },
   "categoryIntros": {
     "washers": "Industrial washers for hotels, hospitals, and commercial laundries. Compare models by load in kilograms, heating type, and dimensions.",
-    "dryers": "Dryers for different shift volumes and heating types. Match drum size and power so drying does not bottleneck the wash line.",
+    "dryers": "Dryers for different hourly volumes and heating types. Match drum size and power so drying does not bottleneck the wash line.",
     "flatwork-ironers": "Flatwork ironers for bed linen and large textiles. Use working width and throughput speed as the primary filters.",
     "laundry-carts": "Carts for moving soiled and clean linen inside the laundry. They help shape zone-to-zone logistics without extra handling.",
     "ironing-rollers": "Ironing rollers for finishing table linen and mid-format textiles. Compare shaft width and line throughput.",
@@ -318,6 +325,7 @@
     }
   },
   "quote": {
+    "breadcrumbs": "Breadcrumb",
     "title": "Get a commercial quote",
     "subtitle": "Tell us about the site and linen volume. We will pick a model and calculate the price.",
     "name": "Name",
@@ -325,7 +333,7 @@
     "contact": "Email or phone",
     "site": "Site",
     "sitePlaceholder": "Select site type",
-    "kgPerShift": "Kg of linen per shift",
+    "kgPerShift": "Kg of linen per hour",
     "models": "Models",
     "modelsHint": "Remove any you do not need. Add models from the catalog or compare.",
     "removeModel": "Remove {name}",
@@ -398,7 +406,7 @@
     "title": "Privacy",
     "intro": "This page describes only what the request form on this site does. A full legal policy will replace this after lawyer review.",
     "fieldsTitle": "Fields the form collects",
-    "fieldsBody": "Name, company, email or phone, facility type, kilograms of laundry per shift, selected models, and a comment. Service requests may also include the model, serial number, and a problem description.",
+    "fieldsBody": "Name, company, email or phone, facility type, kilograms of laundry per hour, selected models, and a comment. Service requests may also include the model, serial number, and a problem description.",
     "purposeTitle": "Why",
     "purposeBody": "So we can reply to your request (quote, service, or other message) through the configured lead delivery channel."
   },
@@ -420,7 +428,7 @@
     "title": "About the company",
     "lead": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
     "historyHeading": "Experience since 1994",
-    "historyBody": "For more than three decades we have helped hotels, hospitals, commercial and central laundries build lineups around real linen volume per shift. From the first consultation through commissioning and service we stay an on-site engineering partner — without loud promises we cannot confirm in a quote.",
+    "historyBody": "For more than three decades we have helped hotels, hospitals, commercial and central laundries build lineups around real linen volume per hour. From the first consultation through commissioning and service we stay an on-site engineering partner — without loud promises we cannot confirm in a quote.",
     "expertiseHeading": "Expertise and focus",
     "expertiseBody": "We specialise in Fagor Professional industrial laundry equipment: washers, dryers, finishing, and related machinery. The on-site catalog is built so a buyer can quickly compare models by kilograms, heating, and dimensions.",
     "infraHeading": "Infrastructure in Ukraine",
@@ -428,7 +436,7 @@
     "infraAddressLabel": "Address: ",
     "mapLink": "Open in maps",
     "standardsHeading": "Engineering standards",
-    "standardsBody": "We size equipment to linen volumes per shift, support installation, and provide technical assistance without invented “24/7” or minute-based SLA claims — timelines and terms are agreed in the quote and the service request.",
+    "standardsBody": "We size equipment to linen volumes per hour, support installation, and provide technical assistance without invented “24/7” or minute-based SLA claims — timelines and terms are agreed in the quote and the service request.",
     "standardsServiceLink": "Service and support",
     "ctaBannerHeading": "Ready for a quote?",
     "ctaBannerBody": "Send a request — we will prepare a commercial proposal from the selected models and site conditions.",
@@ -467,7 +475,7 @@
     "faq2Q": "Do you use original Fagor parts?",
     "faq2A": "Yes. We use original Fagor components from stock or order them from the manufacturer.",
     "faq3Q": "Do you service equipment not bought from you?",
-    "faq3A": "Yes. We service and repair industrial laundry equipment from Fagor Industrial.",
+    "faq3A": "Yes. We service and repair industrial laundry equipment from Fagor Professional.",
     "name": "Name",
     "contact": "Email or phone",
     "modelLabel": "Model (as on the plate)",
@@ -532,7 +540,7 @@
   "footer": {
     "company": "Company",
     "privacy": "Privacy",
-    "copyright": "© {year} Fagor Industrial",
+    "copyright": "© {year} Fagor Professional",
     "quotePrompt": "Leave a request for a commercial proposal."
   },
   "fontcheck": {

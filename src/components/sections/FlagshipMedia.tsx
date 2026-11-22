@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 import { Silhouette } from "@/components/ui/Silhouette";
+import { Link } from "@/i18n/navigation";
 import {
   buildCloudinaryUrl,
   getImagesCloudName,
@@ -17,15 +18,21 @@ type FlagshipMediaProps = {
 
 /**
  * Equal-height media well: e_trim photo, max-height fill, feet on the floor line.
+ * Linked with an accessible name; empty alt stays decorative inside that link.
  */
 export function FlagshipMedia({ product, categoryLabel }: FlagshipMediaProps) {
   const photo = getModelImage(product, { categoryLabel });
   const cloudName = getImagesCloudName();
   const dims = product.dimensionsMm;
+  const href = `/catalog/${product.category}/${product.slug}`;
 
   if (!photo?.publicId || !cloudName) {
     return (
-      <div className="flagship-card-media" aria-hidden="true">
+      <Link
+        href={href}
+        className="flagship-card-media"
+        aria-label={product.name}
+      >
         {dims ? (
           <Silhouette
             widthMm={dims.w}
@@ -34,7 +41,7 @@ export function FlagshipMedia({ product, categoryLabel }: FlagshipMediaProps) {
             title={product.name}
           />
         ) : null}
-      </div>
+      </Link>
     );
   }
 
@@ -46,7 +53,7 @@ export function FlagshipMedia({ product, categoryLabel }: FlagshipMediaProps) {
   });
 
   return (
-    <div className="flagship-card-media" aria-hidden="true">
+    <Link href={href} className="flagship-card-media" aria-label={product.name}>
       <Image
         src={src}
         alt=""
@@ -56,6 +63,6 @@ export function FlagshipMedia({ product, categoryLabel }: FlagshipMediaProps) {
         unoptimized
         className="flagship-card-photo"
       />
-    </div>
+    </Link>
   );
 }
