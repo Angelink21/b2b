@@ -422,7 +422,7 @@
     "cookiesTitle": "Cookies and similar technologies",
     "cookiesBody": "The site may use technical cookies/browser storage for theme, language, the compare list, and form protection. Vercel Analytics records anonymised page-view events. We do not add advertising trackers.",
     "updatesTitle": "Updates",
-    "updatesBody": "This text may change if forms or delivery channels change. The current version is always on this page. Updated: 22 Nov 2026."
+    "updatesBody": "This text may change if forms or delivery channels change. The current version is always on this page."
   },
   "errors": {
     "notFoundTitle": "Page not found",
