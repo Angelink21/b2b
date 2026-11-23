@@ -283,17 +283,34 @@ describe("normalizeDescription", () => {
     expect(result.blocks).toEqual([]);
   });
 
-  it("sentence-cases kit headings and keeps • bullets", () => {
+  it("drops kit lead-in headings and keeps • bullets", () => {
     const result = normalizeDescription(
       "КОМПЛЕКТАЦІЯ\n• Пральна машина\nДо складу входять:\n• Сушильна машина",
     );
     expect(result.blocks).toEqual([
-      { kind: "heading", text: "Комплектація" },
       { kind: "bullet", text: "Пральна машина" },
-      { kind: "heading", text: "До складу входять:" },
       { kind: "bullet", text: "Сушильна машина" },
     ]);
     expect(result.bullets).toEqual(["Пральна машина", "Сушильна машина"]);
+  });
+
+  it("drops consecutive kit headings leaving only bullets", () => {
+    const result = normalizeDescription(
+      "КОМПЛЕКТАЦІЯ\nДо складу входять:\n• Пральна машина (завантаження 18 кг)",
+    );
+    expect(result.blocks).toEqual([
+      { kind: "bullet", text: "Пральна машина (завантаження 18 кг)" },
+    ]);
+  });
+
+  it("strips orphan trailing кг) without touching real (… кг) clauses", () => {
+    const result = normalizeDescription(
+      "• Стандартне підключення через Ethernet для віддаленого керування кг)\n• Промислова пральна машина (завантаження 18 кг)",
+    );
+    expect(result.bullets).toEqual([
+      "Стандартне підключення через Ethernet для віддаленого керування",
+      "Промислова пральна машина (завантаження 18 кг)",
+    ]);
   });
 });
 

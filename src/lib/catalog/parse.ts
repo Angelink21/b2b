@@ -485,9 +485,78 @@ const HEADING_ALIASES: Readonly<Record<string, string>> = {
   "до складу входять": "До складу входять:",
 };
 
+/** Kit lead-ins that should not stack as consecutive headings. */
+const KIT_HEADING_TEXTS = new Set(Object.values(HEADING_ALIASES));
+
 function sentenceCaseHeading(line: string): string | null {
   const key = line.replace(/\s+/g, " ").trim().toLowerCase();
   return HEADING_ALIASES[key] ?? null;
+}
+
+/**
+ * Drop copy-paste junk like trailing ` кг)` when it is not a `(… кг)` clause.
+ */
+export function cleanDescriptionBulletText(text: string): string {
+  let cleaned = text.replace(/\s+/g, " ").trim();
+  if (/\sкг\)\s*$/u.test(cleaned) && !/\([^)]*кг\)\s*$/u.test(cleaned)) {
+    cleaned = cleaned.replace(/\sкг\)\s*$/u, "").trim();
+  }
+  return cleaned;
+}
+
+/**
+ * Presentation polish for description blocks (snapshot or freshly parsed).
+ * Drops kit lead-ins (Комплектація / До складу…) — the page already has
+ * «Опис серії»; cleans orphan `кг)` on bullets.
+ */
+export function sanitizeDescriptionBlocks(
+  blocks: readonly DescriptionBlock[],
+): DescriptionBlock[] {
+  const out: DescriptionBlock[] = [];
+  for (const block of blocks) {
+    if (block.kind === "heading") {
+      const text = sentenceCaseHeading(block.text) ?? block.text.trim();
+      if (!text) continue;
+      // Redundant under page h2 «Опис серії» / «Series description».
+      if (KIT_HEADING_TEXTS.has(text)) continue;
+      out.push({ kind: "heading", text });
+      continue;
+    }
+    const text = cleanDescriptionBulletText(block.text);
+    if (!text) continue;
+    out.push({ kind: "bullet", text });
+  }
+  return out;
+}
+
+type SeriesDescriptionFields = {
+  fullDescription: string;
+  fullBullets: string[];
+  fullBlocks?: DescriptionBlock[] | undefined;
+};
+
+/** Apply block/bullet polish to a series record without rebuilding catalog JSON. */
+export function presentSeriesDescription<T extends SeriesDescriptionFields>(
+  series: T,
+): T {
+  if (series.fullBlocks && series.fullBlocks.length > 0) {
+    const fullBlocks = sanitizeDescriptionBlocks(series.fullBlocks);
+    return {
+      ...series,
+      fullDescription: cleanDescriptionBulletText(series.fullDescription),
+      fullBlocks,
+      fullBullets: fullBlocks
+        .filter((b) => b.kind === "bullet")
+        .map((b) => b.text),
+    };
+  }
+  return {
+    ...series,
+    fullDescription: cleanDescriptionBulletText(series.fullDescription),
+    fullBullets: series.fullBullets
+      .map(cleanDescriptionBulletText)
+      .filter((t) => t.length > 0),
+  };
 }
 
 /** Collapse whitespace; split full description into headings + • bullets. */
@@ -543,13 +612,18 @@ export function normalizeDescription(rawInput: string | undefined | null): {
 
   // No • and no recognized headings → single prose blob as before (no fake bullets).
   if (!collapsed.includes("•") && blocks.every((b) => b.kind === "bullet")) {
-    const text = collapsed.replace(/\s+/g, " ").trim();
+    const text = cleanDescriptionBulletText(
+      collapsed.replace(/\s+/g, " ").trim(),
+    );
     return { text, bullets: [], blocks: [] };
   }
 
+  const sanitized = sanitizeDescriptionBlocks(blocks);
   return {
-    text: collapsed.replace(/\s+/g, " ").trim(),
-    bullets,
-    blocks,
+    text: cleanDescriptionBulletText(collapsed.replace(/\s+/g, " ").trim()),
+    bullets: sanitized
+      .filter((b) => b.kind === "bullet")
+      .map((b) => b.text),
+    blocks: sanitized,
   };
 }

@@ -15,6 +15,7 @@ import {
   fetchCatalogCsvText,
   type FetchCatalogCsv,
 } from "./csv-source";
+import { presentSeriesDescription } from "./parse";
 import {
   buildCatalogFromCsvText,
   checkCatalogShrink,
@@ -117,7 +118,10 @@ export function buildSnapshotResult(errors: string[] = []): CatalogRuntimeResult
   return {
     data: {
       products,
-      series: snapshotGenerated.series,
+      // Polish description blocks at read time — do not rewrite catalog JSON.
+      series: snapshotGenerated.series.map((s) =>
+        presentSeriesDescription(s),
+      ),
       index: snapshotIndex.products,
     },
     meta: {
@@ -212,7 +216,7 @@ export async function loadCatalogFromSheet(
   return {
     data: {
       products: generated.products,
-      series: generated.series,
+      series: generated.series.map((s) => presentSeriesDescription(s)),
       index: index.products,
     },
     meta: {
