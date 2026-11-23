@@ -1,7 +1,7 @@
 {
   "meta": {
     "siteName": "Fagor Professional",
-    "homeTitle": "Fagor Professional — equipment lineup",
+    "homeTitle": "Official Fagor Professional representative — equipment lineup",
     "homeDescription": "Industrial laundry equipment. Pick a model by load and request a commercial quote.",
     "catalogTitle": "Catalog",
     "catalogDescription": "Fagor Professional industrial laundry equipment catalog.",
@@ -17,9 +17,9 @@
     "categoryDescription": "{category}. Fagor Professional industrial laundry equipment catalog.",
     "categoryOgAlt": "{category} — Fagor Professional",
     "modelOgAlt": "{name} — Fagor Professional",
-    "homeOgAlt": "Fagor Professional — equipment lineup",
+    "homeOgAlt": "Official Fagor Professional representative — equipment lineup",
     "aboutTitle": "About the company",
-    "aboutDescription": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
+    "aboutDescription": "Operating since 1994. Official representative of Fagor Professional in Ukraine.",
     "serviceTitle": "Service and support",
     "serviceDescription": "Request service for Fagor Professional equipment: describe the model and issue.",
     "contactsTitle": "Contacts",
@@ -444,7 +444,7 @@
   "about": {
     "breadcrumbs": "Breadcrumb",
     "title": "About the company",
-    "lead": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
+    "lead": "Operating since 1994. Official representative of Fagor Professional in Ukraine.",
     "historyHeading": "Experience since 1994",
     "historyBody": "For more than three decades we have helped hotels, hospitals, commercial and central laundries build lineups around real linen volume per cycle. From the first consultation through commissioning and service we stay an engineering partner — without loud promises we cannot confirm in a quote.",
     "expertiseHeading": "Expertise and focus",
@@ -464,7 +464,7 @@
   "service": {
     "breadcrumbs": "Breadcrumb",
     "title": "Service and support",
-    "lead": "Describe the equipment and the issue—we will pass the request to the responsible specialists.",
+    "lead": "Official Fagor Professional representative. Describe the equipment and the issue—we will pass the request to the responsible specialists.",
     "checklistHeading": "Before you request service",
     "checklist1": "Find the model in the catalog or write the name from the plate.",
     "checklist2": "Note the serial number if it is on the machine.",
@@ -519,7 +519,7 @@
   "contacts": {
     "breadcrumbs": "Breadcrumb",
     "title": "Contacts",
-    "lead": "Phone, email, warehouse address in Vyshneve, and a contact form.",
+    "lead": "Official Fagor Professional representative. Phone, email, warehouse address in Vyshneve, and a contact form.",
     "formHeading": "Write to us",
     "detailsHeading": "Details",
     "phone": "Phone",
@@ -558,7 +558,7 @@
   "footer": {
     "company": "Company",
     "privacy": "Privacy",
-    "copyright": "© {year} Fagor Professional",
+    "copyright": "© {year} Official Fagor Professional representative",
     "quotePrompt": "Leave a request for a commercial proposal."
   },
   "fontcheck": {

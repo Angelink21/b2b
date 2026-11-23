@@ -36,7 +36,7 @@ Fill these in `src/config/site.ts` (or dedicated content files) before publishin
 
 | Slot | Status | Notes |
 |------|--------|-------|
-| Lead + history (since 1994, FAGOR PROFESSIONAL) | set | Owner wording + draft expansion |
+| Lead + history (since 1994, official representative) | set | Owner wording + draft expansion |
 | Expertise / infra / standards | set | Infra mentions Vyshneve warehouse |
 | Team | empty | People / roles |
 | Certificates | empty | Only real certificates with source docs |

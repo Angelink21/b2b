@@ -71,3 +71,5 @@
 2026-11-23 · Runtime Cloudinary photo probe (HEAD + fl_getinfo) with `'use cache'` ~300s; manifest remains fast-path snapshot · Owner uploads to Cloudinary without committing `images.generated.json`; same public delivery as `images:sync`, no Admin API.
 2026-11-23 · Drop kit lead-in headings (Комплектація / До складу…) at present/parse time; strip orphan `кг)` · TO GO CSV nests kit labels under page «Опис серії»; polish without rewriting catalog JSON.
 2026-11-23 · `localeDetection: false` in next-intl routing · Root `/` must always redirect to `/uk` so Telegram/OG crawlers (Accept-Language: en) do not pick English meta/OG.
+2026-11-23 · About lead: «Офіційний представник Fagor Professional» (en: Official representative) · Owner request; replaces «постачальник … FAGOR PROFESSIONAL».
+2026-11-23 · Short «Оф. представник» / Official representative on home title+OG, footer copyright, service/contacts lead · Owner request; keep short brand in header/siteConfig.name.

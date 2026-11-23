@@ -1,7 +1,7 @@
 {
   "meta": {
     "siteName": "Fagor Professional",
-    "homeTitle": "Fagor Professional — лінійка обладнання",
+    "homeTitle": "Оф. представник Fagor Professional — лінійка обладнання",
     "homeDescription": "Промислове пральне обладнання. Підберіть модель за завантаженням і запросіть комерційну пропозицію.",
     "catalogTitle": "Каталог",
     "catalogDescription": "Каталог промислового прального обладнання Fagor Professional.",
@@ -17,9 +17,9 @@
     "categoryDescription": "{category}. Каталог промислового прального обладнання Fagor Professional.",
     "categoryOgAlt": "{category} — Fagor Professional",
     "modelOgAlt": "{name} — Fagor Professional",
-    "homeOgAlt": "Fagor Professional — лінійка обладнання",
+    "homeOgAlt": "Оф. представник Fagor Professional — лінійка обладнання",
     "aboutTitle": "Про компанію",
-    "aboutDescription": "Працюємо з 1994 року. Офіційний постачальник промислового прального обладнання FAGOR PROFESSIONAL в Україні.",
+    "aboutDescription": "Працюємо з 1994 року. Офіційний представник Fagor Professional в Україні.",
     "serviceTitle": "Сервіс та підтримка",
     "serviceDescription": "Запит на сервіс обладнання Fagor Professional: опишіть модель і проблему.",
     "contactsTitle": "Контакти",
@@ -444,7 +444,7 @@
   "about": {
     "breadcrumbs": "Шлях",
     "title": "Про компанію",
-    "lead": "Працюємо з 1994 року. Офіційний постачальник промислового прального обладнання FAGOR PROFESSIONAL в Україні.",
+    "lead": "Працюємо з 1994 року. Офіційний представник Fagor Professional в Україні.",
     "historyHeading": "Досвід з 1994 року",
     "historyBody": "Понад три десятиліття допомагаємо готелям, лікарням, комерційним і централізованим пральням будувати лінійки під реальний обсяг білизни за один цикл. Від першої консультації до запуску та сервісу залишаємося інженерним партнером — без гучних обіцянок, яких не можемо підтвердити в КП.",
     "expertiseHeading": "Експертиза та фокус",
@@ -464,7 +464,7 @@
   "service": {
     "breadcrumbs": "Шлях",
     "title": "Сервіс та підтримка",
-    "lead": "Опишіть обладнання та проблему — ми передамо запит відповідальним спеціалістам.",
+    "lead": "Оф. представник Fagor Professional. Опишіть обладнання та проблему — ми передамо запит відповідальним спеціалістам.",
     "checklistHeading": "Перед замовленням сервісу",
     "checklist1": "Знайдіть модель у каталозі або вкажіть назву з таблички.",
     "checklist2": "Запишіть серійний номер, якщо він є на обладнанні.",
@@ -519,7 +519,7 @@
   "contacts": {
     "breadcrumbs": "Шлях",
     "title": "Контакти",
-    "lead": "Телефон, email, адреса складу у Вишневому та форма зворотного зв’язку.",
+    "lead": "Оф. представник Fagor Professional. Телефон, email, адреса складу у Вишневому та форма зворотного зв’язку.",
     "formHeading": "Написати нам",
     "detailsHeading": "Реквізити",
     "phone": "Телефон",
@@ -558,7 +558,7 @@
   "footer": {
     "company": "Компанія",
     "privacy": "Конфіденційність",
-    "copyright": "© {year} Fagor Professional",
+    "copyright": "© {year} Оф. представник Fagor Professional",
     "quotePrompt": "Залиште заявку на комерційну пропозицію."
   },
   "fontcheck": {
