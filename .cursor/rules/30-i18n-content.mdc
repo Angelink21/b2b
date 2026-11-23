@@ -3,7 +3,7 @@ description: Локализация uk/en, типографика украинс
 globs: src/**/*.{ts,tsx},messages/**
 alwaysApply: false
 ---
-- Локали: `uk` (основная) и `en`. Адреса с префиксом: `/uk/...`, `/en/...`. Корень `/` перенаправляется в `proxy.ts`.
+- Локали: `uk` (основная) и `en`. Адреса с префиксом: `/uk/...`, `/en/...`. Корень `/` → `/uk` (`localeDetection: false` — без Accept-Language/cookie).
 - Все строки только в `messages/uk.json` и `messages/en.json`, по неймспейсам. Ключи типизированы; пропуск ключа ломает сборку (тест).
 - Множественное число только через ICU `plural`. В украинском 4 формы: `one`, `few`, `many`, `other`
   (пример: `{count, plural, one {# модель} few {# моделі} many {# моделей} other {# моделі}}`).

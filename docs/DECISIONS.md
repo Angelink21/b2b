@@ -70,3 +70,4 @@
 2026-11-23 · Advantages section Container max-width 1400px from 1600px viewport · Four ≥300px cards + 24px gaps need >1200px content width; default `--container` alone cannot satisfy the 4-up rule.
 2026-11-23 · Runtime Cloudinary photo probe (HEAD + fl_getinfo) with `'use cache'` ~300s; manifest remains fast-path snapshot · Owner uploads to Cloudinary without committing `images.generated.json`; same public delivery as `images:sync`, no Admin API.
 2026-11-23 · Drop kit lead-in headings (Комплектація / До складу…) at present/parse time; strip orphan `кг)` · TO GO CSV nests kit labels under page «Опис серії»; polish without rewriting catalog JSON.
+2026-11-23 · `localeDetection: false` in next-intl routing · Root `/` must always redirect to `/uk` so Telegram/OG crawlers (Accept-Language: en) do not pick English meta/OG.

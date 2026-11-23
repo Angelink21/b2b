@@ -13,6 +13,18 @@ test.describe("smoke", () => {
     });
   }
 
+  test("root redirects to uk even with Accept-Language: en", async ({
+    page,
+  }) => {
+    await page.setExtraHTTPHeaders({ "Accept-Language": "en-US,en;q=0.9" });
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/uk\/?$/);
+    await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute(
+      "content",
+      "uk_UA",
+    );
+  });
+
   test("language switch keeps path", async ({ page }) => {
     await page.goto("/uk/catalog");
     const switcher = page
