@@ -26,6 +26,8 @@ const envSchema = z.object({
   ENABLE_STYLEGUIDE: z.string().optional(),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_FOLDER: z.string().optional(),
+  /** Runtime Cloudinary probe TTL (seconds). Default 300 — same idea as catalog. */
+  IMAGES_CACHE_REVALIDATE_SECONDS: z.string().optional(),
   /** Published Google Sheet CSV URL (runtime + catalog:build). Never log the value. */
   CATALOG_CSV_URL: z.string().optional(),
   CATALOG_ALLOW_SHRINK: z.string().optional(),

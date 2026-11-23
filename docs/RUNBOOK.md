@@ -53,6 +53,7 @@ Vercel → **Deployments** → попередній успішний депло�
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Turnstile | Ні (пара) | — |
 | `CLOUDINARY_CLOUD_NAME` | Фото моделей | Для фото | `your_cloud` |
 | `CLOUDINARY_FOLDER` | Папка public_id | Ні | `fagor` |
+| `IMAGES_CACHE_REVALIDATE_SECONDS` | TTL runtime-probe фото | Ні (300) | `300` |
 | `ENABLE_STYLEGUIDE` | `/_styleguide` у проді | Ні | `1` |
 
 Без `NEXT_PUBLIC_SITE_URL` збірка падає на `http://localhost:3000` у canonical — для продакшену замініть.
@@ -78,9 +79,10 @@ Vercel → **Deployments** → попередній успішний депло�
 
 ### Фото моделей
 
-1. Завантажте в Cloudinary файл з `public_id` = `imageKey` (пробіли → `_`), опційно в `CLOUDINARY_FOLDER`.
-2. Локально/CI: `pnpm images:sync` (після `catalog:build`).
-3. Без фото — силует з мм каталогу. Вимоги до зйомки: `docs/PHOTO_SPEC.md` (якщо є).
+1. Завантажте в Cloudinary файл PNG з `public_id` = `imageKey` (пробіли → `_`), опційно в `CLOUDINARY_FOLDER`.
+2. На сайті (з `CLOUDINARY_CLOUD_NAME` у env) фото підхоплюється **runtime HEAD-probe** без коміту маніфесту — зазвичай протягом TTL (~5 хв, `IMAGES_CACHE_REVALIDATE_SECONDS`).
+3. Періодично/для знімка збірки: `pnpm images:sync` (після `catalog:build`) → `images.generated.json` + `IMAGES_REPORT.md` (офлайн/швидкий hit).
+4. Без фото — силует з мм каталогу.
 
 ## Заявки КП (отримувачі)
 

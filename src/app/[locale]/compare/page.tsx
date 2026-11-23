@@ -76,23 +76,25 @@ export default async function ComparePage({ params }: PageProps) {
 
   const products = await getAll();
   const photos = new Map(
-    products.map((product) => {
-      const categoryLabel = categoryLabels[product.category];
-      const photo =
-        categoryLabel !== undefined
-          ? getModelImage(product, { categoryLabel })
-          : getModelImage(product);
-      if (!photo) return [product.slug, null] as const;
-      return [
-        product.slug,
-        {
-          loaderSrc: photo.loaderSrc,
-          alt: photo.alt,
-          width: photo.width,
-          height: photo.height,
-        },
-      ] as const;
-    }),
+    await Promise.all(
+      products.map(async (product) => {
+        const categoryLabel = categoryLabels[product.category];
+        const photo =
+          categoryLabel !== undefined
+            ? await getModelImage(product, { categoryLabel })
+            : await getModelImage(product);
+        if (!photo) return [product.slug, null] as const;
+        return [
+          product.slug,
+          {
+            loaderSrc: photo.loaderSrc,
+            alt: photo.alt,
+            width: photo.width,
+            height: photo.height,
+          },
+        ] as const;
+      }),
+    ),
   );
   const records = buildCompareRecords(products, photos);
 

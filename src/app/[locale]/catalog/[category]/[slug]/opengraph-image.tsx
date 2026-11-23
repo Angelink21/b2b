@@ -50,7 +50,7 @@ export default async function Image({ params }: Props) {
     units: messages.units,
   });
 
-  const photo = getModelImage(product, {
+  const photo = await getModelImage(product, {
     categoryLabel: messages.categories[product.category],
   });
   const ogPhotoH = photo

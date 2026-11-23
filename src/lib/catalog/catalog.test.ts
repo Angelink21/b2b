@@ -173,9 +173,9 @@ describe("catalog API", () => {
 });
 
 describe("getModelImage", () => {
-  it("returns null or a photo object without throwing", () => {
+  it("returns null or a photo object without throwing", async () => {
     const product = loadGenerated().products[0]!;
-    const photo = getModelImage(product);
+    const photo = await getModelImage(product);
     if (photo === null) {
       expect(photo).toBeNull();
     } else {

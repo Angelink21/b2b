@@ -18,7 +18,7 @@ import {
   type RangeStripCandidate,
   unitToFraction,
 } from "./lineup";
-import { hasModelImage } from "@/lib/images";
+import { hasModelImageInManifest } from "@/lib/images";
 
 describe("selectLineup", () => {
   it("returns 8 washers including unique kg min and max", () => {
@@ -55,7 +55,7 @@ describe("selectLineup", () => {
   });
 
   it("limits the floor row to photo washers when at least six exist", () => {
-    const hasPhoto = (slug: string) => hasModelImage(slug);
+    const hasPhoto = (slug: string) => hasModelImageInManifest(slug);
     const lineup = selectLineup(getAll(), { hasPhoto });
     const washers = getAll().filter(
       (p) => p.category === "washers" && p.loadKg && hasPhoto(p.slug),

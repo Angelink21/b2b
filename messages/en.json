@@ -75,7 +75,7 @@
     "system": "System"
   },
   "home": {
-    "title": "How many kilograms per hour?",
+    "title": "How many kilograms per cycle?",
     "subtitle": "Drag the load range: matching models step forward and the catalog filters itself.",
     "catalogCta": "Open the catalog",
     "scaleNote": "All machines drawn at one scale",
@@ -84,7 +84,7 @@
     "presetBetween": "{from}–{to} kg",
     "presetFrom": "from {kg} kg",
     "stepsHeading": "How we work",
-    "step1Title": "Sized to your hourly volume",
+    "step1Title": "Sized to your cycle load",
     "step1Body": "Engineering selection against your linen volumes — lineup and catalog by kilograms.",
     "step2Title": "Specification and quote",
     "step2Body": "Send a request with selected models; we prepare a specification and commercial proposal from the form.",
@@ -106,7 +106,7 @@
     "advantage1Body": "Intelligent load weighing (Auto Weight): automatic adjustment of water, chemicals, and energy.",
     "advantage2Title": "G-factor up to 450–500",
     "advantage2Body": "High spin reduces residual moisture and shortens drying time.",
-    "advantage3Title": "Built for intensive hourly load",
+    "advantage3Title": "Built for intensive shifts",
     "advantage3Body": "Industrial components designed for daily continuous duty in commercial and industrial laundries.",
     "advantage4Title": "Local stock and service",
     "advantage4Body": "Genuine spare parts in Ukraine and on-site engineer visits.",
@@ -123,15 +123,16 @@
       },
       "selfService": {
         "title": "Self-service laundry",
-        "body": "Compact washer-dryer setups with high turnover: a practical start on a small floor plate and a clear path to expand the park."
+        "body": "Compact washer-dryer setups with high turnover: a practical start on a small floor plate and a clear path to expand the site."
       },
       "central": {
         "title": "Central laundry",
-        "body": "A wash, dry, and finishing cascade for large hourly volumes — from ironers and rollers to carts and water recovery."
+        "body": "A wash, dry, and finishing cascade for large per-cycle volumes — from ironers and rollers to carts and water recovery."
       }
     },
     "lineupLabel": "Washer lineup by load capacity",
-    "machineCaption": "{kg} kg · {w}×{d}×{h} mm",
+    "machineAriaLabel": "{name}, {kg}\u00a0kg",
+    "machineHint": "{name} · {kg}\u00a0kg · {dims}\u00a0mm · Open →",
     "ariaMin": "Minimum load",
     "ariaMax": "Maximum load",
     "ariaValueText": "from {from} to {to} kg",
@@ -286,12 +287,12 @@
   },
   "categoryIntros": {
     "washers": "Industrial washers for hotels, hospitals, and commercial laundries. Compare models by load in kilograms, heating type, and dimensions.",
-    "dryers": "Dryers for different hourly volumes and heating types. Match drum size and power so drying does not bottleneck the wash line.",
-    "flatwork-ironers": "Flatwork ironers for bed linen and large textiles. Use working width and throughput speed as the primary filters.",
+    "dryers": "Dryers for different per-cycle volumes and heating types. Match drum size and power so drying does not bottleneck the wash line.",
+    "flatwork-ironers": "Flatwork ironers for bed linen and large textiles. Use working width and ironing speed as the primary filters.",
     "laundry-carts": "Carts for moving soiled and clean linen inside the laundry. They help shape zone-to-zone logistics without extra handling.",
     "ironing-rollers": "Ironing rollers for finishing table linen and mid-format textiles. Compare shaft width and line throughput.",
-    "finishing": "Finishing equipment — from presses to dedicated stations. Completes the cycle after drying and ironing.",
-    "water-recovery": "Water-recovery systems to cut consumption in industrial laundries. Sized to the washer circuit and local connections.",
+    "finishing": "Finishing equipment — completes the cycle after drying and calendering.",
+    "water-recovery": "Water-recovery systems to cut costs in industrial laundries.",
     "washer-dryers": "Washer-dryers in one cabinet — when floor space is tight but you still need a full cycle without a separate drying zone.",
     "mobile-laundry": "Modular mobile laundries for temporary and remote sites. Compare kit contents and connection power. (needs-review)"
   },
@@ -333,7 +334,7 @@
     "contact": "Email or phone",
     "site": "Site",
     "sitePlaceholder": "Select site type",
-    "kgPerShift": "Kg of linen per hour",
+    "kgPerShift": "Kg of linen per cycle",
     "models": "Models",
     "modelsHint": "Remove any you do not need. Add models from the catalog or compare.",
     "removeModel": "Remove {name}",
@@ -408,7 +409,7 @@
     "controllerTitle": "Who is responsible",
     "controllerBody": "{name}. Privacy contact: {email}. Phones: {phones}. Address: {address}.",
     "fieldsTitle": "What we collect",
-    "fieldsBody": "From the Quote, Service, and Contacts forms: name, company (optional), email or phone, facility type, kilograms of linen per hour (if provided), selected models, and a comment. Service requests may also include model, serial number, and a problem description. Technically we may process form-protection signals (for example Cloudflare Turnstile when enabled) and anonymised page-view analytics (Vercel Analytics).",
+    "fieldsBody": "From the Quote, Service, and Contacts forms: name, company (optional), email or phone, facility type, kilograms of linen per cycle (if provided), selected models, and a comment. Service requests may also include model, serial number, and a problem description. Technically we may process form-protection signals (for example Cloudflare Turnstile when enabled) and anonymised page-view analytics (Vercel Analytics).",
     "purposeTitle": "Why we use the data",
     "purposeBody": "To accept and handle your request: prepare a commercial quote, reply to a service or other enquiry, and clarify models and volume. We do not sell the data or share it with third parties for their marketing.",
     "legalTitle": "Basis for processing",
@@ -442,7 +443,7 @@
     "title": "About the company",
     "lead": "Operating since 1994. Official supplier of industrial laundry equipment from FAGOR PROFESSIONAL in Ukraine.",
     "historyHeading": "Experience since 1994",
-    "historyBody": "For more than three decades we have helped hotels, hospitals, commercial and central laundries build lineups around real linen volume per hour. From the first consultation through commissioning and service we stay an on-site engineering partner — without loud promises we cannot confirm in a quote.",
+    "historyBody": "For more than three decades we have helped hotels, hospitals, commercial and central laundries build lineups around real linen volume per cycle. From the first consultation through commissioning and service we stay an engineering partner — without loud promises we cannot confirm in a quote.",
     "expertiseHeading": "Expertise and focus",
     "expertiseBody": "We specialise in Fagor Professional industrial laundry equipment: washers, dryers, finishing, and related machinery. The on-site catalog is built so a buyer can quickly compare models by kilograms, heating, and dimensions.",
     "infraHeading": "Infrastructure in Ukraine",
@@ -450,7 +451,7 @@
     "infraAddressLabel": "Address: ",
     "mapLink": "Open in maps",
     "standardsHeading": "Engineering standards",
-    "standardsBody": "We size equipment to linen volumes per hour, support installation, and provide technical assistance without invented “24/7” or minute-based SLA claims — timelines and terms are agreed in the quote and the service request.",
+    "standardsBody": "We size equipment to linen volumes per cycle, support installation, and provide technical assistance without invented “24/7” or minute-based SLA claims — timelines and terms are agreed in the quote and the service request.",
     "standardsServiceLink": "Service and support",
     "ctaBannerHeading": "Ready for a quote?",
     "ctaBannerBody": "Send a request — we will prepare a commercial proposal from the selected models and site conditions.",
@@ -460,7 +461,7 @@
   "service": {
     "breadcrumbs": "Breadcrumb",
     "title": "Service and support",
-    "lead": "Describe the equipment and the issue—we will pass the request on. No SLA or warranty claims until those are confirmed separately.",
+    "lead": "Describe the equipment and the issue—we will pass the request to the responsible specialists.",
     "checklistHeading": "Before you request service",
     "checklist1": "Find the model in the catalog or write the name from the plate.",
     "checklist2": "Note the serial number if it is on the machine.",
@@ -485,7 +486,7 @@
     "mapLink": "Open in maps",
     "faqHeading": "Frequently asked questions",
     "faq1Q": "What details speed up diagnosis?",
-    "faq1A": "Model, serial number from the nameplate, and a symptom description or error code.",
+    "faq1A": "Model, serial number on the nameplate, and a symptom description or error code.",
     "faq2Q": "Do you use original Fagor parts?",
     "faq2A": "Yes. We use original Fagor components from stock or order them from the manufacturer.",
     "faq3Q": "Do you service equipment not bought from you?",

@@ -7,7 +7,8 @@ type ModelImageProps = {
   product: Pick<
     Product,
     "slug" | "imageKey" | "name" | "category" | "image" | "dimensionsMm"
-  >;
+  > &
+    Partial<Pick<Product, "imageId">>;
   /** CSS aspect-ratio string; default from photo pixels, else dims, else fallback. */
   aspectRatio?: string;
   /** Fill a fixed-height parent well; machines share one floor line. */
@@ -23,7 +24,7 @@ type ModelImageProps = {
  * Server-friendly wrapper: resolves Cloudinary photo, then renders ModelImageView.
  * Do not import this from Client Components — use ModelImageView + a preloaded photo.
  */
-export function ModelImage({
+export async function ModelImage({
   product,
   aspectRatio,
   fillWell = false,
@@ -33,7 +34,7 @@ export function ModelImage({
   priority = false,
   categoryLabel,
 }: ModelImageProps) {
-  const photo = getModelImage(
+  const photo = await getModelImage(
     product,
     categoryLabel !== undefined ? { categoryLabel } : undefined,
   );

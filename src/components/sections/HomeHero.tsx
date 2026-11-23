@@ -18,7 +18,10 @@ import {
   hasModelImage,
 } from "@/lib/images";
 import { canUseLineupPhotos } from "@/lib/images/lineup-photos";
-import { formatIndexLoadKg } from "@/lib/catalog/format";
+import {
+  formatIndexDimensions,
+  formatIndexLoadKg,
+} from "@/lib/catalog/format";
 
 import { LineupMachineSlot } from "./LineupMachineSlot";
 import { LineupMachineVisual } from "./LineupMachineVisual";
@@ -30,7 +33,12 @@ export async function HomeHero() {
   const locale = await getLocale();
   const t = await getTranslations("home");
   const all = await getAll();
-  const hasPhoto = (slug: string) => hasModelImage(slug);
+  const photoFlags = new Map(
+    await Promise.all(
+      all.map(async (p) => [p.slug, await hasModelImage(p)] as const),
+    ),
+  );
+  const hasPhoto = (slug: string) => photoFlags.get(slug) ?? false;
   const lineup = selectLineup(all, { hasPhoto });
   const index = await getIndex();
   const kgPairs = indexKgPairs(index);
@@ -40,7 +48,7 @@ export async function HomeHero() {
   const rangeStripCandidates: RangeStripCandidate[] = [];
   for (const product of all) {
     if (!product.loadKg || !hasPhoto(product.slug)) continue;
-    const photo = getModelImage(product);
+    const photo = await getModelImage(product);
     const thumbnailSrc =
       photo?.publicId && cloudName
         ? buildCloudinaryUrl(cloudName, photo.publicId, 240, {
@@ -68,6 +76,14 @@ export async function HomeHero() {
   const scale = LINEUP_TARGET_PX / maxH;
   const usePhotos = canUseLineupPhotos(lineup, hasPhoto);
 
+  const captions = lineup.map((m) => ({
+    hint: t("machineHint", {
+      name: m.name,
+      kg: m.kgMax,
+      dims: formatIndexDimensions(m.dimensionsMm, locale),
+    }),
+  }));
+
   return (
     <section className="home-hero">
       <Container>
@@ -91,22 +107,20 @@ export async function HomeHero() {
         anchors={lineup.map((m) => m.kgMax)}
         kgPairs={kgPairs}
         totalCount={index.length}
+        captions={captions}
         rangeStripCandidates={rangeStripCandidates}
       >
         {lineup.map((m, i) => {
           const size = floorSizes[i]!;
           const product = bySlug.get(m.slug);
+          const category = product?.category ?? "washers";
           return (
             <LineupMachineSlot
               key={m.slug}
               kgMax={m.kgMax}
               index={i}
-              caption={t("machineCaption", {
-                kg: m.kgMax,
-                w: m.dimensionsMm.w,
-                d: m.dimensionsMm.d,
-                h: m.dimensionsMm.h,
-              })}
+              href={`/catalog/${category}/${m.slug}`}
+              label={t("machineAriaLabel", { name: m.name, kg: m.kgMax })}
             >
               {product ? (
                 <LineupMachineVisual

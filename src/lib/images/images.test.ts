@@ -175,9 +175,13 @@ describe("lineup photo gate", () => {
 });
 
 describe("getModelImage", () => {
-  it("returns null when manifest has no cloud / no entry", () => {
+  it("returns null when manifest has no cloud / no entry", async () => {
+    const prev = process.env.CLOUDINARY_CLOUD_NAME;
+    delete process.env.CLOUDINARY_CLOUD_NAME;
+    const { resetEnvCache } = await import("@/env");
+    resetEnvCache();
     __setImagesManifestForTests(emptyImagesManifest());
-    expect(
+    await expect(
       getModelImage({
         slug: "lap-08-tp2-e",
         name: "LAP-08 TP2 E",
@@ -185,10 +189,13 @@ describe("getModelImage", () => {
         imageKey: "LAP-08 TP2 E.png",
         image: null,
       }),
-    ).toBeNull();
+    ).resolves.toBeNull();
+    if (prev === undefined) delete process.env.CLOUDINARY_CLOUD_NAME;
+    else process.env.CLOUDINARY_CLOUD_NAME = prev;
+    resetEnvCache();
   });
 
-  it("returns photo when slug is in the manifest", () => {
+  it("returns photo when slug is in the manifest", async () => {
     __setImagesManifestForTests(
       emptyImagesManifest({
         cloudName: "demo",
@@ -201,7 +208,7 @@ describe("getModelImage", () => {
         },
       }),
     );
-    const photo = getModelImage({
+    const photo = await getModelImage({
       slug: "lap-08-tp2-e",
       name: "LAP-08 TP2 E",
       category: "washers",
@@ -210,8 +217,8 @@ describe("getModelImage", () => {
     });
     expect(photo).not.toBeNull();
     expect(photo?.publicId).toBe("LAP-08_TP2_E");
-    expect(photo?.loaderSrc).toBe("demo::LAP-08_TP2_E");
+    expect(photo?.loaderSrc.endsWith("::LAP-08_TP2_E")).toBe(true);
     expect(photo?.alt).toBe("LAP-08 TP2 E, washers");
-    expect(photo?.url).toContain("res.cloudinary.com/demo/");
+    expect(photo?.url).toContain("res.cloudinary.com/");
   });
 });

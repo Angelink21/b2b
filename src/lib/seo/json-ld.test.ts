@@ -69,10 +69,10 @@ describe("JSON-LD builders (S3)", () => {
     expect(assertNoInventedFields(data)).toEqual([]);
   });
 
-  it("Product JSON-LD uses specs only; image omitted without photo", () => {
+  it("Product JSON-LD uses specs only; image omitted without photo", async () => {
     const product = getAll().find((p) => p.slug.length > 0);
     expect(product).toBeDefined();
-    const data = productJsonLd("uk", product!, {
+    const data = await productJsonLd("uk", product!, {
       category: "Пральні машини",
       heating: "Електричний",
       propertyNames: {
@@ -88,7 +88,7 @@ describe("JSON-LD builders (S3)", () => {
       },
     });
     expect(data["@type"]).toBe("Product");
-    // Image only when sync found a Cloudinary asset for the model.
+    // Image only when sync/runtime found a Cloudinary asset for the model.
     if (data.image !== undefined) {
       expect(typeof data.image).toBe("string");
       expect(String(data.image)).toMatch(/^https:\/\/res\.cloudinary\.com\//);
@@ -106,7 +106,7 @@ describe("JSON-LD builders (S3)", () => {
     expect(() => JSON.parse(raw)).not.toThrow();
   });
 
-  it("every built graph parses as JSON", () => {
+  it("every built graph parses as JSON", async () => {
     const product = getAll()[0]!;
     const graphs = [
       organizationJsonLd(),
@@ -115,7 +115,7 @@ describe("JSON-LD builders (S3)", () => {
       itemListJsonLd("en", "Washers", [
         { name: product.name, path: `/catalog/${product.category}/${product.slug}` },
       ]),
-      productJsonLd("en", product, {
+      await productJsonLd("en", product, {
         category: "Washers",
         heating: null,
         propertyNames: {

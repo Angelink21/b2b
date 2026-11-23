@@ -172,11 +172,11 @@ function propertyValue(
   return { "@type": "PropertyValue", name, value };
 }
 
-export function productJsonLd(
+export async function productJsonLd(
   locale: string,
   product: Product,
   labels: ProductJsonLdLabels,
-): JsonLd {
+): Promise<JsonLd> {
   const path: LocalePath = `/catalog/${product.category}/${product.slug}`;
   const additionalProperty: ReturnType<typeof propertyValue>[] = [];
 
@@ -247,7 +247,7 @@ export function productJsonLd(
     additionalProperty,
   };
 
-  const photo = getModelImage(product);
+  const photo = await getModelImage(product);
   if (photo?.url) {
     data.image = photo.url;
   }

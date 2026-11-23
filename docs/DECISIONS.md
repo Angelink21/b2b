@@ -63,6 +63,9 @@
 2026-11-22 · `getSiteUrl()`: NEXT_PUBLIC_SITE_URL → Vercel production/preview hosts → localhost only off production · Stops preview OG/canonical leaking localhost or sibling deployment URLs.
 2026-11-22 · Prerender-manifest test accepts `compute: "resuming"` · Cache Components marks compare/quote/catalog (searchParams) as resuming while still PARTIALLY_STATIC.
 2026-11-22 · Brand copy `Fagor Professional`; linen volume phrased per hour (uk «у годину», en «per hour») · Owner request; replaces Industrial / per-shift wording in UI.
+2026-11-23 · Home H1 and all linen-volume copy: uk «за один цикл», en «per cycle» (replaces «за годину» / «per hour» / «hourly») · Owner request; machine load is per cycle. Leave contacts «hours» (business hours) unchanged.
 2026-11-22 · Interim factual `/privacy` notice (not lawyer-certified) · Owner asked for launchable text; sticks to real forms/contacts/processors, no invented statutes.
 2026-11-22 · Email LeadSink TO defaults to `siteConfig.email` when `LEADS_EMAIL_TO` unset · Owner wants leads on the published mailbox; avoids duplicating the address in env.
 2026-11-22 · Production domain `https://pralne-obladnannya.com.ua` (replaces planned `fagorlaundry.com.ua`) · Owner confirmed 2026-11-22.
+2026-11-23 · Advantages section Container max-width 1400px from 1600px viewport · Four ≥300px cards + 24px gaps need >1200px content width; default `--container` alone cannot satisfy the 4-up rule.
+2026-11-23 · Runtime Cloudinary photo probe (HEAD + fl_getinfo) with `'use cache'` ~300s; manifest remains fast-path snapshot · Owner uploads to Cloudinary without committing `images.generated.json`; same public delivery as `images:sync`, no Admin API.

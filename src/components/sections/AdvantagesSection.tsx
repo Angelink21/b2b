@@ -9,7 +9,7 @@ export async function AdvantagesSection() {
   const t = await getTranslations("home");
 
   return (
-    <Section className="home-block">
+    <Section className="home-block advantages-section">
       <h2 className="text-balance">{typo(t("advantagesHeading"))}</h2>
       <p className="home-block-lead text-pretty">
         {typo(t("advantagesLead"))}

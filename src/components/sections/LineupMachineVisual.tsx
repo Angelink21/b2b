@@ -22,14 +22,14 @@ type LineupMachineVisualProps = {
  * Lineup visual: photo in the same floor box as the silhouette (shared mm scale,
  * bottom-aligned), or silhouette.
  */
-export function LineupMachineVisual({
+export async function LineupMachineVisual({
   product,
   floorWidthMm,
   floorHeightMm,
   scale,
   usePhotos,
 }: LineupMachineVisualProps) {
-  const photo = usePhotos ? getModelImage(product) : null;
+  const photo = usePhotos ? await getModelImage(product) : null;
   const cloudName = getImagesCloudName();
   const boxW = Math.max(1, Math.round(floorWidthMm * scale));
   const boxH = Math.max(1, Math.round(floorHeightMm * scale));

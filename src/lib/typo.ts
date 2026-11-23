@@ -1,13 +1,34 @@
 /**
- * Glue short Ukrainian function words to the following word
- * so headings and paragraphs do not break after у / в / з / до / на / і / й / та / що.
- * Applied to both uk and en copy; the words are matched as whole tokens.
+ * Glue short Ukrainian function words (1–2 letters) to the following word
+ * with a non-breaking space. At most one glue in a row so chains of three
+ * or more words stay breakable (e.g. «в комерційних і промислових»).
+ * Applied to both uk and en copy; matched as whole tokens.
  */
-const SHORT_WORD = /(?<=^|[^\p{L}\p{N}])(що|до|на|та|у|в|з|і|й)[ \t]+(?=\p{L})/giu;
+const SHORT_WORD =
+  /(?<=^|[^\p{L}\p{N}])(від|та|до|на|по|за|у|в|з|і|й|а)[ \t]+(?=\p{L})/giu;
 
 export function typo(text: string): string {
-  return text.replace(SHORT_WORD, (match) => {
-    const word = match.replace(/[ \t]+$/u, "");
-    return `${word}\u00A0`;
-  });
+  const re = new RegExp(SHORT_WORD.source, "giu");
+  let result = "";
+  let lastIndex = 0;
+  let prevWasGlue = false;
+  let match = re.exec(text);
+  while (match) {
+    const between = text.slice(lastIndex, match.index);
+    result += between;
+    if (/\p{L}/u.test(between)) {
+      prevWasGlue = false;
+    }
+    if (prevWasGlue) {
+      result += match[0];
+      prevWasGlue = false;
+    } else {
+      result += `${match[1]}\u00A0`;
+      prevWasGlue = true;
+    }
+    lastIndex = match.index + match[0].length;
+    match = re.exec(text);
+  }
+  result += text.slice(lastIndex);
+  return result;
 }

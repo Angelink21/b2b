@@ -13,7 +13,7 @@ export async function QuoteStepsSection() {
       <h2 className="text-balance">{typo(t("stepsHeading"))}</h2>
       <ol className="process-steps">
         {STEPS.map((step) => (
-          <li key={step} className="process-step premium-frame">
+          <li key={step} className="process-step">
             <span className="process-step-index tabular-nums" aria-hidden="true">
               {String(step).padStart(2, "0")}
             </span>

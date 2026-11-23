@@ -20,8 +20,11 @@ type FlagshipMediaProps = {
  * Equal-height media well: e_trim photo, max-height fill, feet on the floor line.
  * Linked with an accessible name; empty alt stays decorative inside that link.
  */
-export function FlagshipMedia({ product, categoryLabel }: FlagshipMediaProps) {
-  const photo = getModelImage(product, { categoryLabel });
+export async function FlagshipMedia({
+  product,
+  categoryLabel,
+}: FlagshipMediaProps) {
+  const photo = await getModelImage(product, { categoryLabel });
   const cloudName = getImagesCloudName();
   const dims = product.dimensionsMm;
   const href = `/catalog/${product.category}/${product.slug}`;

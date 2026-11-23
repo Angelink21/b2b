@@ -31,23 +31,28 @@ export async function SiteShell({ children }: SiteShellProps) {
   const products = await getAll();
   const cloudName = getImagesCloudName();
   const itemsBySlug: Record<string, CompareTrayItem> = {};
-  for (const product of products) {
-    const photo = getModelImage(product);
-    const thumbSrc =
-      photo?.publicId && cloudName
-        ? buildCloudinaryUrl(cloudName, photo.publicId, COMPARE_TRAY_THUMB_WIDTH, {
-            padSquare: true,
-          })
-        : null;
-    itemsBySlug[product.slug] = {
-      slug: product.slug,
-      name: product.name,
-      category: product.category,
-      thumbSrc,
-      thumbW: photo?.trimWidth ?? photo?.width ?? 44,
-      thumbH: photo?.trimHeight ?? photo?.height ?? 44,
-    };
-  }
+  await Promise.all(
+    products.map(async (product) => {
+      const photo = await getModelImage(product);
+      const thumbSrc =
+        photo?.publicId && cloudName
+          ? buildCloudinaryUrl(
+              cloudName,
+              photo.publicId,
+              COMPARE_TRAY_THUMB_WIDTH,
+              { padSquare: true },
+            )
+          : null;
+      itemsBySlug[product.slug] = {
+        slug: product.slug,
+        name: product.name,
+        category: product.category,
+        thumbSrc,
+        thumbW: photo?.trimWidth ?? photo?.width ?? 44,
+        thumbH: photo?.trimHeight ?? photo?.height ?? 44,
+      };
+    }),
+  );
 
   return (
     <SiteChromeProvider>

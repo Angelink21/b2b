@@ -47,11 +47,18 @@ import {
   type LineupRangeStripProps,
 } from "./LineupRangeStrip";
 
+export type LineupCaptionData = {
+  /** Full fixed info-line text while this machine is hovered/focused. */
+  hint: string;
+};
+
 export type LineupRulerProps = {
   anchors: readonly number[];
   kgPairs: readonly KgPair[];
   /** Full catalog length (including models without kg). */
   totalCount: number;
+  /** Info-line copy, parallel to anchors / children. */
+  captions: readonly LineupCaptionData[];
   rangeStripCandidates?: LineupRangeStripProps["candidates"];
   children: ReactNode;
 };
@@ -100,6 +107,7 @@ export function LineupRuler({
   anchors,
   kgPairs,
   totalCount,
+  captions,
   rangeStripCandidates = [],
   children,
 }: LineupRulerProps) {
@@ -334,6 +342,10 @@ export function LineupRuler({
   };
 
   const slots = Children.toArray(children);
+  const hoveredIndex =
+    hoveredKg === null ? -1 : anchors.findIndex((kg) => kg === hoveredKg);
+  const hoveredHint =
+    hoveredIndex >= 0 ? captions[hoveredIndex]?.hint : undefined;
 
   const dragHandle =
     (which: "lo" | "hi") => (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -473,7 +485,13 @@ export function LineupRuler({
               />
             </div>
           </div>
-          <p className="lineup-scale-note">{t("scaleNote")}</p>
+          <p
+            className="lineup-scale-note"
+            data-testid="lineup-scale-note"
+            aria-live="polite"
+          >
+            {hoveredHint ?? t("scaleNote")}
+          </p>
         </Container>
       </div>
 

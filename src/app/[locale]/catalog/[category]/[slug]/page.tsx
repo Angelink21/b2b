@@ -14,7 +14,6 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import { ModelImage } from "@/components/ui/ModelImage";
-import { Row, RowList } from "@/components/ui/Row";
 import { Silhouette } from "@/components/ui/Silhouette";
 import {
   GENERIC_SILHOUETTE_MM,
@@ -38,6 +37,7 @@ import {
 import { buildModelStaticParams } from "@/lib/catalog/static-params";
 import { buildSpecGroups } from "@/lib/catalog/spec-groups";
 import { getModelImage } from "@/lib/images";
+import { Link } from "@/i18n/navigation";
 import {
   breadcrumbListJsonLd,
   productJsonLd,
@@ -118,7 +118,7 @@ export default async function ModelPage({ params }: PageProps) {
   }
   const groups = buildSpecGroups(product, heatingLabels, locale);
 
-  const photo = getModelImage(product);
+  const photo = await getModelImage(product);
   const dims = product.dimensionsMm;
   const realDims = hasRealDimensions(dims);
   const drawDims = realDims ? dims : GENERIC_SILHOUETTE_MM;
@@ -148,7 +148,7 @@ export default async function ModelPage({ params }: PageProps) {
               path: `/catalog/${product.category}/${product.slug}`,
             },
           ]),
-          productJsonLd(locale, product, {
+          await productJsonLd(locale, product, {
             category: tCat(product.category),
             heating: heatingLabel,
             propertyNames: {
@@ -349,24 +349,30 @@ export default async function ModelPage({ params }: PageProps) {
               aria-labelledby="model-related-heading"
             >
               <h2 id="model-related-heading">{t("related")}</h2>
-              <RowList className="mt-6 model-related-list">
+              <ul className="model-related-list">
                 {related.map((item) => {
                   const meta = item.loadKg
                     ? `${formatLoadKg(item.loadKg, locale)} ${tCatalog("kg")}`
                     : undefined;
                   return (
-                    <div key={item.slug} className="model-related-row">
-                      <Row
+                    <li key={item.slug} className="model-related-row">
+                      <Link
                         href={`/catalog/${item.category}/${item.slug}`}
-                        title={item.name}
-                        body={tCat(item.category)}
-                        {...(meta ? { meta } : {})}
-                      />
+                        className="model-related-copy"
+                      >
+                        <span className="model-related-title">{item.name}</span>
+                        <span className="model-related-type">
+                          {tCat(item.category)}
+                        </span>
+                      </Link>
+                      <span className="model-related-meta tabular-nums">
+                        {meta ?? "—"}
+                      </span>
                       <CompareToggle slug={item.slug} size="sm" />
-                    </div>
+                    </li>
                   );
                 })}
-              </RowList>
+              </ul>
             </section>
           ) : null}
         </div>
