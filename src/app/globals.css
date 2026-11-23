@@ -737,6 +737,8 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
 .range-dual {
   position: relative;
   height: 44px;
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .range-dual-track {
@@ -745,7 +747,7 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
   left: 12px;
   right: 12px;
   height: 4px;
-  transform: translateY(-50%);
+  margin-top: -2px;
   background: var(--line);
   border-radius: 2px;
   pointer-events: none;
@@ -759,53 +761,35 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
   border-radius: 2px;
 }
 
-.range-dual-input {
+.range-dual-thumb {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 44px;
+  top: 50%;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
   margin: 0;
-  appearance: none;
-  background: transparent;
-  pointer-events: none;
-}
-
-.range-dual-input::-webkit-slider-thumb {
-  appearance: none;
-  box-sizing: border-box;
-  pointer-events: auto;
-  width: 24px;
-  height: 24px;
-  margin-top: -10px;
-  border-radius: 50%;
+  padding: 0;
   border: 1.5px solid var(--ink);
-  background: var(--surf);
-  cursor: pointer;
-}
-
-.range-dual-input::-moz-range-thumb {
-  box-sizing: border-box;
-  pointer-events: auto;
-  width: 24px;
-  height: 24px;
   border-radius: 50%;
-  border: 1.5px solid var(--ink);
   background: var(--surf);
-  cursor: pointer;
-}
-
-.range-dual-input::-webkit-slider-runnable-track {
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  touch-action: none;
   appearance: none;
-  height: 4px;
-  background: transparent;
-  border: none;
 }
 
-.range-dual-input::-moz-range-track {
-  height: 4px;
-  background: transparent;
-  border: none;
+.range-dual-thumb:active {
+  cursor: grabbing;
+}
+
+.range-dual-thumb.is-max {
+  z-index: 2;
+}
+
+.range-dual-thumb:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
 }
 
 .data-table-wrap {
@@ -2578,24 +2562,43 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
   grid-column: 1;
   grid-row: 1;
   position: sticky;
-  top: var(--header-h);
+  top: calc(var(--header-h) + 16px);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   align-self: start;
-  max-height: calc(100dvh - var(--header-h));
-  overflow: auto;
+  max-height: calc(100dvh - var(--header-h) - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  overflow-anchor: none;
   min-width: 0;
   width: 100%;
   padding-top: var(--space-2);
   /* Content inset; active category bar stays on the panel’s left edge. */
   padding-inline-start: var(--space-3);
+  container-type: inline-size;
+  container-name: catalog-panel;
+}
+
+.catalog-panel-reset-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  margin: calc(-1 * var(--space-2)) 0 0;
+  padding: var(--space-2) 0;
+  background: var(--bg);
 }
 
 .catalog-results {
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
+  min-height: max(70vh, var(--catalog-panel-h, 70vh));
+  overflow-anchor: none;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -2722,28 +2725,40 @@ a.chip[aria-pressed="true"] {
 }
 
 .catalog-range {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: 0;
   min-width: 0;
-  min-height: 72px;
+  min-height: 84px;
+  padding-bottom: 16px;
+  overflow: visible;
 }
 
 .catalog-range-head {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--space-2);
+  min-height: 24px;
   min-width: 0;
+  /* Reserve × hit area without stealing label width into ellipsis. */
+  padding-inline-end: 36px;
 }
 
 .catalog-kg-label {
   margin: 0;
   font-weight: 500;
-  white-space: nowrap;
-  flex: 0 1 auto;
   min-width: 0;
+}
+
+.catalog-range-head .catalog-kg-label {
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.25;
+  text-wrap: balance;
+  hyphens: auto;
 }
 
 .catalog-range-value {
@@ -2751,7 +2766,41 @@ a.chip[aria-pressed="true"] {
   color: var(--steel);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  flex: 0 0 auto;
+  line-height: 1.25;
+}
+
+.catalog-range-reset {
+  position: absolute;
+  inset-inline-end: -4px;
+  top: 50%;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.catalog-range-reset[hidden],
+.catalog-range-reset.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.catalog-range-reset:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
 }
 
 .catalog-meta {
@@ -4564,10 +4613,70 @@ body.has-compare-tray #main {
 
 /* Catalog dimension filters */
 .catalog-dimension-filters {
+  margin: 0;
+  min-width: 0;
+}
+
+.catalog-dimension-filters > summary {
+  position: relative;
+  cursor: pointer;
+  font-weight: 500;
+  list-style: none;
+  min-height: 44px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  padding-inline-end: var(--space-4);
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.catalog-dimension-filters > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Same disclosure chevron language as service FAQ. */
+.catalog-dimension-filters > summary::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: translateY(-60%) rotate(45deg);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.catalog-dimension-filters[open] > summary::after {
+  transform: translateY(-20%) rotate(225deg);
+}
+
+.catalog-dimension-filters > summary:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-dimension-filters > summary::after {
+    transition: none;
+  }
+}
+
+.catalog-dimension-fields {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--space-3);
-  margin-top: var(--space-4);
+  padding-top: var(--space-2);
+}
+
+@container catalog-panel (min-width: 280px) {
+  .catalog-dimension-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
 }
 
 .catalog-dimension-note {

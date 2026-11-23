@@ -2,7 +2,14 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryStates } from "nuqs";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
@@ -95,6 +102,21 @@ export function CatalogExplorer({
   const toggleRef = useRef<HTMLButtonElement>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const panelScrollRef = useRef(0);
+  const windowScrollRef = useRef(0);
+  const filterTimers = useRef<Partial<Record<RangeFacet, number>>>({});
+  const urlTimers = useRef<Partial<Record<RangeFacet, number>>>({});
+  /** Immediate slider values while dragging (do not remount controls). */
+  const [draftRanges, setDraftRanges] = useState<
+    Partial<Record<RangeFacet, KgRangeParam>>
+  >({});
+  /** Debounced ranges applied to the results table (150ms). */
+  const [tableRanges, setTableRanges] = useState<
+    Partial<Record<RangeFacet, KgRangeParam>>
+  >({});
+  /** User-toggled open state when dimension URL params are absent. */
+  const [dimsOpen, setDimsOpen] = useState(false);
 
   const [query, setQuery] = useQueryStates(catalogParsers, {
     history: "replace",
@@ -174,6 +196,32 @@ export function CatalogExplorer({
   }, []);
 
   useEffect(() => {
+    const panel = panelRef.current;
+    const results = resultsRef.current;
+    if (!panel || !results) return;
+    const sync = () => {
+      results.style.setProperty(
+        "--catalog-panel-h",
+        `${Math.ceil(panel.getBoundingClientRect().height)}px`,
+      );
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(panel);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+    const onScroll = () => {
+      panelScrollRef.current = panel.scrollTop;
+    };
+    panel.addEventListener("scroll", onScroll, { passive: true });
+    return () => panel.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
     const media = window.matchMedia(DESKTOP_FILTERS_MQ);
     const closeOnDesktop = () => {
       if (media.matches) setSheetOpen(false);
@@ -244,7 +292,9 @@ export function CatalogExplorer({
     return filter;
   }, [activeCategory, query.d, query.h, query.w]);
 
-  const applied = useMemo(() => {
+  const dimsActive = dimensionFilterActive(dimensionMax);
+
+  const urlApplied = useMemo(() => {
     return {
       kg: bounds.kg ? tighten(query.kg, bounds.kg) : null,
       power: bounds.power ? tighten(query.power, bounds.power) : null,
@@ -253,9 +303,47 @@ export function CatalogExplorer({
       volume: bounds.volume ? tighten(query.volume, bounds.volume) : null,
       heat: facetAllowed(activeCategory, "heating") ? query.heat : null,
       sort: sortAllowed(activeCategory, query.sort) ? query.sort : null,
-      dimensionsMax: dimensionFilterActive(dimensionMax) ? dimensionMax : null,
+      dimensionsMax: dimsActive ? dimensionMax : null,
     };
-  }, [activeCategory, bounds, dimensionMax, query]);
+  }, [activeCategory, bounds, dimensionMax, dimsActive, query]);
+
+  /** Ranges driving the table: URL, overridden by debounced drag values. */
+  const applied = useMemo(() => {
+    const mergeRange = (facet: RangeFacet) => {
+      const edge = bounds[facet];
+      if (!edge) return null;
+      if (Object.prototype.hasOwnProperty.call(tableRanges, facet)) {
+        return tighten(tableRanges[facet] ?? null, edge);
+      }
+      return urlApplied[facet];
+    };
+    return {
+      kg: mergeRange("kg"),
+      power: mergeRange("power"),
+      width: mergeRange("width"),
+      speed: mergeRange("speed"),
+      volume: mergeRange("volume"),
+      heat: urlApplied.heat,
+      sort: urlApplied.sort,
+      dimensionsMax: urlApplied.dimensionsMax,
+    };
+  }, [bounds, tableRanges, urlApplied]);
+
+  const restoreScrollPending = useRef(false);
+
+  function rememberScroll() {
+    windowScrollRef.current = window.scrollY;
+    panelScrollRef.current = panelRef.current?.scrollTop ?? 0;
+    restoreScrollPending.current = true;
+  }
+
+  useLayoutEffect(() => {
+    if (!restoreScrollPending.current) return;
+    restoreScrollPending.current = false;
+    const panel = panelRef.current;
+    if (panel) panel.scrollTop = panelScrollRef.current;
+    window.scrollTo(0, windowScrollRef.current);
+  });
 
   const filtered = useMemo(() => {
     const filter = {
@@ -302,30 +390,34 @@ export function CatalogExplorer({
   const returnSearch = useMemo(() => {
     const params = new URLSearchParams();
     if (!lockedCategory && activeCategory) params.set("type", activeCategory);
-    if (applied.heat) params.set("heat", applied.heat);
-    if (applied.kg) params.set("kg", `${applied.kg.min}-${applied.kg.max}`);
-    if (applied.power) params.set("power", `${applied.power.min}-${applied.power.max}`);
-    if (applied.width) params.set("width", `${applied.width.min}-${applied.width.max}`);
-    if (applied.speed) params.set("speed", `${applied.speed.min}-${applied.speed.max}`);
-    if (applied.volume)
-      params.set("volume", `${applied.volume.min}-${applied.volume.max}`);
+    if (urlApplied.heat) params.set("heat", urlApplied.heat);
+    if (urlApplied.kg) params.set("kg", `${urlApplied.kg.min}-${urlApplied.kg.max}`);
+    if (urlApplied.power)
+      params.set("power", `${urlApplied.power.min}-${urlApplied.power.max}`);
+    if (urlApplied.width)
+      params.set("width", `${urlApplied.width.min}-${urlApplied.width.max}`);
+    if (urlApplied.speed)
+      params.set("speed", `${urlApplied.speed.min}-${urlApplied.speed.max}`);
+    if (urlApplied.volume)
+      params.set("volume", `${urlApplied.volume.min}-${urlApplied.volume.max}`);
     if (query.w) params.set("w", String(query.w));
     if (query.d) params.set("d", String(query.d));
     if (query.h) params.set("h", String(query.h));
     if (query.q) params.set("q", query.q);
-    if (applied.sort) params.set("sort", `${applied.sort.by}:${applied.sort.dir}`);
+    if (urlApplied.sort)
+      params.set("sort", `${urlApplied.sort.by}:${urlApplied.sort.dir}`);
     if (limit !== CATALOG_PAGE_SIZE) params.set("limit", String(limit));
     const s = params.toString();
     return s ? `?${s}` : "";
   }, [
     activeCategory,
-    applied,
     limit,
     lockedCategory,
     query.d,
     query.h,
     query.q,
     query.w,
+    urlApplied,
   ]);
 
   const heatKeys = useMemo(
@@ -335,17 +427,19 @@ export function CatalogExplorer({
 
   const hasActiveFilters = Boolean(
     query.q ||
-    applied.heat ||
-    applied.kg ||
-    applied.power ||
-    applied.width ||
-    applied.speed ||
-    applied.volume ||
+    urlApplied.heat ||
+    urlApplied.kg ||
+    urlApplied.power ||
+    urlApplied.width ||
+    urlApplied.speed ||
+    urlApplied.volume ||
+    Object.values(draftRanges).some(Boolean) ||
+    Object.values(tableRanges).some(Boolean) ||
     query.w ||
     query.d ||
     query.h ||
     (!lockedCategory && query.type) ||
-    applied.sort,
+    urlApplied.sort,
   );
 
   function selectCategory(next: CategorySlug | null) {
@@ -370,6 +464,17 @@ export function CatalogExplorer({
   }
 
   async function resetAll() {
+    rememberScroll();
+    for (const facet of Object.keys(filterTimers.current) as RangeFacet[]) {
+      window.clearTimeout(filterTimers.current[facet]);
+    }
+    for (const facet of Object.keys(urlTimers.current) as RangeFacet[]) {
+      window.clearTimeout(urlTimers.current[facet]);
+    }
+    filterTimers.current = {};
+    urlTimers.current = {};
+    setDraftRanges({});
+    setTableRanges({});
     await setQuery({
       kg: null,
       power: null,
@@ -390,17 +495,84 @@ export function CatalogExplorer({
   function rangeValue(facet: RangeFacet): { min: number; max: number } | null {
     const edge = bounds[facet];
     if (!edge) return null;
-    const current = applied[facet] ?? edge;
+    const draft = draftRanges[facet];
+    const current = draft ?? urlApplied[facet] ?? edge;
     return { min: current.min, max: current.max };
   }
 
-  function onRange(facet: RangeFacet, next: { min: number; max: number }) {
+  function rangeIsActive(facet: RangeFacet): boolean {
+    const edge = bounds[facet];
+    if (!edge) return false;
+    const value = rangeValue(facet);
+    if (!value) return false;
+    return value.min > edge.min || value.max < edge.max;
+  }
+
+  function writeRangeToUrl(facet: RangeFacet, next: { min: number; max: number }) {
     const edge = bounds[facet];
     const full = edge !== null && next.min <= edge.min && next.max >= edge.max;
+    rememberScroll();
     void setQuery({
       [facet]: full ? null : next,
       limit: CATALOG_PAGE_SIZE,
+    }).then(() => {
+      setDraftRanges((prev) => {
+        if (!(facet in prev)) return prev;
+        const copy = { ...prev };
+        delete copy[facet];
+        return copy;
+      });
+      setTableRanges((prev) => {
+        if (!(facet in prev)) return prev;
+        const copy = { ...prev };
+        delete copy[facet];
+        return copy;
+      });
     });
+  }
+
+  function onRangeChange(facet: RangeFacet, next: { min: number; max: number }) {
+    rememberScroll();
+    setDraftRanges((prev) => ({ ...prev, [facet]: next }));
+
+    window.clearTimeout(filterTimers.current[facet]);
+    filterTimers.current[facet] = window.setTimeout(() => {
+      rememberScroll();
+      setTableRanges((prev) => ({ ...prev, [facet]: next }));
+    }, 150);
+
+    window.clearTimeout(urlTimers.current[facet]);
+    urlTimers.current[facet] = window.setTimeout(() => {
+      writeRangeToUrl(facet, next);
+    }, 300);
+  }
+
+  function onRangeCommit(facet: RangeFacet, next: { min: number; max: number }) {
+    window.clearTimeout(filterTimers.current[facet]);
+    window.clearTimeout(urlTimers.current[facet]);
+    rememberScroll();
+    setDraftRanges((prev) => ({ ...prev, [facet]: next }));
+    setTableRanges((prev) => ({ ...prev, [facet]: next }));
+    writeRangeToUrl(facet, next);
+  }
+
+  function resetRange(facet: RangeFacet) {
+    const edge = bounds[facet];
+    if (!edge) return;
+    window.clearTimeout(filterTimers.current[facet]);
+    window.clearTimeout(urlTimers.current[facet]);
+    rememberScroll();
+    setDraftRanges((prev) => {
+      const copy = { ...prev };
+      delete copy[facet];
+      return copy;
+    });
+    setTableRanges((prev) => {
+      const copy = { ...prev };
+      delete copy[facet];
+      return copy;
+    });
+    void setQuery({ [facet]: null, limit: CATALOG_PAGE_SIZE });
   }
 
   const empty: ReactNode = (
@@ -461,7 +633,7 @@ export function CatalogExplorer({
   const orphanRanges = (["kg", "power", "width", "speed", "volume"] as const).flatMap(
     (facet) => {
       if (facetAllowed(activeCategory, facet)) return [];
-      const value = applied[facet];
+      const value = urlApplied[facet];
       if (!value) return [];
       const label = t("activeRange", {
         min:
@@ -478,6 +650,14 @@ export function CatalogExplorer({
     },
   );
 
+  const rangeMetricName: Record<RangeFacet, string> = {
+    kg: t("metricLeadKg"),
+    power: t("metricLeadPower"),
+    width: t("metricLeadWidth"),
+    speed: t("metricLeadSpeed"),
+    volume: t("metricLeadVolume"),
+  };
+
   const totalCount = CATEGORY_SLUGS.reduce(
     (sum, slug) => sum + (categoryCounts[slug] ?? 0),
     0,
@@ -488,7 +668,7 @@ export function CatalogExplorer({
       <CatalogReturnTracker pathname={pathname} search={returnSearch} />
       <CatalogScrollRestore />
       <Grid className="catalog-layout">
-        <div className="catalog-results">
+        <div ref={resultsRef} className="catalog-results">
           <div className="catalog-results-bar">
             <button
               ref={toggleRef}
@@ -508,7 +688,7 @@ export function CatalogExplorer({
                   className="catalog-reset"
                   onClick={() => void resetAll()}
                 >
-                  {t("reset")}
+                  {t("resetAll")}
                 </button>
               ) : null}
             </div>
@@ -628,6 +808,18 @@ export function CatalogExplorer({
             </button>
           ) : null}
 
+          {hasActiveFilters ? (
+            <div className="catalog-panel-reset-bar">
+              <button
+                type="button"
+                className="catalog-reset"
+                onClick={() => void resetAll()}
+              >
+                {t("resetAll")}
+              </button>
+            </div>
+          ) : null}
+
           <nav className="catalog-cat-list" aria-label={t("type")}>
             {lockedCategory ? (
               <>
@@ -736,32 +928,43 @@ export function CatalogExplorer({
           ) : null}
 
           {dimensionFilterAllowed(activeCategory) ? (
-            <div className="catalog-dimension-filters">
-              <p className="catalog-kg-label">{t("dimensionFilters")}</p>
-              {(["w", "d", "h"] as const).map((axis) => (
-                <Field
-                  key={axis}
-                  id={`catalog-dim-${axis}`}
-                  label={t(`dimensionMax${axis.toUpperCase()}` as "dimensionMaxW")}
-                >
-                  <Input
+            <details
+              className="catalog-dimension-filters"
+              open={dimsActive || dimsOpen}
+              onToggle={(event) => {
+                if (!dimsActive) {
+                  setDimsOpen(event.currentTarget.open);
+                }
+              }}
+            >
+              <summary>{t("dimensionFilters")}</summary>
+              <div className="catalog-dimension-fields">
+                {(["w", "d", "h"] as const).map((axis) => (
+                  <Field
+                    key={axis}
                     id={`catalog-dim-${axis}`}
-                    type="number"
-                    inputMode="numeric"
-                    step={10}
-                    min={10}
-                    value={query[axis] ?? ""}
-                    onChange={(event) => {
-                      const raw = event.target.value.trim();
-                      void setQuery({
-                        [axis]: raw === "" ? null : Number(raw),
-                        limit: CATALOG_PAGE_SIZE,
-                      });
-                    }}
-                  />
-                </Field>
-              ))}
-            </div>
+                    label={t(`dimensionMax${axis.toUpperCase()}` as "dimensionMaxW")}
+                  >
+                    <Input
+                      id={`catalog-dim-${axis}`}
+                      type="number"
+                      inputMode="numeric"
+                      step={10}
+                      min={10}
+                      value={query[axis] ?? ""}
+                      onChange={(event) => {
+                        const raw = event.target.value.trim();
+                        rememberScroll();
+                        void setQuery({
+                          [axis]: raw === "" ? null : Number(raw),
+                          limit: CATALOG_PAGE_SIZE,
+                        });
+                      }}
+                    />
+                  </Field>
+                ))}
+              </div>
+            </details>
           ) : null}
 
           {(["kg", "power", "width", "speed", "volume"] as const).map((facet) => {
@@ -770,7 +973,7 @@ export function CatalogExplorer({
             const value = rangeValue(facet);
             if (!edge || !value) return null;
             const copy = rangeCopy[facet];
-            const active = applied[facet] !== null;
+            const active = rangeIsActive(facet);
             const formatEdge = (n: number) =>
               facet === "kg"
                 ? formatLoadNumber(locale, n)
@@ -780,10 +983,26 @@ export function CatalogExplorer({
               max: formatEdge(value.max),
             });
             return (
-              <div key={facet} className="catalog-range">
+              <div key={facet} className="catalog-range" data-facet={facet}>
                 <div className="catalog-range-head">
                   <p className="catalog-kg-label">{copy.label}</p>
                   <p className="catalog-range-value">{readout}</p>
+                  <button
+                    type="button"
+                    className={
+                      active
+                        ? "catalog-range-reset"
+                        : "catalog-range-reset is-hidden"
+                    }
+                    aria-label={t("resetRangeNamed", {
+                      name: rangeMetricName[facet],
+                    })}
+                    aria-hidden={!active}
+                    tabIndex={active ? 0 : -1}
+                    onClick={() => resetRange(facet)}
+                  >
+                    ×
+                  </button>
                 </div>
                 <RangeDual
                   min={edge.min}
@@ -796,20 +1015,9 @@ export function CatalogExplorer({
                   valueTextTo={t("to")}
                   labelMin={copy.min}
                   labelMax={copy.max}
-                  onChange={(next) => onRange(facet, next)}
+                  onChange={(next) => onRangeChange(facet, next)}
+                  onCommit={(next) => onRangeCommit(facet, next)}
                 />
-                {active ? (
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    onClick={() => {
-                      void setQuery({ [facet]: null, limit: CATALOG_PAGE_SIZE });
-                    }}
-                  >
-                    {t("resetRange")}
-                  </Button>
-                ) : null}
               </div>
             );
           })}

@@ -63,8 +63,12 @@ test.describe("catalog layout p6", () => {
             const label = head.querySelector(".catalog-kg-label");
             const value = head.querySelector(".catalog-range-value");
             if (!label || !value) return false;
+            const truncated =
+              label.textContent?.includes("…") ||
+              label.textContent?.includes("...");
             return (
-              Math.round(head.getBoundingClientRect().height) <= 30 &&
+              Math.round(head.getBoundingClientRect().height) <= 48 &&
+              !truncated &&
               label.scrollWidth <= label.clientWidth + 1 &&
               value.scrollWidth <= value.clientWidth + 1
             );
