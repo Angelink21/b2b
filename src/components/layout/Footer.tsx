@@ -75,7 +75,7 @@ export async function Footer() {
           </div>
 
           <div className="site-footer-col site-footer-col--brand">
-            <h2 translate="no">{siteConfig.name}</h2>
+            <h2>{t("brand")}</h2>
             {hasContact ? (
               <ul className="site-footer-links">
                 {phones.map((phone) => (
@@ -98,7 +98,7 @@ export async function Footer() {
           </div>
 
           <div className="site-footer-base">
-            <p className="footer-legal">{siteConfig.name}</p>
+            <p className="footer-legal">{t("brand")}</p>
             <Link href="/privacy" className="footer-privacy">
               {t("privacy")}
             </Link>

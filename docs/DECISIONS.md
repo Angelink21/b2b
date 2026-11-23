@@ -73,3 +73,5 @@
 2026-11-23 · `localeDetection: false` in next-intl routing · Root `/` must always redirect to `/uk` so Telegram/OG crawlers (Accept-Language: en) do not pick English meta/OG.
 2026-11-23 · About lead: «Офіційний представник Fagor Professional» (en: Official representative) · Owner request; replaces «постачальник … FAGOR PROFESSIONAL».
 2026-11-23 · Short «Оф. представник» / Official representative on home title+OG, footer copyright, service/contacts lead · Owner request; keep short brand in header/siteConfig.name.
+2026-11-23 · Privacy meta + controller name as official representative · Data controller is the local rep, not the Fagor brand entity.
+2026-11-23 · Footer brand column + legal line use i18n `footer.brand` (оф. представник) · Owner request; header/`siteConfig.name` stay short brand.
