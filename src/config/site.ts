@@ -35,6 +35,10 @@ export const siteConfig: {
   phones: readonly string[];
   email: string;
   address: string;
+  /** Owner Google Maps link for “open in maps”; empty hides nothing if address alone is set. */
+  mapsUrl: string;
+  /** iframe embed for /contacts (pin from mapsUrl); empty falls back to address query. */
+  mapsEmbedSrc: string;
   /** Localized business hours; empty strings keep the hours block hidden. */
   hours: LocalizedHours;
   /** Optional messengers for the mobile action bar; empty href hides each slot. */
@@ -54,7 +58,11 @@ export const siteConfig: {
   },
   phones: ["044-501-88-87", "050-382-48-78"],
   email: "pkmprofessional@ukr.net",
-  address: "вулиця Київська, 27-В, Вишневе, Київська область",
+  address: "вулиця Київська, 27-В, м.Вишневе, Київська область",
+  mapsUrl: "https://maps.app.goo.gl/Bym1u3NTiApW5RNu7",
+  // Place pin from mapsUrl (Промкомплектмонтаж / Київська 27-В), not bare lat/lng.
+  mapsEmbedSrc:
+    "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2544!2d30.3300573!3d50.3746758!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d4ca3985d2f65b%3A0xfc7ee414f22aeb1d!2z!5e0!3m2!1suk!2sua!4v1!5m2!1suk!2sua",
   hours: {
     uk: "Пн–Пт: 9:00–18:00\nСб–Нд: за попереднім записом",
     en: "Mon–Fri: 9:00–18:00\nSat–Sun: by appointment",
@@ -86,6 +94,26 @@ export function visibleMessengers(): MessengerLink[] {
 export function localizedHours(locale: string): string | null {
   const raw = locale === "en" ? siteConfig.hours.en : siteConfig.hours.uk;
   return visibleContact(raw);
+}
+
+/** Outbound maps link: owner short URL, else address search. */
+export function mapsHref(address = siteConfig.address): string | null {
+  const maps = visibleContact(siteConfig.mapsUrl);
+  if (maps) return maps;
+  const addr = visibleContact(address);
+  return addr
+    ? `https://maps.google.com/?q=${encodeURIComponent(addr)}`
+    : null;
+}
+
+/** Contacts map iframe src from owner pin or address. */
+export function mapsEmbedHref(address = siteConfig.address): string | null {
+  const embed = visibleContact(siteConfig.mapsEmbedSrc);
+  if (embed) return embed;
+  const addr = visibleContact(address);
+  return addr
+    ? `https://www.google.com/maps?q=${encodeURIComponent(addr)}&z=15&output=embed`
+    : null;
 }
 
 /** Build a dial link; Ukrainian 0XX… numbers get a +38 country code. */

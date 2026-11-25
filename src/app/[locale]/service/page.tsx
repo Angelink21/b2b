@@ -10,6 +10,7 @@ import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import {
   localizedHours,
+  mapsHref,
   siteConfig,
   telHref,
   visibleContact,
@@ -47,6 +48,7 @@ export default async function ServicePage() {
   const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
   const address = visibleContact(siteConfig.address);
+  const mapUrl = mapsHref();
   const hours = localizedHours(locale);
   const hasDirectContacts = Boolean(phones.length > 0 || email || hours);
 
@@ -165,13 +167,11 @@ export default async function ServicePage() {
                     <dt>{t("address")}</dt>
                     <dd>
                       <p>{address}</p>
-                      <a
-                        href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        {t("mapLink")}
-                      </a>
+                      {mapUrl ? (
+                        <a href={mapUrl} rel="noopener noreferrer" target="_blank">
+                          {t("mapLink")}
+                        </a>
+                      ) : null}
                     </dd>
                   </>
                 ) : null}

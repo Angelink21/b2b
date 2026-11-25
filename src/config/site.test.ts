@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   localizedHours,
+  mapsEmbedHref,
+  mapsHref,
   siteConfig,
   telHref,
   visibleContact,
@@ -25,6 +27,8 @@ describe("site contact slot", () => {
     expect(localizedHours("uk")).toContain("Пн–Пт");
     expect(localizedHours("en")).toContain("Mon–Fri");
     expect(visibleContact(siteConfig.address)).toContain("Вишневе");
+    expect(mapsHref()).toBe("https://maps.app.goo.gl/Bym1u3NTiApW5RNu7");
+    expect(mapsEmbedHref()).toContain("0x40d4ca3985d2f65b");
   });
 
   it("builds Ukrainian tel: hrefs with +38", () => {

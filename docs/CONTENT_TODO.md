@@ -15,7 +15,8 @@ Fill these in `src/config/site.ts` (or dedicated content files) before publishin
 |-------|--------|-------|
 | `phones` | set | `044-501-88-87`, `050-382-48-78` |
 | `email` | set | `pkmprofessional@ukr.net` |
-| `address` | set | вул. Київська, 27-В, Вишневе, Київська область |
+| `address` | set | вул. Київська, 27-В, м.Вишневе, Київська область |
+| `mapsUrl` | set | https://maps.app.goo.gl/Bym1u3NTiApW5RNu7 |
 | `hours` | set | uk/en localized strings |
 | `logo` / `logoDark` | set | `/brand/fagor-logo.png` (+ dark wordmark); SVG master still welcome |
 

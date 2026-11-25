@@ -9,6 +9,8 @@ import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import {
   localizedHours,
+  mapsEmbedHref,
+  mapsHref,
   siteConfig,
   telHref,
   visibleContact,
@@ -47,11 +49,10 @@ export default async function ContactsPage() {
   const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
   const address = visibleContact(siteConfig.address);
+  const mapUrl = mapsHref();
   const hours = localizedHours(locale);
   const hasDetails = Boolean(phones.length > 0 || email || address || hours);
-  const mapEmbedSrc = address
-    ? `https://www.google.com/maps?q=${encodeURIComponent(address)}&z=15&output=embed`
-    : null;
+  const mapEmbedSrc = mapsEmbedHref();
 
   const crumbs = [
     { label: tNav("brand"), href: "/" },
@@ -135,13 +136,11 @@ export default async function ContactsPage() {
                         <p className="contacts-warehouse-note text-pretty">
                           {typo(t("warehouseNote"))}
                         </p>
-                        <a
-                          href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
-                          rel="noopener noreferrer"
-                          target="_blank"
-                        >
-                          {t("mapLink")}
-                        </a>
+                        {mapUrl ? (
+                          <a href={mapUrl} rel="noopener noreferrer" target="_blank">
+                            {t("mapLink")}
+                          </a>
+                        ) : null}
                       </dd>
                     </>
                   ) : null}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { siteConfig, visibleContact } from "@/config/site";
+import { mapsHref, siteConfig, visibleContact } from "@/config/site";
 import {
   aboutPageJsonLd,
   breadcrumbListJsonLd,
@@ -34,6 +34,7 @@ export default async function AboutPage() {
   const t = await getTranslations("about");
   const tNav = await getTranslations("nav");
   const address = visibleContact(siteConfig.address);
+  const mapUrl = mapsHref();
 
   const crumbs = [
     { label: tNav("brand"), href: "/" },
@@ -94,14 +95,14 @@ export default async function AboutPage() {
               <p className="about-infra-address">
                 <span className="about-infra-label">{t("infraAddressLabel")}</span>
                 {address}
-                {" · "}
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(address)}`}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {t("mapLink")}
-                </a>
+                {mapUrl ? (
+                  <>
+                    {" · "}
+                    <a href={mapUrl} rel="noopener noreferrer" target="_blank">
+                      {t("mapLink")}
+                    </a>
+                  </>
+                ) : null}
               </p>
             ) : null}
           </div>

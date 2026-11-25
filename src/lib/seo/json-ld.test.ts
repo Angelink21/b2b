@@ -23,7 +23,7 @@ describe("JSON-LD builders (S3)", () => {
     expect(data.email).toBe("pkmprofessional@ukr.net");
     expect(data.address).toEqual({
       "@type": "PostalAddress",
-      streetAddress: "вулиця Київська, 27-В, Вишневе, Київська область",
+      streetAddress: "вулиця Київська, 27-В, м.Вишневе, Київська область",
       addressCountry: "UA",
     });
   });
