@@ -39,6 +39,9 @@ function isCategorySlug(value: string): value is CategorySlug {
   return (CATEGORY_SLUGS as readonly string[]).includes(value);
 }
 
+/** Params drive the whole page; allow blocking nav (instant-shell validation). */
+export const instant = false;
+
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
     CATEGORY_SLUGS.map((category) => ({ locale, category })),

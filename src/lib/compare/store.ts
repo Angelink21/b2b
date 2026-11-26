@@ -51,8 +51,11 @@ export function getCompareReadySnapshot(): boolean {
   return ready;
 }
 
+/** Stable identity for useSyncExternalStore server snapshot (never allocate). */
+const SERVER_COMPARE_SLUGS: string[] = [];
+
 export function getServerCompareSlugsSnapshot(): string[] {
-  return [];
+  return SERVER_COMPARE_SLUGS;
 }
 
 export function getServerCompareReadySnapshot(): boolean {
