@@ -78,4 +78,27 @@ body:has(.compare-page) .compare-tray {
   .datasheet-drawing svg {
     max-height: 320px;
   }
+
+  .series-features {
+    break-inside: avoid;
+  }
+
+  .series-features-print {
+    display: none !important;
+  }
+
+  .series-features--columns .series-features-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(var(--series-feature-rows, 8), auto);
+    grid-auto-flow: column;
+    column-gap: 48px;
+    align-items: stretch;
+  }
+
+  .series-features,
+  .series-features-item,
+  .series-features-list {
+    background: transparent !important;
+  }
 }

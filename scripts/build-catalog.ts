@@ -24,6 +24,10 @@ import {
   type CatalogPipelineWarning,
 } from "../src/lib/catalog/pipeline";
 import {
+  collectFeatureQualityIssues,
+  formatContentQualityReport,
+} from "../src/lib/catalog/present-features";
+import {
   CATEGORY_SLUGS,
   type CategorySlug,
   type Product,
@@ -45,6 +49,8 @@ const OUT_INDEX = path.join(ROOT, "src", "data", "catalog.index.json");
 const OUT_META = path.join(ROOT, "src", "data", "catalog.meta.json");
 const OUT_SLUG_HISTORY = path.join(ROOT, "src", "data", "slug-history.json");
 const OUT_REPORT = path.join(ROOT, "docs", "CATALOG_REPORT.md");
+const OUT_TRANSLATION = path.join(ROOT, "docs", "TRANSLATION_REPORT.md");
+const OUT_CONTENT_QUALITY = path.join(ROOT, "docs", "CONTENT_QUALITY.md");
 
 type Warning = CatalogPipelineWarning;
 
@@ -369,8 +375,14 @@ async function main(): Promise<void> {
     fail(pipeline.errors.join("; "));
   }
 
-  const { products, series, discardedEmptyRows, warnings, seriesCoverage } =
-    pipeline;
+  const {
+    products,
+    series,
+    discardedEmptyRows,
+    warnings,
+    seriesCoverage,
+    enCoverage,
+  } = pipeline;
 
   const prevMeta = readJsonIfExists<CatalogMeta>(OUT_META);
   const shrink = checkCatalogShrink(products.length, prevMeta?.modelCount);
@@ -446,6 +458,66 @@ async function main(): Promise<void> {
     diff,
   });
 
+  const enWarns = buildWarnings.filter(
+    (w) =>
+      /EN |Conflicting EN|Cyrillic|equals UA|length ratio|short equals EN full/i.test(
+        w.message,
+      ),
+  );
+  const translationLines: string[] = [
+    "# Translation report (EN descriptions)",
+    "",
+    `Generated: ${new Date().toISOString()}`,
+    `Source: **${source}**`,
+    "",
+    "## Coverage",
+    "",
+    `- Series with EN short: **${enCoverage.seriesWithEnShort}** / ${series.length}`,
+    `- Series with EN full: **${enCoverage.seriesWithEnFull}** / ${series.length}`,
+    `- Models with EN short cell: **${enCoverage.modelsWithEnShort}** / ${products.length}`,
+    `- Models with EN full cell: **${enCoverage.modelsWithEnFull}** / ${products.length}`,
+    "",
+    "## Series without EN",
+    "",
+  ];
+  if (enCoverage.seriesWithoutEn.length === 0) {
+    translationLines.push("_All series have at least one EN field._");
+  } else {
+    for (const line of enCoverage.seriesWithoutEn) {
+      translationLines.push(`- ${line}`);
+    }
+  }
+  translationLines.push("", "## Warnings", "");
+  if (enWarns.length === 0) {
+    translationLines.push("_None._");
+  } else {
+    for (const w of enWarns) {
+      translationLines.push(`- ${w.message}`);
+    }
+  }
+  translationLines.push("");
+  fs.writeFileSync(OUT_TRANSLATION, `${translationLines.join("\n")}\n`, "utf8");
+
+  const qualityIssues = collectFeatureQualityIssues(
+    series.map((s) => ({
+      id: s.id,
+      label: s.descriptions.uk.short || s.shortDescription || s.id,
+      items:
+        s.descriptions.uk.fullBlocks && s.descriptions.uk.fullBlocks.length > 0
+          ? s.descriptions.uk.fullBlocks
+              .filter((b) => b.kind === "bullet")
+              .map((b) => b.text)
+          : s.descriptions.uk.fullBullets.length > 0
+            ? s.descriptions.uk.fullBullets
+            : s.fullBullets,
+    })),
+  );
+  fs.writeFileSync(
+    OUT_CONTENT_QUALITY,
+    formatContentQualityReport(qualityIssues, new Date().toISOString()),
+    "utf8",
+  );
+
   const cats = categoryCounts(products);
   console.log("[catalog:build] Done.");
   console.log(`  source:     ${source}`);
@@ -458,6 +530,24 @@ async function main(): Promise<void> {
   console.log(`  empty rows: ${discardedEmptyRows}`);
   console.log(`  redirects:  ${slugHistory.redirects.length}`);
   console.log(`  index gzip: ${indexGzip} bytes`);
+  console.log(
+    `  EN series:  short ${enCoverage.seriesWithEnShort}/${series.length}, full ${enCoverage.seriesWithEnFull}/${series.length}`,
+  );
+  console.log(
+    `  EN models:  short ${enCoverage.modelsWithEnShort}, full ${enCoverage.modelsWithEnFull}`,
+  );
+  console.log(
+    `  EN missing: ${enCoverage.seriesWithoutEn.length} series without EN`,
+  );
+  if (enWarns.length > 0) {
+    console.log(`  EN warns:   ${enWarns.length}`);
+    for (const w of enWarns.slice(0, 12)) {
+      console.log(`    - ${w.message}`);
+    }
+    if (enWarns.length > 12) {
+      console.log(`    … +${enWarns.length - 12} more (see TRANSLATION_REPORT)`);
+    }
+  }
   console.log("  by category:");
   for (const slug of CATEGORY_SLUGS) {
     console.log(`    ${slug}: ${cats[slug]}`);
@@ -467,6 +557,9 @@ async function main(): Promise<void> {
   console.log(`  wrote: ${path.relative(ROOT, OUT_META)}`);
   console.log(`  wrote: ${path.relative(ROOT, OUT_SLUG_HISTORY)}`);
   console.log(`  wrote: ${path.relative(ROOT, OUT_REPORT)}`);
+  console.log(`  wrote: ${path.relative(ROOT, OUT_TRANSLATION)}`);
+  console.log(`  wrote: ${path.relative(ROOT, OUT_CONTENT_QUALITY)}`);
+  console.log(`  content quality issues: ${qualityIssues.length}`);
 
   if (indexGzip > 40 * 1024) {
     fail(`Index gzip ${indexGzip} exceeds 40 KB budget`);

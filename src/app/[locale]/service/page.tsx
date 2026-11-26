@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import {
+  localizedAddress,
   localizedHours,
   mapsHref,
   siteConfig,
@@ -47,8 +48,8 @@ export default async function ServicePage() {
 
   const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
-  const address = visibleContact(siteConfig.address);
-  const mapUrl = mapsHref();
+  const address = localizedAddress(locale);
+  const mapUrl = mapsHref(address ?? undefined);
   const hours = localizedHours(locale);
   const hasDirectContacts = Boolean(phones.length > 0 || email || hours);
 
@@ -61,7 +62,7 @@ export default async function ServicePage() {
     <>
       <JsonLd
         data={[
-          organizationJsonLd(),
+          organizationJsonLd(locale),
           breadcrumbListJsonLd(locale, [
             { name: tNav("brand"), path: "" },
             { name: tNav("service"), path: "/service" },
@@ -101,7 +102,7 @@ export default async function ServicePage() {
           </h2>
           <ol className="process-steps">
             {PROCESS_STEPS.map((step) => (
-              <li key={step} className="process-step premium-frame">
+              <li key={step} className="process-step">
                 <span className="process-step-index tabular-nums" aria-hidden="true">
                   {step.padStart(2, "0")}
                 </span>

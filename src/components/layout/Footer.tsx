@@ -1,10 +1,12 @@
 import { cacheLife } from "next/cache";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Grid } from "@/components/ui/Grid";
 import {
+  localizedAddress,
+  localizedLegalName,
   siteConfig,
   telHref,
   visibleContact,
@@ -28,13 +30,15 @@ const COMPANY = [
 ] as const;
 
 export async function Footer() {
+  const locale = await getLocale();
   const t = await getTranslations("footer");
   const tNav = await getTranslations("nav");
   const tCat = await getTranslations("categories");
   const year = await copyrightYear();
   const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
-  const address = visibleContact(siteConfig.address);
+  const address = localizedAddress(locale);
+  const legalName = localizedLegalName(locale);
   const hasContact = Boolean(phones.length > 0 || email || address);
 
   return (
@@ -98,7 +102,9 @@ export async function Footer() {
           </div>
 
           <div className="site-footer-base">
-            <p className="footer-legal">{t("brand")}</p>
+            <p className="footer-legal">
+              {legalName ? legalName : t("brand")}
+            </p>
             <Link href="/privacy" className="footer-privacy">
               {t("privacy")}
             </Link>

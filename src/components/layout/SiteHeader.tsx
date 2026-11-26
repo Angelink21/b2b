@@ -450,6 +450,7 @@ export function SiteHeader({ categories, logo, logoDark }: SiteHeaderProps) {
           <Link
             href="/"
             className="site-brand"
+            aria-label={brand}
             translate="no"
             onMouseEnter={closeMega}
           >

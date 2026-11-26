@@ -1,4 +1,5 @@
-import type { Product } from "@/lib/catalog/schema";
+import { seriesEnMetaText } from "@/lib/catalog/series-copy";
+import type { Product, Series } from "@/lib/catalog/schema";
 import {
   formatAirflow,
   formatDimensionsMm,
@@ -30,15 +31,12 @@ export type ProductCopyLabels = {
   };
 };
 
-/**
- * Unique page description from model characteristics — never from series copy
- * (series text repeats across many models).
- */
-export function buildProductDescription(
+/** Specs-only fragment (no model name) for uniqueness suffixes. */
+export function buildProductSpecTail(
   product: Product,
   labels: ProductCopyLabels,
 ): string {
-  const parts: string[] = [product.name, labels.category];
+  const parts: string[] = [labels.category];
 
   const load = formatLoadKg(product.loadKg);
   if (load !== EMPTY) {
@@ -91,12 +89,89 @@ export function buildProductDescription(
     parts.push(voltage);
   }
 
-  const dims = formatDimensionsMm(product.dimensionsMm);
+  const dims = formatDimensionsMm(product.dimensionsMm, "en");
   if (dims !== EMPTY) {
     parts.push(`${dims} ${labels.units.mm}`);
   }
 
   return parts.join(" · ");
+}
+
+/**
+ * Unique page description from model characteristics — never from series copy
+ * (series text repeats across many models). Used for /uk and /en without EN text.
+ */
+export function buildProductDescription(
+  product: Product,
+  labels: ProductCopyLabels,
+  locale = "uk",
+): string {
+  // Spec tail used for uniqueness; dimensions note localized when locale=en.
+  const parts: string[] = [product.name, labels.category];
+
+  const load = formatLoadKg(product.loadKg);
+  if (load !== EMPTY) {
+    parts.push(`${load} ${labels.units.kg}`);
+  }
+  if (labels.heating) {
+    parts.push(labels.heating);
+  }
+  const power = formatPowerKw(product.powerKw);
+  if (power !== EMPTY) {
+    parts.push(`${power} ${labels.units.kW}`);
+  }
+  if (product.workingWidthMm != null) {
+    parts.push(`${product.workingWidthMm} ${labels.units.mm}`);
+  }
+  const speed = formatRangeNumber(product.workingSpeedMpm);
+  if (speed !== EMPTY) {
+    parts.push(`${speed} ${labels.units.mpm}`);
+  }
+  const volume = formatVolumeL(product.volumeL);
+  if (volume !== EMPTY) {
+    parts.push(`${volume} ${labels.units.L}`);
+  }
+  if (product.spinRpm != null) {
+    parts.push(`${product.spinRpm} ${labels.units.rpm}`);
+  }
+  if (product.gFactor != null) {
+    parts.push(`G ${product.gFactor}`);
+  }
+  const airflow = formatAirflow(product.airflowM3h);
+  if (airflow !== EMPTY) {
+    parts.push(`${airflow} ${labels.units.m3h}`);
+  }
+  const noise = formatNoiseDb(product.noiseDb);
+  if (noise !== EMPTY) {
+    parts.push(`${noise} ${labels.units.dB}`);
+  }
+  const voltage = formatVoltage(product.voltage, product.voltageRaw);
+  if (voltage !== EMPTY) {
+    parts.push(voltage);
+  }
+  const dims = formatDimensionsMm(product.dimensionsMm, locale);
+  if (dims !== EMPTY) {
+    parts.push(`${dims} ${labels.units.mm}`);
+  }
+
+  return parts.join(" · ");
+}
+
+/**
+ * /en meta / OG / JSON-LD description: EN series text + specs tail when EN exists;
+ * otherwise English specs-only (never Ukrainian series copy).
+ */
+export function buildEnProductDescription(
+  product: Product,
+  labels: ProductCopyLabels,
+  series: Series | null | undefined,
+): string {
+  const enText = seriesEnMetaText(series);
+  const tail = buildProductSpecTail(product, labels);
+  if (enText) {
+    return `${enText} · ${product.name} · ${tail}`;
+  }
+  return buildProductDescription(product, labels, "en");
 }
 
 /** Short spec lines for OG images (max ~4). */

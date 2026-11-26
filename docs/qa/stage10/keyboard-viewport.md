@@ -22,3 +22,15 @@ All steps completed without trap; focus remained visible.
 - /uk/catalog/washers/haier-hcw12cbd: pageOverflow=0px
 - /uk/quote: pageOverflow=0px
 - /uk/compare?m=haier-hcw12cbd: pageOverflow=0px
+
+## 200% zoom (documentElement.zoom=2 @ 640 CSS px)
+
+- /uk: pageOverflow=0px (intentional scroller)
+- /uk/catalog/washers: pageOverflow=0px
+- /uk/quote: pageOverflow=0px
+
+## 200% zoom (documentElement.zoom=2 @ 640 CSS px)
+
+- /uk: pageOverflow=0px (intentional scroller)
+- /uk/catalog/washers: pageOverflow=0px
+- /uk/quote: pageOverflow=0px

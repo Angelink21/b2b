@@ -50,8 +50,36 @@ export const CSV_COLUMNS = {
   imageKey: "Зображення",
 } as const;
 
+/** Optional EN description columns (absent = empty; headers matched case/space-insensitively). */
+export const CSV_OPTIONAL_EN_COLUMNS = {
+  shortDescriptionEn: "Short description (EN)",
+  fullDescriptionEn: "Full description (EN)",
+} as const;
+
+export type CsvOptionalEnKey = keyof typeof CSV_OPTIONAL_EN_COLUMNS;
+
+/** Trim + collapse whitespace + lower-case for optional header matching. */
+export function normalizeHeader(header: string): string {
+  return header.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
 function cell(row: CsvRow, key: keyof typeof CSV_COLUMNS): string {
   return (row[CSV_COLUMNS[key]] ?? "").trim();
+}
+
+/** Read optional EN cell by canonical header (after remap) or fuzzy match. */
+export function cellOptionalEn(
+  row: CsvRow,
+  key: CsvOptionalEnKey,
+): string {
+  const canonical = CSV_OPTIONAL_EN_COLUMNS[key];
+  const direct = row[canonical];
+  if (direct !== undefined) return direct.trim();
+  const want = normalizeHeader(canonical);
+  for (const [header, value] of Object.entries(row)) {
+    if (normalizeHeader(header) === want) return (value ?? "").trim();
+  }
+  return "";
 }
 
 export function isEmptyRow(row: CsvRow): boolean {
@@ -62,6 +90,8 @@ export type NormalizeResult = {
   product: Product;
   shortDescription: string;
   fullDescription: string;
+  shortDescriptionEn: string;
+  fullDescriptionEn: string;
   warnings: string[];
 };
 
@@ -178,6 +208,8 @@ export function normalizeRow(
     product,
     shortDescription: cell(row, "shortDescription"),
     fullDescription: cell(row, "fullDescription"),
+    shortDescriptionEn: cellOptionalEn(row, "shortDescriptionEn"),
+    fullDescriptionEn: cellOptionalEn(row, "fullDescriptionEn"),
     warnings,
   };
 }

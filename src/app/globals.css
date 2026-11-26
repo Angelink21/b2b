@@ -3199,7 +3199,26 @@ a.chip[aria-pressed="true"] {
   hyphens: manual;
 }
 
-@media (min-width: 768px) {
+/* Tablet: index | title+body stacked — avoids a hollow 5fr/7fr middle. */
+@media (min-width: 768px) and (max-width: 1099px) {
+  .process-step {
+    grid-template-columns: 80px minmax(0, 1fr);
+    column-gap: var(--grid-gap);
+    align-items: start;
+  }
+
+  .process-step-index {
+    grid-column: 1;
+  }
+
+  .process-step h3,
+  .process-step p {
+    grid-column: 2;
+  }
+}
+
+/* Desktop: DESIGN row rhythm 5/7. */
+@media (min-width: 1100px) {
   .process-step {
     grid-template-columns: 80px minmax(0, 5fr) minmax(0, 7fr);
     column-gap: var(--grid-gap);
@@ -4249,35 +4268,157 @@ body.has-compare-tray #main {
   overflow-wrap: break-word;
 }
 
-.model-desc-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.model-desc-prose {
   max-width: var(--measure);
+  margin-top: var(--space-4);
 }
 
-.model-desc-heading {
-  margin-top: var(--space-3);
-  font-size: 1rem;
-  font-weight: 600;
+/* —— Series features (model card) —— */
+.series-features {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  row-gap: var(--space-6);
+  margin-top: var(--space-6);
 }
 
-.model-desc-heading:first-child {
-  margin-top: 0;
+.series-features-head {
+  grid-column: 1 / span 4;
+  min-width: 0;
 }
 
-.model-desc-bullet {
+.series-features-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.series-features-title {
   margin: 0;
-  padding-left: 1.1rem;
-  text-wrap: pretty;
-  overflow-wrap: break-word;
-  position: relative;
+  /* Grow on the row axis; min-width (not flex-basis) so column stack
+     on ≤1099px does not invent a ~12rem-tall empty title box. */
+  flex: 1 1 auto;
+  min-width: min(12rem, 100%);
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(28px, 2.4vw, 32px);
+  line-height: 1.2;
+  text-wrap: balance;
+  color: var(--ink);
 }
 
-.model-desc-bullet::before {
-  content: "•";
-  position: absolute;
-  left: 0;
+.series-features-print {
+  flex: 0 0 auto;
+  height: 44px;
+  min-height: 44px;
+}
+
+.series-features-count {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--steel);
+}
+
+.series-features-note {
+  margin-top: var(--space-2);
+}
+
+.series-features-list {
+  grid-column: 5 / span 8;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: series-feature;
+  min-width: 0;
+}
+
+.series-features-item {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  align-items: start;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  counter-increment: series-feature;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.series-features-item:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.series-features-index {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--steel);
+  font-variant-numeric: tabular-nums;
+}
+
+.series-features-index::before {
+  content: counter(series-feature, decimal-leading-zero);
+}
+
+.series-features--dash .series-features-index::before {
+  content: "—";
+}
+
+.series-features-text {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  text-wrap: pretty;
+  hyphens: manual;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+@media (min-width: 1100px) {
+  /* Column-major fill: top→bottom then next column; shared rows equalize heights. */
+  .series-features--columns .series-features-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(var(--series-feature-rows, 8), auto);
+    grid-auto-flow: column;
+    column-gap: 48px;
+    align-items: stretch;
+  }
+
+  .series-features--columns .series-features-item {
+    height: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 1099px) {
+  .series-features-head,
+  .series-features-list {
+    grid-column: 1 / -1;
+  }
+
+  .series-features-title-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .series-features-title {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .series-features-print {
+    width: 100%;
+  }
+
+  /* Stacked head→list: 48px (space-5). */
+  .series-features {
+    row-gap: var(--space-5);
+  }
 }
 
 .styleguide-intro {

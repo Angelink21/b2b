@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { mapsHref, siteConfig, visibleContact } from "@/config/site";
+import { localizedAddress, mapsHref } from "@/config/site";
 import {
   aboutPageJsonLd,
   breadcrumbListJsonLd,
@@ -33,8 +33,8 @@ export default async function AboutPage() {
   const locale = await getLocale();
   const t = await getTranslations("about");
   const tNav = await getTranslations("nav");
-  const address = visibleContact(siteConfig.address);
-  const mapUrl = mapsHref();
+  const address = localizedAddress(locale);
+  const mapUrl = mapsHref(address ?? undefined);
 
   const crumbs = [
     { label: tNav("brand"), href: "/" },
@@ -45,7 +45,7 @@ export default async function AboutPage() {
     <>
       <JsonLd
         data={[
-          organizationJsonLd(),
+          organizationJsonLd(locale),
           aboutPageJsonLd(locale),
           breadcrumbListJsonLd(locale, [
             { name: tNav("brand"), path: "" },

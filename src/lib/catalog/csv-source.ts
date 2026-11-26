@@ -5,12 +5,24 @@
 
 import { parse } from "csv-parse/sync";
 
-import { CSV_COLUMNS, type CsvRow } from "./normalize";
+import {
+  CSV_COLUMNS,
+  CSV_OPTIONAL_EN_COLUMNS,
+  normalizeHeader,
+  type CsvRow,
+} from "./normalize";
 
 export const REQUIRED_CSV_COLUMNS: readonly string[] = Object.values(CSV_COLUMNS);
 
-/** Optional column; kept when present, not required. */
-export const OPTIONAL_CSV_COLUMNS = ["image_id"] as const;
+/** Optional columns; kept when present, not required. EN headers match case/space-insensitively. */
+export const OPTIONAL_CSV_COLUMNS = [
+  "image_id",
+  ...Object.values(CSV_OPTIONAL_EN_COLUMNS),
+] as const;
+
+const OPTIONAL_HEADER_NORMALIZED = new Set(
+  OPTIONAL_CSV_COLUMNS.map((h) => normalizeHeader(h)),
+);
 
 export const FETCH_TIMEOUT_MS = 20_000;
 export const FETCH_RETRIES = 3;
@@ -113,22 +125,70 @@ export type HeaderCheckResult = {
   /** Extra columns other than allowed optional ones. */
   unexpected: string[];
   hasImageId: boolean;
+  hasShortDescriptionEn: boolean;
+  hasFullDescriptionEn: boolean;
 };
+
+function headerMatchesOptional(header: string): boolean {
+  return OPTIONAL_HEADER_NORMALIZED.has(normalizeHeader(header));
+}
+
+/** True when a header matches an optional EN column (any casing/spacing). */
+export function findOptionalEnHeader(
+  headers: readonly string[],
+  canonical: string,
+): string | undefined {
+  const want = normalizeHeader(canonical);
+  return headers.find((h) => normalizeHeader(h) === want);
+}
 
 export function checkCsvHeaders(headers: string[]): HeaderCheckResult {
   const set = new Set(headers);
   const missing = REQUIRED_CSV_COLUMNS.filter((h) => !set.has(h));
   const requiredSet = new Set<string>(REQUIRED_CSV_COLUMNS);
-  const optionalSet = new Set<string>(OPTIONAL_CSV_COLUMNS);
   const unexpected = headers.filter(
-    (h) => !requiredSet.has(h) && !optionalSet.has(h),
+    (h) => !requiredSet.has(h) && !headerMatchesOptional(h),
   );
   return {
     headers,
     missing,
     unexpected,
     hasImageId: set.has("image_id"),
+    hasShortDescriptionEn: Boolean(
+      findOptionalEnHeader(headers, CSV_OPTIONAL_EN_COLUMNS.shortDescriptionEn),
+    ),
+    hasFullDescriptionEn: Boolean(
+      findOptionalEnHeader(headers, CSV_OPTIONAL_EN_COLUMNS.fullDescriptionEn),
+    ),
   };
+}
+
+/**
+ * Rewrite optional EN column keys to canonical headers so downstream code
+ * can read `CSV_OPTIONAL_EN_COLUMNS.*` without fuzzy lookup every time.
+ */
+export function remapOptionalEnHeaders(rows: CsvRow[]): CsvRow[] {
+  if (rows.length === 0) return rows;
+  const sample = rows[0]!;
+  const headers = Object.keys(sample);
+  const renames: Array<{ from: string; to: string }> = [];
+  for (const canonical of Object.values(CSV_OPTIONAL_EN_COLUMNS)) {
+    const found = findOptionalEnHeader(headers, canonical);
+    if (found && found !== canonical) {
+      renames.push({ from: found, to: canonical });
+    }
+  }
+  if (renames.length === 0) return rows;
+  return rows.map((row) => {
+    const next: CsvRow = { ...row };
+    for (const { from, to } of renames) {
+      if (from in next) {
+        next[to] = next[from];
+        delete next[from];
+      }
+    }
+    return next;
+  });
 }
 
 export function formatHeaderError(check: HeaderCheckResult): string {
@@ -148,6 +208,8 @@ export type ParsedCatalogCsv = {
   rows: CsvRow[];
   headers: string[];
   hasImageId: boolean;
+  hasShortDescriptionEn: boolean;
+  hasFullDescriptionEn: boolean;
 };
 
 export function parseCatalogCsvText(text: string): ParsedCatalogCsv {
@@ -179,11 +241,17 @@ export function parseCatalogCsvText(text: string): ParsedCatalogCsv {
     }) as string[][];
     const cols = (headerOnly[0] ?? []).map((c) => c.trim());
     const check = checkCsvHeaders(cols);
-    // Missing required columns fail; extra columns are ignored (except image_id).
+    // Missing required columns fail; extra columns are ignored (except optionals).
     if (check.missing.length > 0) {
       throw new CatalogCsvError(formatHeaderError(check));
     }
-    return { rows: [], headers: cols, hasImageId: check.hasImageId };
+    return {
+      rows: [],
+      headers: cols,
+      hasImageId: check.hasImageId,
+      hasShortDescriptionEn: check.hasShortDescriptionEn,
+      hasFullDescriptionEn: check.hasFullDescriptionEn,
+    };
   }
 
   const check = checkCsvHeaders(headers);
@@ -191,7 +259,17 @@ export function parseCatalogCsvText(text: string): ParsedCatalogCsv {
     throw new CatalogCsvError(formatHeaderError(check));
   }
 
-  return { rows: records, headers, hasImageId: check.hasImageId };
+  const rows = remapOptionalEnHeaders(records);
+  const remappedHeaders =
+    rows.length > 0 ? Object.keys(rows[0] as CsvRow) : headers;
+
+  return {
+    rows,
+    headers: remappedHeaders,
+    hasImageId: check.hasImageId,
+    hasShortDescriptionEn: check.hasShortDescriptionEn,
+    hasFullDescriptionEn: check.hasFullDescriptionEn,
+  };
 }
 
 export type SheetQuirkWarning = {

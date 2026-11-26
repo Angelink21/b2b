@@ -1,5 +1,7 @@
 import { track } from "@vercel/analytics";
 
+import { pushDataLayerEvent } from "./data-layer";
+
 export type AnalyticsEvent =
   | "search_open"
   | "search_select"
@@ -14,8 +16,8 @@ export type AnalyticsEvent =
 type AnalyticsDetail = Record<string, string | number | boolean>;
 
 /**
- * Cookie-less analytics hook. Dispatches a document event, Vercel Analytics
- * custom event, and a dev console log. Never include PII.
+ * Analytics hook: document event, Vercel Analytics, GTM dataLayer push,
+ * and a dev console log. Never include PII.
  */
 export function trackEvent(
   name: AnalyticsEvent,
@@ -25,6 +27,7 @@ export function trackEvent(
   const payload = { name, ...detail };
   window.dispatchEvent(new CustomEvent("fagor:analytics", { detail: payload }));
   track(name, detail);
+  pushDataLayerEvent(name, detail);
   if (process.env.NODE_ENV === "development") {
     console.info("[analytics]", payload);
   }

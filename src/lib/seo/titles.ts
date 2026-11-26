@@ -1,9 +1,12 @@
-import { getSnapshotAll } from "@/lib/catalog";
+import { getSnapshotAll, getSnapshotSeriesById } from "@/lib/catalog";
 import { CATEGORY_SLUGS } from "@/lib/catalog/schema";
 import type { AppLocale } from "@/i18n/routing";
 
 import { seoMessages } from "./messages";
-import { buildProductDescription } from "./product-copy";
+import {
+  buildEnProductDescription,
+  buildProductDescription,
+} from "./product-copy";
 
 export type PageTitleRecord = {
   locale: AppLocale;
@@ -71,15 +74,21 @@ export function collectPublicPageMeta(
     const heatingLabel = product.heating
       ? heating[product.heating as keyof typeof heating]
       : null;
+    const labels = {
+      category: categories[product.category],
+      heating: heatingLabel ?? null,
+      units,
+    };
+    const series = getSnapshotSeriesById(product.seriesId);
+    const description =
+      locale === "en"
+        ? buildEnProductDescription(product, labels, series)
+        : buildProductDescription(product, labels);
     records.push({
       locale,
       path: `/${locale}/catalog/${product.category}/${product.slug}`,
       title: product.name,
-      description: buildProductDescription(product, {
-        category: categories[product.category],
-        heating: heatingLabel ?? null,
-        units,
-      }),
+      description,
     });
   }
 

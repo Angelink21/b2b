@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-11-21T18:32:25.987Z",
+  "generatedAt": "2026-11-26T13:04:24.852Z",
   "cloudName": "dibou5rke",
   "folder": "",
   "fallbackAspectRatio": "4 / 5",
@@ -2125,9 +2125,14 @@
       "height": 1080,
       "trimWidth": 1080,
       "trimHeight": 1080
+    },
+    "pralnia-to-go": {
+      "publicId": "ПРАЛЬНЯ_TO_GO",
+      "width": 1024,
+      "height": 1024,
+      "trimWidth": 1024,
+      "trimHeight": 1024
     }
   },
-  "missingSlugs": [
-    "pralnia-to-go"
-  ]
+  "missingSlugs": []
 }

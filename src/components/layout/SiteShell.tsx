@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
 import {
   CompareProvider,
@@ -7,6 +8,7 @@ import {
 } from "@/components/compare/CompareProvider";
 import { CompareTray } from "@/components/compare/CompareTray";
 import { GlobalSearchMount } from "@/components/search/GlobalSearchMount";
+import { getEnv } from "@/env";
 import { getAll } from "@/lib/catalog/queries";
 import {
   buildCloudinaryUrl,
@@ -29,6 +31,7 @@ type SiteShellProps = {
 
 export async function SiteShell({ children }: SiteShellProps) {
   const products = await getAll();
+  const gtmId = getEnv().gtmId;
   const cloudName = getImagesCloudName();
   const itemsBySlug: Record<string, CompareTrayItem> = {};
   await Promise.all(
@@ -67,6 +70,7 @@ export async function SiteShell({ children }: SiteShellProps) {
         <CompareTray />
         <MobileActionBar />
         <VercelAnalytics />
+        {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
       </CompareProvider>
     </SiteChromeProvider>
   );

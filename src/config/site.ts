@@ -34,13 +34,27 @@ export const siteConfig: {
   /** One or more public phones; empty array hides the phone block. */
   phones: readonly string[];
   email: string;
+  /** Ukrainian street address (owner-confirmed). */
   address: string;
+  /** English rendering of the same address for /en. */
+  addressEn: string;
   /** Owner Google Maps link for “open in maps”; empty hides nothing if address alone is set. */
   mapsUrl: string;
   /** iframe embed for /contacts (pin from mapsUrl); empty falls back to address query. */
   mapsEmbedSrc: string;
-  /** Localized business hours; empty strings keep the hours block hidden. */
+  /**
+   * Localized business hours (legacy nested shape).
+   * Prefer `hoursUk` / `hoursEn` for new code.
+   */
   hours: LocalizedHours;
+  /** Ukrainian hours string (same as hours.uk). */
+  hoursUk: string;
+  /** English hours string (same as hours.en). */
+  hoursEn: string;
+  /** Legal entity name (Ukrainian); empty = hidden. */
+  legalName: string;
+  /** Legal entity name (English); empty = hidden. */
+  legalNameEn: string;
   /** Optional messengers for the mobile action bar; empty href hides each slot. */
   messengers: readonly MessengerLink[];
   readonly url: string | undefined;
@@ -59,14 +73,19 @@ export const siteConfig: {
   phones: ["044-501-88-87", "050-382-48-78"],
   email: "pkmprofessional@ukr.net",
   address: "вулиця Київська, 27-В, м.Вишневе, Київська область",
+  addressEn: "Kyivska Street, 27-V, Vyshneve, Kyiv Oblast",
   mapsUrl: "https://maps.app.goo.gl/Bym1u3NTiApW5RNu7",
   // Place pin from mapsUrl (Промкомплектмонтаж / Київська 27-В), not bare lat/lng.
   mapsEmbedSrc:
     "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2544!2d30.3300573!3d50.3746758!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40d4ca3985d2f65b%3A0xfc7ee414f22aeb1d!2z!5e0!3m2!1suk!2sua!4v1!5m2!1suk!2sua",
+  hoursUk: "Пн–Пт: 9:00–18:00\nСб–Нд: за попереднім записом",
+  hoursEn: "Mon–Fri: 9:00–18:00\nSat–Sun: by appointment",
   hours: {
     uk: "Пн–Пт: 9:00–18:00\nСб–Нд: за попереднім записом",
     en: "Mon–Fri: 9:00–18:00\nSat–Sun: by appointment",
   },
+  legalName: "",
+  legalNameEn: "",
   messengers: [],
   /** Explicit NEXT_PUBLIC_SITE_URL only; SEO absolute URLs use `getSiteUrl()`. */
   get url(): string | undefined {
@@ -92,25 +111,37 @@ export function visibleMessengers(): MessengerLink[] {
 }
 
 export function localizedHours(locale: string): string | null {
-  const raw = locale === "en" ? siteConfig.hours.en : siteConfig.hours.uk;
+  const raw = locale === "en" ? siteConfig.hoursEn : siteConfig.hoursUk;
+  return visibleContact(raw);
+}
+
+export function localizedAddress(locale: string): string | null {
+  const raw =
+    locale === "en" ? siteConfig.addressEn : siteConfig.address;
+  return visibleContact(raw);
+}
+
+export function localizedLegalName(locale: string): string | null {
+  const raw =
+    locale === "en" ? siteConfig.legalNameEn : siteConfig.legalName;
   return visibleContact(raw);
 }
 
 /** Outbound maps link: owner short URL, else address search. */
-export function mapsHref(address = siteConfig.address): string | null {
+export function mapsHref(address?: string): string | null {
   const maps = visibleContact(siteConfig.mapsUrl);
   if (maps) return maps;
-  const addr = visibleContact(address);
+  const addr = visibleContact(address ?? siteConfig.address);
   return addr
     ? `https://maps.google.com/?q=${encodeURIComponent(addr)}`
     : null;
 }
 
 /** Contacts map iframe src from owner pin or address. */
-export function mapsEmbedHref(address = siteConfig.address): string | null {
+export function mapsEmbedHref(address?: string): string | null {
   const embed = visibleContact(siteConfig.mapsEmbedSrc);
   if (embed) return embed;
-  const addr = visibleContact(address);
+  const addr = visibleContact(address ?? siteConfig.address);
   return addr
     ? `https://www.google.com/maps?q=${encodeURIComponent(addr)}&z=15&output=embed`
     : null;

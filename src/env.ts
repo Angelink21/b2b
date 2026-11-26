@@ -34,6 +34,12 @@ const envSchema = z.object({
   CATALOG_CACHE_REVALIDATE_SECONDS: z.string().optional(),
   /** Bearer for GET /api/catalog-status. Unset → route returns 404 (build must not fail). */
   CATALOG_STATUS_SECRET: z.string().optional(),
+  /** Google Search Console HTML meta content (server-only). */
+  GOOGLE_SITE_VERIFICATION: z.string().optional(),
+  /** Bing Webmaster Tools meta content (`msvalidate.01`, server-only). */
+  BING_SITE_VERIFICATION: z.string().optional(),
+  /** Google Tag Manager container id (`GTM-…`). Empty → no GTM. Loads only after marketing consent. */
+  NEXT_PUBLIC_GTM_ID: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema> & {
@@ -47,6 +53,9 @@ export type AppEnv = z.infer<typeof envSchema> & {
   catalogAllowShrink: boolean;
   catalogCacheRevalidateSeconds: number;
   catalogStatusSecret: string | null;
+  googleSiteVerification: string | null;
+  bingSiteVerification: string | null;
+  gtmId: string | null;
 };
 
 function parseSinks(raw: string | undefined): SinkId[] {
@@ -67,6 +76,18 @@ function parsePositiveInt(raw: string | undefined, fallback: number): number {
   if (!raw) return fallback;
   const n = Number.parseInt(raw, 10);
   return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+function parseTrimmed(raw: string | undefined): string | null {
+  const value = raw?.trim();
+  return value ? value : null;
+}
+
+/** Accepts `GTM-XXXX`; rejects empty or malformed values. */
+export function parseGtmId(raw: string | undefined): string | null {
+  const value = raw?.trim();
+  if (!value) return null;
+  return /^GTM-[A-Z0-9]+$/i.test(value) ? value.toUpperCase() : null;
 }
 
 let cached: AppEnv | undefined;
@@ -100,6 +121,9 @@ export function getEnv(): AppEnv {
     catalogAllowShrink: parsed.CATALOG_ALLOW_SHRINK === "1",
     catalogCacheRevalidateSeconds,
     catalogStatusSecret,
+    googleSiteVerification: parseTrimmed(parsed.GOOGLE_SITE_VERIFICATION),
+    bingSiteVerification: parseTrimmed(parsed.BING_SITE_VERIFICATION),
+    gtmId: parseGtmId(parsed.NEXT_PUBLIC_GTM_ID),
   };
   return cached;
 }

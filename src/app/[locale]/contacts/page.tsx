@@ -8,7 +8,9 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Container } from "@/components/ui/Container";
 import { HistoryBackLink } from "@/components/ui/HistoryBackLink";
 import {
+  localizedAddress,
   localizedHours,
+  localizedLegalName,
   mapsEmbedHref,
   mapsHref,
   siteConfig,
@@ -48,11 +50,14 @@ export default async function ContactsPage() {
 
   const phones = visiblePhones();
   const email = visibleContact(siteConfig.email);
-  const address = visibleContact(siteConfig.address);
-  const mapUrl = mapsHref();
+  const address = localizedAddress(locale);
+  const legalName = localizedLegalName(locale);
+  const mapUrl = mapsHref(address ?? undefined);
   const hours = localizedHours(locale);
-  const hasDetails = Boolean(phones.length > 0 || email || address || hours);
-  const mapEmbedSrc = mapsEmbedHref();
+  const hasDetails = Boolean(
+    phones.length > 0 || email || address || hours || legalName,
+  );
+  const mapEmbedSrc = mapsEmbedHref(address ?? undefined);
 
   const crumbs = [
     { label: tNav("brand"), href: "/" },
@@ -63,7 +68,7 @@ export default async function ContactsPage() {
     <>
       <JsonLd
         data={[
-          organizationJsonLd(),
+          organizationJsonLd(locale),
           contactPageJsonLd(locale),
           breadcrumbListJsonLd(locale, [
             { name: tNav("brand"), path: "" },
@@ -125,6 +130,14 @@ export default async function ContactsPage() {
                       <dt>{t("email")}</dt>
                       <dd>
                         <a href={`mailto:${email}`}>{email}</a>
+                      </dd>
+                    </>
+                  ) : null}
+                  {legalName ? (
+                    <>
+                      <dt>{t("legalName")}</dt>
+                      <dd>
+                        <p>{legalName}</p>
                       </dd>
                     </>
                   ) : null}

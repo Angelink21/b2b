@@ -1,6 +1,7 @@
 # Журнал решений
 Формат строки: `YYYY-MM-DD · решение · причина`.
 
+2026-11-26 · `series.descriptions.{uk,en}` + optional CSV EN columns; SEO /en from EN text + specs tail · Owner adds EN copy in sheet; site must work with missing/partial/full EN; never publish UA series text as English meta.
 2026-11-14 · Утверждён docs/PLAN.md (этап 0); Q1–Q10 приняты по рекомендациям · Владелец подтвердил raw+min/max, labels, console LeadSink до этапа 7, силуэты до этапа 12, Node 24.
 2026-11-14 · Zod 4.x (не 3) · Актуальный stable на момент этапа 0 / установки каркаса.
 2026-11-14 · next-intl 4.15.1 + Vitest 5 + Playwright 1.65 + axe + Prettier/tailwind-plugin · Каркас этапа 1 по PLAN.md; Motion/nuqs отложены до этапов с UI/фильтрами.
@@ -77,3 +78,4 @@
 2026-11-23 · Footer brand column + legal line use i18n `footer.brand` (оф. представник) · Owner request; header/`siteConfig.name` stay short brand.
 2026-11-24 · Home OG redesigned as catalog banner: headline, full partner status, real model/kg stats, silhouettes, site host + CTA · Owner-approved ASCII mock; no invented counts.
 2026-11-25 · `siteConfig.mapsUrl` + `mapsEmbedSrc` from owner Google Maps pin · Replaces address-search links; embed uses place-id pb URL (bare lat/lng snapped to a wrong neighbour POI).
+2026-11-26 · Marketing slots: `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` meta + single `NEXT_PUBLIC_GTM_ID`; Ads/GA4 IDs stay in GTM · Owner pastes IDs later; GTM mounts only after marketing consent (P4). Consent banner + privacy update deferred — until then GTM stays off even if env is set. No new npm deps.

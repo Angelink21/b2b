@@ -1,6 +1,6 @@
 # Catalog build report
 
-Generated: 2026-11-21T18:32:13.313Z
+Generated: 2026-11-26T13:04:18.837Z
 Source: **remote**
 
 ## Summary
@@ -74,6 +74,7 @@ Source: **remote**
 - P-18/100 M E Nomex: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
 - P-18/120 M E: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
 - P-18/120 M E Nomex: decimal comma coerced in «Робоча швидкість (м/хв)»: "2,02" → "2.02"
+- Optional EN description columns present: Short description (EN), Full description (EN)
 
 ## Multi-variant families (for review)
 

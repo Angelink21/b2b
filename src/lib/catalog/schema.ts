@@ -88,12 +88,33 @@ export const descriptionBlockSchema = z.object({
 
 export type DescriptionBlock = z.infer<typeof descriptionBlockSchema>;
 
+export const localeDescriptionSchema = z.object({
+  short: z.string(),
+  full: z.string(),
+  fullBullets: z.array(z.string()),
+  /** Present after rebuild; older snapshots omit this. */
+  fullBlocks: z.array(descriptionBlockSchema).optional(),
+});
+
+export type LocaleDescription = z.infer<typeof localeDescriptionSchema>;
+
+export const seriesDescriptionsSchema = z.object({
+  uk: localeDescriptionSchema,
+  en: localeDescriptionSchema,
+});
+
+export type SeriesDescriptions = z.infer<typeof seriesDescriptionsSchema>;
+
 export const seriesSchema = z.object({
   id: z.string(),
+  descriptions: seriesDescriptionsSchema,
+  /**
+   * @deprecated Prefer `descriptions.uk`. Kept as mirrors for gradual migration
+   * of presenters; always equal to uk short/full after build.
+   */
   shortDescription: z.string(),
   fullDescription: z.string(),
   fullBullets: z.array(z.string()),
-  /** Present after rebuild; older snapshots omit this. */
   fullBlocks: z.array(descriptionBlockSchema).optional(),
 });
 

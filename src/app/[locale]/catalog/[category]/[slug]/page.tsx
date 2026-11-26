@@ -7,6 +7,7 @@ import { ModelActions } from "@/components/catalog/ModelActions";
 import { ModelBreadcrumbs } from "@/components/catalog/ModelBreadcrumbs";
 import { ModelFamilySwitcher } from "@/components/catalog/ModelFamilySwitcher";
 import { ModelSpecs } from "@/components/catalog/ModelSpecs";
+import { SeriesFeatures } from "@/components/catalog/SeriesFeatures";
 import { CompareToggle } from "@/components/compare/CompareToggle";
 import { DimHighlightProvider } from "@/components/motion/DimHighlight";
 import { ModelSharedTransition } from "@/components/motion/ModelSharedTransition";
@@ -34,6 +35,7 @@ import {
   type CategorySlug,
   type HeatingKey,
 } from "@/lib/catalog/schema";
+import { resolveSeriesCopy } from "@/lib/catalog/series-copy";
 import { buildModelStaticParams } from "@/lib/catalog/static-params";
 import { buildSpecGroups } from "@/lib/catalog/spec-groups";
 import { getModelImage } from "@/lib/images";
@@ -43,7 +45,10 @@ import {
   productJsonLd,
 } from "@/lib/seo/json-ld";
 import { buildPageMetadata } from "@/lib/seo/metadata";
-import { buildProductDescription } from "@/lib/seo/product-copy";
+import {
+  buildEnProductDescription,
+  buildProductDescription,
+} from "@/lib/seo/product-copy";
 
 type PageProps = {
   params: Promise<{ locale: string; category: string; slug: string }>;
@@ -67,30 +72,38 @@ export async function generateMetadata({ params }: PageProps) {
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
   const tUnits = await getTranslations({ locale, namespace: "units" });
+  const series = await getSeriesById(product.seriesId);
 
   let heatingLabel: string | null = null;
   if (product.heating) {
     heatingLabel = tHeat(product.heating as HeatingKey);
   }
 
+  const labels = {
+    category: tCat(product.category),
+    heating: heatingLabel,
+    units: {
+      kg: tUnits("kg"),
+      kW: tUnits("kW"),
+      mm: tUnits("mm"),
+      L: tUnits("L"),
+      rpm: tUnits("rpm"),
+      mpm: tUnits("mpm"),
+      m3h: tUnits("m3h"),
+      dB: tUnits("dB"),
+    },
+  };
+
+  const description =
+    locale === "en"
+      ? buildEnProductDescription(product, labels, series)
+      : buildProductDescription(product, labels);
+
   return buildPageMetadata({
     locale,
     path: `/catalog/${product.category}/${product.slug}`,
     title: product.name,
-    description: buildProductDescription(product, {
-      category: tCat(product.category),
-      heating: heatingLabel,
-      units: {
-        kg: tUnits("kg"),
-        kW: tUnits("kW"),
-        mm: tUnits("mm"),
-        L: tUnits("L"),
-        rpm: tUnits("rpm"),
-        mpm: tUnits("mpm"),
-        m3h: tUnits("m3h"),
-        dB: tUnits("dB"),
-      },
-    }),
+    description,
   });
 }
 
@@ -106,8 +119,10 @@ export default async function ModelPage({ params }: PageProps) {
   const tCat = await getTranslations({ locale, namespace: "categories" });
   const tCatalog = await getTranslations({ locale, namespace: "catalog" });
   const tHeat = await getTranslations({ locale, namespace: "heating" });
+  const tUnits = await getTranslations({ locale, namespace: "units" });
 
   const series = await getSeriesById(product.seriesId);
+  const seriesCopy = resolveSeriesCopy(series, locale);
   const family = await getFamily(product.familyId);
   const familyMembers = summarizeFamily(product, family);
   const related = await getRelated(product.slug, 4);
@@ -124,14 +139,41 @@ export default async function ModelPage({ params }: PageProps) {
   const drawDims = realDims ? dims : GENERIC_SILHOUETTE_MM;
   const silhouetteKind =
     getCategoryDef(product.category)?.silhouette ?? "porthole";
-  const descriptionBlocks = series?.fullBlocks ?? [];
-  const hasDescription =
-    descriptionBlocks.length > 0 || (series?.fullBullets.length ?? 0) > 0;
+  const descriptionBlocks = seriesCopy?.fullBlocks ?? [];
+  const featureItems =
+    descriptionBlocks.length > 0
+      ? descriptionBlocks
+          .filter((b) => b.kind === "bullet")
+          .map((b) => b.text)
+      : (seriesCopy?.fullBullets ?? []);
+  const hasFeatureList = featureItems.length > 0;
+  const hasFullDescription =
+    Boolean(seriesCopy) &&
+    (hasFeatureList || Boolean(seriesCopy?.full.trim()));
 
   let heatingLabel: string | null = null;
   if (product.heating) {
     heatingLabel = tHeat(product.heating as HeatingKey);
   }
+
+  const copyLabels = {
+    category: tCat(product.category),
+    heating: heatingLabel,
+    units: {
+      kg: tUnits("kg"),
+      kW: tUnits("kW"),
+      mm: tUnits("mm"),
+      L: tUnits("L"),
+      rpm: tUnits("rpm"),
+      mpm: tUnits("mpm"),
+      m3h: tUnits("m3h"),
+      dB: tUnits("dB"),
+    },
+  };
+  const jsonLdDescription =
+    locale === "en"
+      ? buildEnProductDescription(product, copyLabels, series)
+      : buildProductDescription(product, copyLabels);
 
   return (
     <Container className="model-page py-12">
@@ -151,6 +193,7 @@ export default async function ModelPage({ params }: PageProps) {
           await productJsonLd(locale, product, {
             category: tCat(product.category),
             heating: heatingLabel,
+            description: jsonLdDescription,
             propertyNames: {
               loadKg: t("specs.loadKg"),
               powerKw: t("specs.powerKw"),
@@ -205,14 +248,14 @@ export default async function ModelPage({ params }: PageProps) {
             <h1>{product.name}</h1>
           </ModelSharedTransition>
 
-          {series?.shortDescription ? (
+          {seriesCopy?.short ? (
             <p
               className="model-series text-steel"
-              {...(locale === "en" ? { lang: "uk" } : {})}
+              lang={seriesCopy.lang}
             >
-              {series.shortDescription}
-              {locale === "en" ? (
-                <span className="model-uk-note"> — {t("ukCopyNote")}</span>
+              {seriesCopy.short}
+              {seriesCopy.isFallbackUk ? (
+                <span className="model-uk-note"> — {t("ukOnlyNote")}</span>
               ) : null}
             </p>
           ) : null}
@@ -298,51 +341,6 @@ export default async function ModelPage({ params }: PageProps) {
             />
           </div>
 
-          {series && hasDescription ? (
-            <section
-              className="model-description"
-              aria-labelledby="model-desc-heading"
-            >
-              <h2 id="model-desc-heading">{t("fullDescription")}</h2>
-              {locale === "en" ? (
-                <p className="model-uk-note mt-2">{t("ukCopyNote")}</p>
-              ) : null}
-              {descriptionBlocks.length > 0 ? (
-                <div
-                  className="model-desc-blocks"
-                  {...(locale === "en" ? { lang: "uk" } : {})}
-                >
-                  {descriptionBlocks.map((block, index) =>
-                    block.kind === "heading" ? (
-                      <h3
-                        key={`h-${index}-${block.text.slice(0, 24)}`}
-                        className="model-desc-heading"
-                      >
-                        {block.text}
-                      </h3>
-                    ) : (
-                      <p
-                        key={`b-${index}-${block.text.slice(0, 24)}`}
-                        className="model-desc-bullet"
-                      >
-                        {block.text}
-                      </p>
-                    ),
-                  )}
-                </div>
-              ) : (
-                <ul
-                  className="model-bullets"
-                  {...(locale === "en" ? { lang: "uk" } : {})}
-                >
-                  {series.fullBullets.map((bullet, index) => (
-                    <li key={`${index}-${bullet.slice(0, 24)}`}>{bullet}</li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ) : null}
-
           {related.length > 0 ? (
             <section
               className="model-related"
@@ -377,6 +375,35 @@ export default async function ModelPage({ params }: PageProps) {
           ) : null}
         </div>
       </div>
+
+      {seriesCopy && hasFullDescription ? (
+        hasFeatureList ? (
+          <SeriesFeatures
+            title={t("seriesFeatures")}
+            countLabel={t("seriesFeaturesCount", {
+              count: featureItems.length,
+            })}
+            printLabel={t("printableSpec")}
+            datasheetHref={`/catalog/${product.category}/${product.slug}/datasheet`}
+            items={featureItems}
+            lang={seriesCopy.lang}
+            note={seriesCopy.isFallbackUk ? t("ukOnlyNote") : null}
+          />
+        ) : (
+          <section
+            className="model-description"
+            aria-labelledby="model-desc-heading"
+          >
+            <h2 id="model-desc-heading">{t("fullDescription")}</h2>
+            {seriesCopy.isFallbackUk ? (
+              <p className="model-uk-note mt-2">{t("ukOnlyNote")}</p>
+            ) : null}
+            <p className="model-desc-prose text-pretty" lang={seriesCopy.lang}>
+              {seriesCopy.full}
+            </p>
+          </section>
+        )
+      ) : null}
       </DimHighlightProvider>
     </Container>
   );

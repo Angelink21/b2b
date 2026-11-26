@@ -1,4 +1,4 @@
-import { siteConfig } from "@/config/site";
+import { localizedAddress, siteConfig } from "@/config/site";
 import type { Product } from "@/lib/catalog/schema";
 import { getModelImage } from "@/lib/images";
 
@@ -38,7 +38,7 @@ export function assertNoInventedFields(node: unknown, path = "$"): string[] {
   return errors;
 }
 
-export function organizationJsonLd(): JsonLd {
+export function organizationJsonLd(locale = "uk"): JsonLd {
   const data: JsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -54,7 +54,7 @@ export function organizationJsonLd(): JsonLd {
   }
   const email = siteConfig.email.trim();
   if (email) data.email = email;
-  const address = siteConfig.address.trim();
+  const address = localizedAddress(locale);
   if (address) {
     data.address = {
       "@type": "PostalAddress",
@@ -152,6 +152,8 @@ export function itemListJsonLd(
 export type ProductJsonLdLabels = {
   category: string;
   heating: string | null;
+  /** Page-language product description (EN text or specs; never UA series on /en). */
+  description?: string;
   propertyNames: {
     loadKg: string;
     powerKw: string;
@@ -244,8 +246,12 @@ export async function productJsonLd(
       name: siteConfig.name,
     },
     url: absoluteUrl(locale, path),
+    inLanguage: locale,
     additionalProperty,
   };
+  if (labels.description?.trim()) {
+    data.description = labels.description.trim();
+  }
 
   const photo = await getModelImage(product);
   if (photo?.url) {

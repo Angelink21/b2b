@@ -1,9 +1,9 @@
 # Images report
 
-Generated: 2026-11-21T18:32:25.987Z
+Generated: 2026-11-26T13:04:24.852Z
 
-Photos found: **303** / 304
-Models without photos: **1**
+Photos found: **304** / 304
+Models without photos: **0**
 
 ## Naming scheme (chosen from step-0 probe)
 
@@ -33,7 +33,7 @@ Lineup slugs (LA/LAP/LN front-loaders only):
 
 ## Models without photos
 
-- ПРАЛЬНЯ TO GO (`pralnia-to-go`)
+_(none)_
 
 ## Aspect-ratio warnings (>8% vs Ш/В)
 
@@ -335,6 +335,7 @@ Lineup slugs (LA/LAP/LN front-loaders only):
 - WREC-150T2 (`wrec-150t2`): trimmed photo 1067×800 vs dims 551×1023 mm — deviation 147.6% (likely not a straight front view)
 - WREC-150T3 (`wrec-150t3`): trimmed photo 1067×800 vs dims 551×1438 mm — deviation 248.1% (likely not a straight front view)
 - WREC-1000 (`wrec-1000`): trimmed photo 1080×1080 vs dims 702×2206 mm — deviation 214.2% (likely not a straight front view)
+- ПРАЛЬНЯ TO GO (`pralnia-to-go`): trimmed photo 1024×1024 vs dims 2877×2235 mm — deviation 22.3% (likely not a straight front view)
 
 ## Ambiguous matches
 

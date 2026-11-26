@@ -11,6 +11,8 @@ import {
 } from "./csv-source";
 import {
   CSV_COLUMNS,
+  CSV_OPTIONAL_EN_COLUMNS,
+  cellOptionalEn,
   isEmptyRow,
   normalizeRow,
   toIndexItem,
@@ -26,7 +28,10 @@ import {
   type Product,
   type Series,
 } from "./schema";
-import { buildSeriesRegistry } from "./series";
+import {
+  buildSeriesRegistry,
+  type SeriesEnCoverage,
+} from "./series";
 
 export type CatalogPipelineWarning = {
   level: "warn" | "needs-review";
@@ -46,6 +51,7 @@ export type CatalogPipelineSuccess = {
     uniqueShort: number;
     uniqueFull: number;
   };
+  enCoverage: SeriesEnCoverage;
 };
 
 export type CatalogPipelineFailure = {
@@ -126,6 +132,19 @@ export function buildCatalogFromCsvText(
         "Optional column image_id present — used for photo matching and slug redirects",
     });
   }
+  if (parsed.hasShortDescriptionEn || parsed.hasFullDescriptionEn) {
+    const present: string[] = [];
+    if (parsed.hasShortDescriptionEn) {
+      present.push(CSV_OPTIONAL_EN_COLUMNS.shortDescriptionEn);
+    }
+    if (parsed.hasFullDescriptionEn) {
+      present.push(CSV_OPTIONAL_EN_COLUMNS.fullDescriptionEn);
+    }
+    warnings.push({
+      level: "warn",
+      message: `Optional EN description columns present: ${present.join(", ")}`,
+    });
+  }
 
   let discardedEmptyRows = 0;
   const dataRows: CsvRow[] = [];
@@ -140,8 +159,16 @@ export function buildCatalogFromCsvText(
   const seriesInputs = dataRows.map((row) => ({
     shortDescription: (row[CSV_COLUMNS.shortDescription] ?? "").trim(),
     fullDescription: (row[CSV_COLUMNS.fullDescription] ?? "").trim(),
+    shortDescriptionEn: cellOptionalEn(row, "shortDescriptionEn"),
+    fullDescriptionEn: cellOptionalEn(row, "fullDescriptionEn"),
   }));
   const seriesRegistry = buildSeriesRegistry(seriesInputs);
+  for (const w of seriesRegistry.warnings) {
+    warnings.push({
+      level: "warn",
+      message: `${w.seriesId}: ${w.message}`,
+    });
+  }
 
   const products: Product[] = [];
   const slugSet = new Set<string>();
@@ -209,6 +236,7 @@ export function buildCatalogFromCsvText(
     discardedEmptyRows,
     warnings,
     seriesCoverage: seriesRegistry.coverage,
+    enCoverage: seriesRegistry.enCoverage,
   };
 }
 

@@ -13,6 +13,25 @@ export function metadataBaseUrl(): URL {
   return new URL(getSiteUrl());
 }
 
+export type SiteVerificationInput = {
+  google?: string | null;
+  bing?: string | null;
+};
+
+/** Search Console / Bing HTML meta tags. Omit empty values. */
+export function buildSiteVerification(
+  input: SiteVerificationInput,
+): Metadata["verification"] | undefined {
+  const google = input.google?.trim();
+  const bing = input.bing?.trim();
+  if (!google && !bing) return undefined;
+
+  return {
+    ...(google ? { google } : {}),
+    ...(bing ? { other: { "msvalidate.01": bing } } : {}),
+  };
+}
+
 export type PageMetaInput = {
   locale: string;
   /** Path without locale, e.g. "" or "/catalog/washers". */

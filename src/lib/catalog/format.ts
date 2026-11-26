@@ -113,13 +113,30 @@ export function formatRangeNumber(
   return range.raw;
 }
 
+const DIMENSION_NOTE_EN: Readonly<Record<string, string>> = {
+  "з колесами": "with wheels",
+};
+
+export function formatDimensionNote(
+  note: string | undefined,
+  locale = "uk",
+): string | undefined {
+  if (!note) return undefined;
+  if (locale === "en") {
+    return DIMENSION_NOTE_EN[note] ?? note;
+  }
+  return note;
+}
+
 export function formatDimensionsMm(
   dims: DimensionsMm | null | undefined,
+  locale = "uk",
 ): string {
   if (!dims) return EMPTY;
   if (!(dims.w > 0 && dims.d > 0 && dims.h > 0)) return EMPTY;
   const base = `${dims.w}×${dims.d}×${dims.h}`;
-  return dims.note ? `${base} (${dims.note})` : base;
+  const note = formatDimensionNote(dims.note, locale);
+  return note ? `${base} (${note})` : base;
 }
 
 export function formatNoiseDb(noise: NoiseDb | null | undefined): string {

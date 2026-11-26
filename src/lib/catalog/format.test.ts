@@ -29,6 +29,17 @@ describe("catalog formatters", () => {
         note: "з колесами",
       }),
     ).toBe("1710×810×580 (з колесами)");
+    expect(
+      formatDimensionsMm(
+        {
+          w: 1710,
+          d: 810,
+          h: 580,
+          note: "з колесами",
+        },
+        "en",
+      ),
+    ).toBe("1710×810×580 (with wheels)");
     expect(formatDimensionsMm({ w: 0, d: 0, h: 0 })).toBe("—");
   });
 

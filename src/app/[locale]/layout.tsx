@@ -8,7 +8,11 @@ import { SiteShell } from "@/components/layout/SiteShell";
 import { ThemeScript } from "@/components/theme/ThemeScript";
 import { MOTION_LEVEL } from "@/config/motion";
 import { routing } from "@/i18n/routing";
-import { metadataBaseUrl } from "@/lib/seo/metadata";
+import { getEnv } from "@/env";
+import {
+  buildSiteVerification,
+  metadataBaseUrl,
+} from "@/lib/seo/metadata";
 import "../globals.css";
 
 const spectral = Spectral({
@@ -47,6 +51,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps) {
     return {};
   }
   const t = await getTranslations({ locale, namespace: "meta" });
+  const env = getEnv();
 
   return {
     metadataBase: metadataBaseUrl(),
@@ -55,6 +60,10 @@ export async function generateMetadata({ params }: LocaleLayoutProps) {
       template: `%s · ${t("siteName")}`,
     },
     description: t("homeDescription"),
+    verification: buildSiteVerification({
+      google: env.googleSiteVerification,
+      bing: env.bingSiteVerification,
+    }),
   };
 }
 

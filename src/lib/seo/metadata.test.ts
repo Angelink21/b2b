@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { buildPageMetadata } from "./metadata";
+import { buildPageMetadata, buildSiteVerification } from "./metadata";
 import { absoluteUrl } from "./paths";
 import { getSiteUrl } from "./site-url";
 
@@ -30,6 +30,24 @@ afterEach(() => {
   for (const key of KEYS) {
     writeEnv(key, original[key]);
   }
+});
+
+describe("buildSiteVerification", () => {
+  it("returns undefined when both empty", () => {
+    expect(buildSiteVerification({})).toBeUndefined();
+    expect(
+      buildSiteVerification({ google: "  ", bing: null }),
+    ).toBeUndefined();
+  });
+
+  it("maps google and bing meta tokens", () => {
+    expect(
+      buildSiteVerification({ google: "g-token", bing: "b-token" }),
+    ).toEqual({
+      google: "g-token",
+      other: { "msvalidate.01": "b-token" },
+    });
+  });
 });
 
 describe("production metadata URLs", () => {

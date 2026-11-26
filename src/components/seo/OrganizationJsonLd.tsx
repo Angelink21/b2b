@@ -8,6 +8,6 @@ type OrganizationJsonLdProps = {
 /** Organization + WebSite on the home page (no invented address/phone). */
 export function OrganizationJsonLd({ locale }: OrganizationJsonLdProps) {
   return (
-    <JsonLd data={[organizationJsonLd(), webSiteJsonLd(locale)]} />
+    <JsonLd data={[organizationJsonLd(locale), webSiteJsonLd(locale)]} />
   );
 }

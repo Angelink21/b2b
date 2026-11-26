@@ -15,7 +15,7 @@ import {
 
 describe("JSON-LD builders (S3)", () => {
   it("Organization uses owner-confirmed phone/email/address", () => {
-    const data = organizationJsonLd();
+    const data = organizationJsonLd("uk");
     expect(data["@type"]).toBe("Organization");
     expect(assertNoInventedFields(data)).toEqual([]);
     expect(data.name).toBe("Fagor Professional");
@@ -24,6 +24,13 @@ describe("JSON-LD builders (S3)", () => {
     expect(data.address).toEqual({
       "@type": "PostalAddress",
       streetAddress: "вулиця Київська, 27-В, м.Вишневе, Київська область",
+      addressCountry: "UA",
+    });
+
+    const en = organizationJsonLd("en");
+    expect(en.address).toEqual({
+      "@type": "PostalAddress",
+      streetAddress: "Kyivska Street, 27-V, Vyshneve, Kyiv Oblast",
       addressCountry: "UA",
     });
   });

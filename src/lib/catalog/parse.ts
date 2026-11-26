@@ -479,57 +479,142 @@ export type DescriptionBlock = {
   text: string;
 };
 
-const HEADING_ALIASES: Readonly<Record<string, string>> = {
+export type DescriptionLocale = "uk" | "en";
+
+const HEADING_ALIASES_UK: Readonly<Record<string, string>> = {
   комплектація: "Комплектація",
   "до складу входять:": "До складу входять:",
   "до складу входять": "До складу входять:",
 };
 
-/** Kit lead-ins that should not stack as consecutive headings. */
-const KIT_HEADING_TEXTS = new Set(Object.values(HEADING_ALIASES));
+const HEADING_ALIASES_EN: Readonly<Record<string, string>> = {
+  "kit contents": "Kit contents",
+  "kit contents:": "Kit contents:",
+  "includes:": "Includes:",
+  includes: "Includes",
+};
 
-function sentenceCaseHeading(line: string): string | null {
+/** Kit lead-ins that should not stack as consecutive headings. */
+const KIT_HEADING_TEXTS = new Set([
+  ...Object.values(HEADING_ALIASES_UK),
+  ...Object.values(HEADING_ALIASES_EN),
+]);
+
+function sentenceCaseHeading(
+  line: string,
+  locale: DescriptionLocale,
+): string | null {
   const key = line.replace(/\s+/g, " ").trim().toLowerCase();
-  return HEADING_ALIASES[key] ?? null;
+  const aliases = locale === "en" ? HEADING_ALIASES_EN : HEADING_ALIASES_UK;
+  return aliases[key] ?? null;
+}
+
+const NBSP = "\u00a0";
+const EN_DASH = "\u2013";
+
+/** EN typography: en dash ranges, NBSP before units, keep decimal points. */
+export function applyEnDescriptionTypography(text: string): string {
+  let out = text.replace(/\s+/g, " ").trim();
+  if (!out) return out;
+  // Numeric ranges: 8-9 / 8 - 9 → 8–9 (avoid dates and negatives)
+  out = out.replace(
+    /(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/g,
+    `$1${EN_DASH}$2`,
+  );
+  // Number + unit → NBSP (kg, kW, mm, L, rpm, …)
+  out = out.replace(
+    /(\d+(?:\.\d+)?)\s+(kg|kW|mm|cm|m|L|l|rpm|mpm|m³\/h|m3\/h|dB|V|Hz)\b/g,
+    `$1${NBSP}$2`,
+  );
+  return out;
 }
 
 /**
  * Drop copy-paste junk like trailing ` кг)` when it is not a `(… кг)` clause.
  */
-export function cleanDescriptionBulletText(text: string): string {
+export function cleanDescriptionBulletText(
+  text: string,
+  locale: DescriptionLocale = "uk",
+): string {
   let cleaned = text.replace(/\s+/g, " ").trim();
   if (/\sкг\)\s*$/u.test(cleaned) && !/\([^)]*кг\)\s*$/u.test(cleaned)) {
     cleaned = cleaned.replace(/\sкг\)\s*$/u, "").trim();
+  }
+  if (/\skg\)\s*$/i.test(cleaned) && !/\([^)]*kg\)\s*$/i.test(cleaned)) {
+    cleaned = cleaned.replace(/\skg\)\s*$/i, "").trim();
+  }
+  if (locale === "en") {
+    cleaned = applyEnDescriptionTypography(cleaned);
   }
   return cleaned;
 }
 
 /**
  * Presentation polish for description blocks (snapshot or freshly parsed).
- * Drops kit lead-ins (Комплектація / До складу…) — the page already has
- * «Опис серії»; cleans orphan `кг)` on bullets.
+ * Drops kit lead-ins — the page already has «Опис серії» / «Series description».
  */
 export function sanitizeDescriptionBlocks(
   blocks: readonly DescriptionBlock[],
+  locale: DescriptionLocale = "uk",
 ): DescriptionBlock[] {
   const out: DescriptionBlock[] = [];
   for (const block of blocks) {
     if (block.kind === "heading") {
-      const text = sentenceCaseHeading(block.text) ?? block.text.trim();
+      const text =
+        sentenceCaseHeading(block.text, locale) ?? block.text.trim();
       if (!text) continue;
-      // Redundant under page h2 «Опис серії» / «Series description».
       if (KIT_HEADING_TEXTS.has(text)) continue;
-      out.push({ kind: "heading", text });
+      out.push({
+        kind: "heading",
+        text: locale === "en" ? applyEnDescriptionTypography(text) : text,
+      });
       continue;
     }
-    const text = cleanDescriptionBulletText(block.text);
+    const text = cleanDescriptionBulletText(block.text, locale);
     if (!text) continue;
     out.push({ kind: "bullet", text });
   }
   return out;
 }
 
+type LocaleDescFields = {
+  short: string;
+  full: string;
+  fullBullets: string[];
+  fullBlocks?: DescriptionBlock[] | undefined;
+};
+
+function presentLocaleDescription(
+  desc: LocaleDescFields,
+  locale: DescriptionLocale,
+): LocaleDescFields {
+  if (desc.fullBlocks && desc.fullBlocks.length > 0) {
+    const fullBlocks = sanitizeDescriptionBlocks(desc.fullBlocks, locale);
+    return {
+      short: cleanDescriptionBulletText(desc.short, locale),
+      full: cleanDescriptionBulletText(desc.full, locale),
+      fullBlocks,
+      fullBullets: fullBlocks
+        .filter((b) => b.kind === "bullet")
+        .map((b) => b.text),
+    };
+  }
+  return {
+    short: cleanDescriptionBulletText(desc.short, locale),
+    full: cleanDescriptionBulletText(desc.full, locale),
+    fullBullets: desc.fullBullets
+      .map((t) => cleanDescriptionBulletText(t, locale))
+      .filter((t) => t.length > 0),
+    fullBlocks: desc.fullBlocks,
+  };
+}
+
 type SeriesDescriptionFields = {
+  descriptions?: {
+    uk: LocaleDescFields;
+    en: LocaleDescFields;
+  };
+  shortDescription: string;
   fullDescription: string;
   fullBullets: string[];
   fullBlocks?: DescriptionBlock[] | undefined;
@@ -539,28 +624,42 @@ type SeriesDescriptionFields = {
 export function presentSeriesDescription<T extends SeriesDescriptionFields>(
   series: T,
 ): T {
-  if (series.fullBlocks && series.fullBlocks.length > 0) {
-    const fullBlocks = sanitizeDescriptionBlocks(series.fullBlocks);
+  if (series.descriptions) {
+    const uk = presentLocaleDescription(series.descriptions.uk, "uk");
+    const en = presentLocaleDescription(series.descriptions.en, "en");
     return {
       ...series,
-      fullDescription: cleanDescriptionBulletText(series.fullDescription),
-      fullBlocks,
-      fullBullets: fullBlocks
-        .filter((b) => b.kind === "bullet")
-        .map((b) => b.text),
+      descriptions: { uk, en },
+      shortDescription: uk.short,
+      fullDescription: uk.full,
+      fullBullets: uk.fullBullets,
+      fullBlocks: uk.fullBlocks,
     };
   }
+
+  const uk = presentLocaleDescription(
+    {
+      short: series.shortDescription,
+      full: series.fullDescription,
+      fullBullets: series.fullBullets,
+      fullBlocks: series.fullBlocks,
+    },
+    "uk",
+  );
   return {
     ...series,
-    fullDescription: cleanDescriptionBulletText(series.fullDescription),
-    fullBullets: series.fullBullets
-      .map(cleanDescriptionBulletText)
-      .filter((t) => t.length > 0),
+    shortDescription: uk.short,
+    fullDescription: uk.full,
+    fullBullets: uk.fullBullets,
+    fullBlocks: uk.fullBlocks,
   };
 }
 
 /** Collapse whitespace; split full description into headings + • bullets. */
-export function normalizeDescription(rawInput: string | undefined | null): {
+export function normalizeDescription(
+  rawInput: string | undefined | null,
+  locale: DescriptionLocale = "uk",
+): {
   text: string;
   bullets: string[];
   blocks: DescriptionBlock[];
@@ -577,7 +676,10 @@ export function normalizeDescription(rawInput: string | undefined | null): {
     const line = lineRaw.replace(/\s+/g, " ").trim();
     if (!line) continue;
 
-    const heading = sentenceCaseHeading(line.replace(/•/g, "").trim());
+    const heading = sentenceCaseHeading(
+      line.replace(/•/g, "").trim(),
+      locale,
+    );
     if (heading && !line.includes("•")) {
       blocks.push({ kind: "heading", text: heading });
       continue;
@@ -589,7 +691,7 @@ export function normalizeDescription(rawInput: string | undefined | null): {
         const part = parts[i]!;
         if (!part) continue;
         if (i === 0) {
-          const leadHeading = sentenceCaseHeading(part);
+          const leadHeading = sentenceCaseHeading(part, locale);
           if (leadHeading) {
             blocks.push({ kind: "heading", text: leadHeading });
             continue;
@@ -614,13 +716,17 @@ export function normalizeDescription(rawInput: string | undefined | null): {
   if (!collapsed.includes("•") && blocks.every((b) => b.kind === "bullet")) {
     const text = cleanDescriptionBulletText(
       collapsed.replace(/\s+/g, " ").trim(),
+      locale,
     );
     return { text, bullets: [], blocks: [] };
   }
 
-  const sanitized = sanitizeDescriptionBlocks(blocks);
+  const sanitized = sanitizeDescriptionBlocks(blocks, locale);
   return {
-    text: cleanDescriptionBulletText(collapsed.replace(/\s+/g, " ").trim()),
+    text: cleanDescriptionBulletText(
+      collapsed.replace(/\s+/g, " ").trim(),
+      locale,
+    ),
     bullets: sanitized
       .filter((b) => b.kind === "bullet")
       .map((b) => b.text),

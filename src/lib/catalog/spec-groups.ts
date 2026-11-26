@@ -130,7 +130,7 @@ export function getSpecFieldValue(
     case "noiseDb":
       return product.noiseDb ? formatNoiseDb(product.noiseDb) : null;
     case "dimensionsMm":
-      return formatDimensionsMm(product.dimensionsMm);
+      return formatDimensionsMm(product.dimensionsMm, locale);
     default:
       return null;
   }

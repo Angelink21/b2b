@@ -55,21 +55,47 @@ Vercel → **Deployments** → попередній успішний депло�
 | `CLOUDINARY_FOLDER` | Папка public_id | Ні | `fagor` |
 | `IMAGES_CACHE_REVALIDATE_SECONDS` | TTL runtime-probe фото | Ні (300) | `300` |
 | `ENABLE_STYLEGUIDE` | `/_styleguide` у проді | Ні | `1` |
+| `GOOGLE_SITE_VERIFICATION` | Meta для Search Console (HTML-метод) | Ні | токен з GSC |
+| `BING_SITE_VERIFICATION` | Meta `msvalidate.01` | Ні | токен з Bing |
+| `NEXT_PUBLIC_GTM_ID` | Контейнер GTM (`GTM-…`) | Ні | `GTM-XXXX` |
 
 Без `NEXT_PUBLIC_SITE_URL` збірка падає на `http://localhost:3000` у canonical — для продакшену замініть.
 
-Аналітика: `@vercel/analytics` (без cookie). Окремих env не потрібно. Події: `quote_open`, `quote_success`, `lineup_use`, `compare_add`, пошу пошуку / mobile bar.
+Аналітика: `@vercel/analytics` (без cookie). Події: `quote_open`, `quote_success`, `lineup_use`, `compare_add`, пошу пошуку / mobile bar — також в `dataLayer` для GTM.
+
+### Google Tag Manager / Ads
+
+1. Створіть контейнер GTM → значення `GTM-…` вставте в Vercel env `NEXT_PUBLIC_GTM_ID`.
+2. **Google Ads (`AW-…`) і GA4 (`G-…`) не кладіть у env сайту** — додайте теги всередині GTM.
+3. Conversion: Custom Event `quote_success` (йде з форми КП).
+4. Скрипт GTM на сайті вмикається **лише після marketing consent**. Поки немає cookie-баннера, GTM **не завантажується**, навіть якщо env заповнений. Перед увімкненням реклами потрібен етап баннера + оновлення `/privacy`.
 
 ## Каталог (Google Таблиця)
 
 Рантайм (без редеплою): раз на ~5 хвилин сайт підтягує CSV (`CATALOG_CSV_URL`). Знімок `src/data/catalog.generated.json` — запасний на збірці й при збої таблиці.
 
-1. Редагуйте лист **«Каталог»** (22 колонки — `docs/DATA_CONTRACT.md`). Діапазони — **Простой текст**, локаль таблиці **США**.
+1. Редагуйте лист **«Каталог»** (22 обов’язкові колонки + до 2 optional EN — `docs/DATA_CONTRACT.md`). Діапазони — **Простой текст**, локаль таблиці **США**.
 2. Лист **опублікований у веб** як CSV; у env є `CATALOG_CSV_URL`.
 3. Зачекайте ~5 хвилин (або два завантаження сторінки після `revalidate`).
 4. Перевірка: `GET /api/catalog-status` з `Authorization: Bearer <CATALOG_STATUS_SECRET>`.
-5. Періодично: `pnpm catalog:build` → PR → preview (оновлює знімок, `CATALOG_REPORT`, slug-history / 301).
+5. Періодично: `pnpm catalog:build` → PR → preview (оновлює знімок, `CATALOG_REPORT`, `TRANSLATION_REPORT`, slug-history / 301).
 6. Нова категорія: `docs/ADD_CATEGORY.md`.
+
+### Англійські описи серій (optional)
+
+Заголовки колонок **точно** (регістр/пробіли не важливі для імпорту, але краще так):
+
+- `Short description (EN)`
+- `Full description (EN)`
+
+Правила заповнення:
+
+1. Формат комірки — **Простой текст**; переноси рядків всередині комірки дозволені.
+2. Маркери списку — символ `•` на початку рядка (як в українському повному описі).
+3. Підзаголовки — звичайний регістр (sentence case), не ALL CAPS.
+4. Достатньо заповнити **одну рядок моделі на серію** — пайплайн візьме найчастіше непусте значення на всю серію. Порожня EN-комірка не затирає значення серії.
+5. Не копіюйте український текст у EN без перекладу; збірка лише попередить (кирилиця / EN=UA / дивна довжина).
+6. Після змін: опублікований CSV → ~5 хв runtime, або `pnpm catalog:build` → див. `docs/TRANSLATION_REPORT.md`.
 
 ### Червона збірка `catalog:build`
 
@@ -108,14 +134,17 @@ Vercel → **Deployments** → попередній успішний депло�
 ### Google Search Console
 
 1. [Search Console](https://search.google.com/search-console) → Domain або URL prefix = `NEXT_PUBLIC_SITE_URL`.
-2. Підтвердіть власність (DNS TXT / HTML).
+2. Підтвердіть власність:
+   - **Domain** → DNS TXT у реєстратора (код у сайт не потрібен).
+   - **URL prefix** → HTML-тег: токен у Vercel env `GOOGLE_SITE_VERIFICATION` → редеплой.
 3. Sitemaps → `https://<домен>/sitemap.xml`.
 4. URL Inspection: canonical + hreflang uk/en/x-default.
 
 ### Bing Webmaster Tools
 
 1. [Bing Webmaster](https://www.bing.com/webmasters) → додайте сайт або імпорт з GSC.
-2. Sitemap + перевірка `/robots.txt` (`/_styleguide`, `/fontcheck` заблоковані).
+2. HTML-meta: токен у `BING_SITE_VERIFICATION` → редеплой.
+3. Sitemap + перевірка `/robots.txt` (`/_styleguide`, `/fontcheck` заблоковані).
 
 ## JSON-LD
 
