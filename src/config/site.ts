@@ -34,10 +34,24 @@ export const siteConfig: {
   /** One or more public phones; empty array hides the phone block. */
   phones: readonly string[];
   email: string;
-  /** Ukrainian street address (owner-confirmed). */
+  /** Ukrainian street address (owner-confirmed), one-line for UI. */
   address: string;
   /** English rendering of the same address for /en. */
   addressEn: string;
+  /** Street line only (JSON-LD PostalAddress.streetAddress), UK. */
+  addressStreet: string;
+  /** Street line only, EN. */
+  addressStreetEn: string;
+  /** City / locality (JSON-LD), UK. */
+  addressLocality: string;
+  /** City / locality, EN. */
+  addressLocalityEn: string;
+  /** Region (JSON-LD), UK. */
+  addressRegion: string;
+  /** Region, EN. */
+  addressRegionEn: string;
+  /** Postal code (owner-confirmed). Empty omits from JSON-LD. */
+  postalCode: string;
   /** Owner Google Maps link for “open in maps”; empty hides nothing if address alone is set. */
   mapsUrl: string;
   /** iframe embed for /contacts (pin from mapsUrl); empty falls back to address query. */
@@ -74,6 +88,13 @@ export const siteConfig: {
   email: "pkmprofessional@ukr.net",
   address: "вулиця Київська, 27-В, м.Вишневе, Київська область",
   addressEn: "Kyivska Street, 27-V, Vyshneve, Kyiv Oblast",
+  addressStreet: "вулиця Київська, 27-В",
+  addressStreetEn: "Kyivska Street, 27-V",
+  addressLocality: "Вишневе",
+  addressLocalityEn: "Vyshneve",
+  addressRegion: "Київська область",
+  addressRegionEn: "Kyiv Oblast",
+  postalCode: "08134",
   mapsUrl: "https://maps.app.goo.gl/Bym1u3NTiApW5RNu7",
   // Place pin from mapsUrl (Промкомплектмонтаж / Київська 27-В), not bare lat/lng.
   mapsEmbedSrc:
@@ -119,6 +140,33 @@ export function localizedAddress(locale: string): string | null {
   const raw =
     locale === "en" ? siteConfig.addressEn : siteConfig.address;
   return visibleContact(raw);
+}
+
+/** Structured PostalAddress parts for JSON-LD (owner-confirmed only). */
+export function localizedPostalAddress(locale: string): {
+  streetAddress: string;
+  addressLocality: string;
+  addressRegion: string;
+  postalCode: string;
+  addressCountry: "UA";
+} | null {
+  const street =
+    locale === "en" ? siteConfig.addressStreetEn : siteConfig.addressStreet;
+  const locality =
+    locale === "en"
+      ? siteConfig.addressLocalityEn
+      : siteConfig.addressLocality;
+  const region =
+    locale === "en" ? siteConfig.addressRegionEn : siteConfig.addressRegion;
+  const postal = siteConfig.postalCode.trim();
+  if (!street.trim() || !locality.trim()) return null;
+  return {
+    streetAddress: street.trim(),
+    addressLocality: locality.trim(),
+    addressRegion: region.trim(),
+    postalCode: postal,
+    addressCountry: "UA",
+  };
 }
 
 export function localizedLegalName(locale: string): string | null {

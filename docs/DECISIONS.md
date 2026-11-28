@@ -83,3 +83,4 @@
 2026-11-28 · Footer: `© {year} Промкомплектмонтаж` on the legal line; right keeps bare `Fagor Professional` (no ©) · Owner: move copyright to PKM, keep Fagor text.
 2026-11-28 · Privacy controller = legalName + brand; cookies/processors mention GTM only after marketing consent · Align copy with dealer entity and deferred consent banner.
 2026-11-28 · MarketingConsentBanner: Accept/Decline → localStorage; GTM mounts only on granted · Ships the deferred P4 gate; no new deps; Vercel Analytics stays consent-free.
+2026-11-28 · Organization PostalAddress split + postalCode 08134 · Owner-confirmed; clears optional Rich Results locality/postal warnings.

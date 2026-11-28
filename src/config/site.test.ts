@@ -34,6 +34,9 @@ describe("site contact slot", () => {
     expect(localizedAddress("en")).not.toMatch(/[а-яА-ЯіІїЇєЄґҐ]/u);
     expect(siteConfig.legalName).toBe("ТОВ «Промкомплектмонтаж»");
     expect(siteConfig.legalNameEn).toBe('TOV "Promkomplektmontazh"');
+    expect(siteConfig.postalCode).toBe("08134");
+    expect(siteConfig.addressLocality).toBe("Вишневе");
+    expect(siteConfig.addressStreet).toContain("Київська");
     expect(mapsHref()).toBe("https://maps.app.goo.gl/Bym1u3NTiApW5RNu7");
     expect(mapsEmbedHref()).toContain("0x40d4ca3985d2f65b");
   });

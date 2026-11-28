@@ -1,6 +1,6 @@
 import {
-  localizedAddress,
   localizedLegalName,
+  localizedPostalAddress,
   siteConfig,
 } from "@/config/site";
 import type { Product } from "@/lib/catalog/schema";
@@ -80,13 +80,21 @@ export function organizationJsonLd(locale = "uk"): JsonLd {
   }
   const email = siteConfig.email.trim();
   if (email) data.email = email;
-  const address = localizedAddress(locale);
-  if (address) {
-    data.address = {
+  const postal = localizedPostalAddress(locale);
+  if (postal) {
+    const address: JsonLd = {
       "@type": "PostalAddress",
-      streetAddress: address,
-      addressCountry: "UA",
+      streetAddress: postal.streetAddress,
+      addressLocality: postal.addressLocality,
+      addressCountry: postal.addressCountry,
     };
+    if (postal.addressRegion) {
+      address.addressRegion = postal.addressRegion;
+    }
+    if (postal.postalCode) {
+      address.postalCode = postal.postalCode;
+    }
+    data.address = address;
   }
   return data;
 }

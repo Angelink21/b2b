@@ -37,7 +37,10 @@ describe("JSON-LD builders (S3)", () => {
     expect(data.email).toBe("pkmprofessional@ukr.net");
     expect(data.address).toEqual({
       "@type": "PostalAddress",
-      streetAddress: "вулиця Київська, 27-В, м.Вишневе, Київська область",
+      streetAddress: "вулиця Київська, 27-В",
+      addressLocality: "Вишневе",
+      addressRegion: "Київська область",
+      postalCode: "08134",
       addressCountry: "UA",
     });
 
@@ -50,7 +53,10 @@ describe("JSON-LD builders (S3)", () => {
     expect(en.description).toContain("Official representative");
     expect(en.address).toEqual({
       "@type": "PostalAddress",
-      streetAddress: "Kyivska Street, 27-V, Vyshneve, Kyiv Oblast",
+      streetAddress: "Kyivska Street, 27-V",
+      addressLocality: "Vyshneve",
+      addressRegion: "Kyiv Oblast",
+      postalCode: "08134",
       addressCountry: "UA",
     });
   });
