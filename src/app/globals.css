@@ -1826,11 +1826,11 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
 }
 
 .footer-locale {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .footer-copy {
-  margin: 0;
+  margin: 0 0 0 auto;
   color: var(--steel);
   font-size: var(--text-caption);
   text-align: end;
@@ -1859,11 +1859,8 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
     align-items: flex-start;
   }
 
-  .footer-locale {
-    margin-left: 0;
-  }
-
   .footer-copy {
+    margin-left: 0;
     text-align: start;
   }
 }

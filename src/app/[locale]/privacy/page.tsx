@@ -1,7 +1,12 @@
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/Container";
-import { localizedAddress, siteConfig, visiblePhones } from "@/config/site";
+import {
+  localizedAddress,
+  localizedLegalName,
+  siteConfig,
+  visiblePhones,
+} from "@/config/site";
 import { typo } from "@/lib/typo";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 
@@ -40,8 +45,11 @@ export default async function PrivacyPage({
   const { locale } = await params;
   const t = await getTranslations("privacy");
   const phones = visiblePhones().join(", ");
+  const legalName = localizedLegalName(locale) ?? siteConfig.name;
   const vars = {
     name: siteConfig.name,
+    legalName,
+    brand: siteConfig.name,
     email: siteConfig.email,
     phones,
     address: localizedAddress(locale) ?? siteConfig.address,

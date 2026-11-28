@@ -80,3 +80,5 @@
 2026-11-25 · `siteConfig.mapsUrl` + `mapsEmbedSrc` from owner Google Maps pin · Replaces address-search links; embed uses place-id pb URL (bare lat/lng snapped to a wrong neighbour POI).
 2026-11-26 · Marketing slots: `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` meta + single `NEXT_PUBLIC_GTM_ID`; Ads/GA4 IDs stay in GTM · Owner pastes IDs later; GTM mounts only after marketing consent (P4). Consent banner + privacy update deferred — until then GTM stays off even if env is set. No new npm deps.
 2026-11-28 · Organization JSON-LD `name` = legalName «Промкомплектмонтаж» / Promkomplektmontazh; `brand` = Fagor Professional · Owner-confirmed dealer vs manufacturer; header/`siteConfig.name` stay brand.
+2026-11-28 · Footer: `© {year} Промкомплектмонтаж` on the legal line; right keeps bare `Fagor Professional` (no ©) · Owner: move copyright to PKM, keep Fagor text.
+2026-11-28 · Privacy controller = legalName + brand; cookies/processors mention GTM only after marketing consent · Align copy with dealer entity and deferred consent banner.

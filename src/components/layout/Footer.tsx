@@ -103,7 +103,10 @@ export async function Footer() {
 
           <div className="site-footer-base">
             <p className="footer-legal">
-              {legalName ? legalName : t("brand")}
+              {t("copyright", {
+                year,
+                name: legalName ?? t("brand"),
+              })}
             </p>
             <Link href="/privacy" className="footer-privacy">
               {t("privacy")}
@@ -111,7 +114,7 @@ export async function Footer() {
             <div className="footer-locale">
               <LocaleSwitcher />
             </div>
-            <p className="footer-copy">{t("copyright", { year })}</p>
+            <p className="footer-copy">{siteConfig.name}</p>
           </div>
         </Grid>
       </Container>

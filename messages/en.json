@@ -8,7 +8,7 @@
     "quoteTitle": "Get a quote",
     "quoteDescription": "Request a commercial quote.",
     "privacyTitle": "Privacy",
-    "privacyDescription": "How the official Fagor Professional representative processes personal data from site forms.",
+    "privacyDescription": "How Promkomplektmontazh (official Fagor Professional representative) processes personal data from site forms.",
     "compareTitle": "Compare models",
     "compareDescription": "Compare specifications of selected Fagor Professional models.",
     "datasheetTitle": "Datasheet",
@@ -414,7 +414,7 @@
     "title": "Privacy",
     "intro": "This page explains which personal data we receive through the site and how we use it. The text follows how the forms actually work; a lawyer can refine it later if needed.",
     "controllerTitle": "Who is responsible",
-    "controllerBody": "Official representative of {name}. Privacy contact: {email}. Phones: {phones}. Address: {address}.",
+    "controllerBody": "{legalName} — official representative of {brand} in Ukraine. Privacy contact: {email}. Phones: {phones}. Address: {address}.",
     "fieldsTitle": "What we collect",
     "fieldsBody": "From the Quote, Service, and Contacts forms: name, company (optional), email or phone, facility type, kilograms of linen per cycle (if provided), selected models, and a comment. Service requests may also include model, serial number, and a problem description. Technically we may process form-protection signals (for example Cloudflare Turnstile when enabled) and anonymised page-view analytics (Vercel Analytics).",
     "purposeTitle": "Why we use the data",
@@ -422,15 +422,15 @@
     "legalTitle": "Basis for processing",
     "legalBody": "Processing is based on your consent (the form checkbox) and/or on preparing a reply to a request you started. You can withdraw consent and ask us to delete a request by emailing {email}.",
     "processorsTitle": "Who may receive data when delivering a request",
-    "processorsBody": "Requests are handled by our team. Site operation and message delivery may involve infrastructure providers (site hosting), email or other lead channels configured by the administrator, Cloudflare Turnstile (bot protection), and Vercel Analytics (page views without advertising profiles). Exact channels depend on server configuration.",
+    "processorsBody": "Requests are handled by the {legalName} team. Site operation and message delivery may involve infrastructure providers (site hosting), email or other lead channels configured by the administrator, Cloudflare Turnstile (bot protection), and Vercel Analytics (page views without advertising profiles). After marketing consent, Google Tag Manager may load (GA / Ads tags inside the container when enabled). Exact channels depend on server configuration.",
     "retentionTitle": "How long we keep data",
     "retentionBody": "We keep requests as long as needed to reply and close the enquiry, and for a reasonable period for correspondence history. To delete data sooner, email {email}.",
     "rightsTitle": "Your rights",
     "rightsBody": "You may request access to your request data, correction of inaccuracies, or deletion, and you may withdraw consent to further processing. Email {email} or call the numbers on the Contacts page.",
     "cookiesTitle": "Cookies and similar technologies",
-    "cookiesBody": "The site may use technical cookies/browser storage for theme, language, the compare list, and form protection. Vercel Analytics records anonymised page-view events. We do not add advertising trackers.",
+    "cookiesBody": "The site may use technical cookies/browser storage for theme, language, the compare list, form protection, and storing your marketing-consent choice. Vercel Analytics records anonymised page-view events without advertising profiles and does not require marketing consent. Google Tag Manager (and Google Analytics / Google Ads tags inside it) load only after marketing consent; without consent, marketing scripts are not loaded. A consent banner will ship separately — until then GTM stays off even if a container ID is configured.",
     "updatesTitle": "Updates",
-    "updatesBody": "This text may change if forms or delivery channels change. The current version is always on this page."
+    "updatesBody": "This text may change if forms, analytics, or delivery channels change. The current version is always on this page."
   },
   "errors": {
     "notFoundTitle": "Page not found",
@@ -564,7 +564,7 @@
     "company": "Company",
     "brand": "Official representative of Fagor Professional",
     "privacy": "Privacy",
-    "copyright": "© {year} Fagor Professional",
+    "copyright": "© {year} {name}",
     "quotePrompt": "Leave a request for a commercial proposal."
   },
   "og": {
