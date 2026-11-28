@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   getMarketingConsent,
+  getStoredMarketingConsent,
   hasMarketingConsent,
   MARKETING_CONSENT_EVENT,
   MARKETING_CONSENT_STORAGE_KEY,
@@ -15,7 +16,8 @@ afterEach(() => {
 });
 
 describe("marketing consent", () => {
-  it("defaults to denied", () => {
+  it("defaults to no stored choice and denied for tags", () => {
+    expect(getStoredMarketingConsent()).toBeNull();
     expect(getMarketingConsent()).toBe("denied");
     expect(hasMarketingConsent()).toBe(false);
   });
@@ -29,7 +31,14 @@ describe("marketing consent", () => {
     expect(window.localStorage.getItem(MARKETING_CONSENT_STORAGE_KEY)).toBe(
       "granted",
     );
+    expect(getStoredMarketingConsent()).toBe("granted");
     expect(hasMarketingConsent()).toBe(true);
     expect(handler).toHaveBeenCalledTimes(1);
+  });
+
+  it("persists decline without enabling tags", () => {
+    setMarketingConsent("denied");
+    expect(getStoredMarketingConsent()).toBe("denied");
+    expect(hasMarketingConsent()).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
+import { MarketingConsentBanner } from "@/components/analytics/MarketingConsentBanner";
 import { VercelAnalytics } from "@/components/analytics/VercelAnalytics";
 import {
   CompareProvider,
@@ -70,6 +71,7 @@ export async function SiteShell({ children }: SiteShellProps) {
         <CompareTray />
         <MobileActionBar />
         <VercelAnalytics />
+        <MarketingConsentBanner />
         {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
       </CompareProvider>
     </SiteChromeProvider>

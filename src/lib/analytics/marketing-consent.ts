@@ -1,6 +1,6 @@
 /**
  * Marketing consent gate for third-party tags (GTM / Ads).
- * Default is denied. Banner UI is a follow-up; until then GTM never loads.
+ * No stored choice → banner shows; GTM loads only when granted.
  */
 
 export const MARKETING_CONSENT_STORAGE_KEY = "fagor-marketing-consent";
@@ -16,14 +16,21 @@ function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
 
-export function getMarketingConsent(): MarketingConsent {
-  if (!isBrowser()) return "denied";
+/** Stored choice, or `null` when the visitor has not answered yet. */
+export function getStoredMarketingConsent(): MarketingConsent | null {
+  if (!isBrowser()) return null;
   try {
     const raw = window.localStorage.getItem(MARKETING_CONSENT_STORAGE_KEY);
-    return raw === "granted" ? "granted" : "denied";
+    if (raw === "granted" || raw === "denied") return raw;
+    return null;
   } catch {
-    return "denied";
+    return null;
   }
+}
+
+/** Effective gate for tags: granted or denied (unset counts as denied). */
+export function getMarketingConsent(): MarketingConsent {
+  return getStoredMarketingConsent() === "granted" ? "granted" : "denied";
 }
 
 export function hasMarketingConsent(): boolean {

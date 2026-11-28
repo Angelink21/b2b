@@ -410,6 +410,12 @@
       "dimensionsMm": "Size, mm"
     }
   },
+  "marketingConsent": {
+    "title": "Marketing cookies",
+    "body": "We load Google Tag Manager (analytics and ads) only after your consent. Site essentials and cookieless Vercel Analytics work without it. Details are in the <privacy>privacy policy</privacy>.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
   "privacy": {
     "title": "Privacy",
     "intro": "This page explains which personal data we receive through the site and how we use it. The text follows how the forms actually work; a lawyer can refine it later if needed.",
@@ -428,7 +434,7 @@
     "rightsTitle": "Your rights",
     "rightsBody": "You may request access to your request data, correction of inaccuracies, or deletion, and you may withdraw consent to further processing. Email {email} or call the numbers on the Contacts page.",
     "cookiesTitle": "Cookies and similar technologies",
-    "cookiesBody": "The site may use technical cookies/browser storage for theme, language, the compare list, form protection, and storing your marketing-consent choice. Vercel Analytics records anonymised page-view events without advertising profiles and does not require marketing consent. Google Tag Manager (and Google Analytics / Google Ads tags inside it) load only after marketing consent; without consent, marketing scripts are not loaded. A consent banner will ship separately — until then GTM stays off even if a container ID is configured.",
+    "cookiesBody": "The site may use technical cookies/browser storage for theme, language, the compare list, form protection, and storing your marketing-consent choice. Vercel Analytics records anonymised page-view events without advertising profiles and does not require marketing consent. Google Tag Manager (and Google Analytics / Google Ads tags inside it) load only after you tap Accept on the consent banner; without consent or after Decline, marketing scripts are not loaded.",
     "updatesTitle": "Updates",
     "updatesBody": "This text may change if forms, analytics, or delivery channels change. The current version is always on this page."
   },

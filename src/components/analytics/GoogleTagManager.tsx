@@ -26,8 +26,7 @@ function getServerConsentSnapshot() {
 }
 
 /**
- * Loads GTM only when marketing consent is granted (P4).
- * Without a consent banner, consent stays denied → this renders nothing.
+ * Loads GTM only when marketing consent is granted (banner Accept).
  */
 export function GoogleTagManager({ gtmId }: GoogleTagManagerProps) {
   const allowed = useSyncExternalStore(
