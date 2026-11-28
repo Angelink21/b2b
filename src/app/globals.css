@@ -1826,11 +1826,11 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
 }
 
 .footer-locale {
-  margin-left: 0;
+  margin-left: auto;
 }
 
 .footer-copy {
-  margin: 0 0 0 auto;
+  margin: 0;
   color: var(--steel);
   font-size: var(--text-caption);
   text-align: end;
@@ -1857,6 +1857,10 @@ html[data-motion-level="expressive"] .btn-link:hover .btn-arrow {
   .site-footer-base {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footer-locale {
+    margin-left: 0;
   }
 
   .footer-copy {

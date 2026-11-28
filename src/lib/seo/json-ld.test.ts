@@ -18,7 +18,7 @@ describe("JSON-LD builders (S3)", () => {
     const data = organizationJsonLd("uk");
     expect(data["@type"]).toBe("Organization");
     expect(assertNoInventedFields(data)).toEqual([]);
-    expect(data.name).toBe("Промкомплектмонтаж");
+    expect(data.name).toBe("ТОВ «Промкомплектмонтаж»");
     expect(data.brand).toEqual({
       "@type": "Brand",
       name: "Fagor Professional",
@@ -42,7 +42,7 @@ describe("JSON-LD builders (S3)", () => {
     });
 
     const en = organizationJsonLd("en");
-    expect(en.name).toBe("Promkomplektmontazh");
+    expect(en.name).toBe('TOV "Promkomplektmontazh"');
     expect(en.brand).toEqual({
       "@type": "Brand",
       name: "Fagor Professional",
