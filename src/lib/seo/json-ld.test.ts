@@ -14,11 +14,25 @@ import {
 } from "./json-ld";
 
 describe("JSON-LD builders (S3)", () => {
-  it("Organization uses owner-confirmed phone/email/address", () => {
+  it("Organization uses dealer legal name and Fagor brand", () => {
     const data = organizationJsonLd("uk");
     expect(data["@type"]).toBe("Organization");
     expect(assertNoInventedFields(data)).toEqual([]);
-    expect(data.name).toBe("Fagor Professional");
+    expect(data.name).toBe("Промкомплектмонтаж");
+    expect(data.brand).toEqual({
+      "@type": "Brand",
+      name: "Fagor Professional",
+    });
+    expect(data.description).toContain("Офіційний представник");
+    expect(data.logo).toEqual({
+      "@type": "ImageObject",
+      url: expect.stringMatching(/\/brand\/fagor-logo\.png$/),
+      width: 182,
+      height: 64,
+    });
+    expect(data.image).toEqual(
+      (data.logo as { url: string }).url,
+    );
     expect(data.telephone).toEqual(["044-501-88-87", "050-382-48-78"]);
     expect(data.email).toBe("pkmprofessional@ukr.net");
     expect(data.address).toEqual({
@@ -28,6 +42,12 @@ describe("JSON-LD builders (S3)", () => {
     });
 
     const en = organizationJsonLd("en");
+    expect(en.name).toBe("Promkomplektmontazh");
+    expect(en.brand).toEqual({
+      "@type": "Brand",
+      name: "Fagor Professional",
+    });
+    expect(en.description).toContain("Official representative");
     expect(en.address).toEqual({
       "@type": "PostalAddress",
       streetAddress: "Kyivska Street, 27-V, Vyshneve, Kyiv Oblast",

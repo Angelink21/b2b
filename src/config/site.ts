@@ -84,8 +84,8 @@ export const siteConfig: {
     uk: "Пн–Пт: 9:00–18:00\nСб–Нд: за попереднім записом",
     en: "Mon–Fri: 9:00–18:00\nSat–Sun: by appointment",
   },
-  legalName: "",
-  legalNameEn: "",
+  legalName: "Промкомплектмонтаж",
+  legalNameEn: "Promkomplektmontazh",
   messengers: [],
   /** Explicit NEXT_PUBLIC_SITE_URL only; SEO absolute URLs use `getSiteUrl()`. */
   get url(): string | undefined {

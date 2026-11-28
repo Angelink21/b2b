@@ -1,4 +1,8 @@
-import { localizedAddress, siteConfig } from "@/config/site";
+import {
+  localizedAddress,
+  localizedLegalName,
+  siteConfig,
+} from "@/config/site";
 import type { Product } from "@/lib/catalog/schema";
 import { getModelImage } from "@/lib/images";
 
@@ -39,13 +43,35 @@ export function assertNoInventedFields(node: unknown, path = "$"): string[] {
 }
 
 export function organizationJsonLd(locale = "uk"): JsonLd {
+  const legalName = localizedLegalName(locale) ?? siteConfig.name;
   const data: JsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${getSiteUrl()}/#organization`,
-    name: siteConfig.name,
+    name: legalName,
   };
   data.url = getSiteUrl();
+  data.brand = {
+    "@type": "Brand",
+    name: siteConfig.name,
+  };
+  data.description =
+    locale === "en"
+      ? `Official representative of ${siteConfig.name} in Ukraine.`
+      : `Офіційний представник ${siteConfig.name} в Україні.`;
+  const logoSrc = siteConfig.logo.src.trim();
+  if (logoSrc) {
+    const logoUrl = logoSrc.startsWith("http")
+      ? logoSrc
+      : `${getSiteUrl()}${logoSrc.startsWith("/") ? "" : "/"}${logoSrc}`;
+    data.logo = {
+      "@type": "ImageObject",
+      url: logoUrl,
+      width: siteConfig.logo.width,
+      height: siteConfig.logo.height,
+    };
+    data.image = logoUrl;
+  }
   const phones = siteConfig.phones.map((p) => p.trim()).filter((p) => p.length > 0);
   if (phones.length === 1) {
     data.telephone = phones[0];
